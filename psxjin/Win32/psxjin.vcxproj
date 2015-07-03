@@ -1,0 +1,512 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release FastBuild|Win32">
+      <Configuration>Release FastBuild</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{66893A12-B867-4F74-B698-38DB297CDDA5}</ProjectGuid>
+    <RootNamespace>pcsx</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v120</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>12.0.30501.0</_ProjectFileVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>..\output</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>..\output\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <TargetName>psxjin-release</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">
+    <OutDir>$(ProjectDir)..\output\</OutDir>
+    <IntDir>$(SolutionDir)$(Configuration)\$(ProjectName)\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <PreBuildEvent>
+      <Command>defaultconfig\SubWCRev.bat</Command>
+    </PreBuildEvent>
+    <Midl>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Debug/psxjin.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig;libbzip2;directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_WIN32;_DEBUG;_WINDOWS;__WIN32__;__i386__;PCSX_VERSION="1.5";ENABLE_NLS;PACKAGE="psxjin";_MSC_VER_;NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4996;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0000</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng-2008-x32.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)psxjin-debug.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>./includes;./lua/lib;zlib;libpng;directx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>psxjin_x86.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Debug/psxjin.bsc</OutputFile>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)\dll\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Command>defaultconfig\SubWCRev.bat</Command>
+    </PreBuildEvent>
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/psxjin.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/Zm200 /MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig;libbzip2;directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_WIN32;NDEBUG;__WIN32__;_MSC_VER_;PCSX_VERSION="1.5";__i386__;ENABLE_NLS;PACKAGE="psxjin";NOMINMAX;NOCONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4996;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0000</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng-2008-x32.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>..\output\psxjin-release.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>./includes;./lua/lib;zlib;libpng;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Windows</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+      <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>psxjin_x86.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/psxjin.bsc</OutputFile>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)\dll\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">
+    <PreBuildEvent>
+      <Command>defaultconfig\SubWCRev.bat</Command>
+    </PreBuildEvent>
+    <Midl>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <TargetEnvironment>Win32</TargetEnvironment>
+      <TypeLibraryName>.\Release/psxjin.tlb</TypeLibraryName>
+      <HeaderFileName />
+    </Midl>
+    <ClCompile>
+      <AdditionalOptions>/Zm200 /MP %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Full</Optimization>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <OmitFramePointers>true</OmitFramePointers>
+      <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
+      <AdditionalIncludeDirectories>..;.;./includes;lua/lua-5.1.4/src;zlib;libpng;userconfig;defaultconfig;libbzip2;directx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>_WINDOWS;WIN32;_WIN32;NDEBUG;_WINDOWS;__WIN32__;_MSC_VER_;PCSX_VERSION="1.5";__i386__;ENABLE_NLS;PACKAGE="psxjin";NOMINMAX;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <StructMemberAlignment>16Bytes</StructMemberAlignment>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <PrecompiledHeaderOutputFile>$(IntDir)$(TargetName).pch</PrecompiledHeaderOutputFile>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ProgramDataBaseFileName>$(IntDir)vc80.pdb</ProgramDataBaseFileName>
+      <WarningLevel>Level3</WarningLevel>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <CompileAs>Default</CompileAs>
+      <DisableSpecificWarnings>4996;4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <Culture>0x0000</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng-2008-x32.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <OutputFile>$(OutDir)psxjin-releaseFastbuild.exe</OutputFile>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <AdditionalLibraryDirectories>./includes;./lua/lib;zlib;libpng;libbzip2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <LinkTimeCodeGeneration />
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention />
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+    <Manifest>
+      <AdditionalManifestFiles>psxjin_x86.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
+    </Manifest>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\Release/psxjin.bsc</OutputFile>
+    </Bscmake>
+    <PostBuildEvent>
+      <Command>xcopy /y /d "$(ProjectDir)\dll\*.dll" "$(OutDir)"</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\CdRom.cpp" />
+    <ClCompile Include="..\cheat.cpp" />
+    <ClCompile Include="..\Decode_XA.cpp" />
+    <ClCompile Include="..\DisR3000A.cpp" />
+    <ClCompile Include="..\emufile.cpp" />
+    <ClCompile Include="..\gpu\cstuff.c" />
+    <ClCompile Include="..\gpu\draw.cpp" />
+    <ClCompile Include="..\gpu\DrawString.cpp" />
+    <ClCompile Include="..\gpu\fps.cpp" />
+    <ClCompile Include="..\gpu\gpu.cpp" />
+    <ClCompile Include="..\gpu\gpu_cfg.cpp" />
+    <ClCompile Include="..\gpu\gpu_record.cpp" />
+    <ClCompile Include="..\gpu\menu.cpp" />
+    <ClCompile Include="..\gpu\prim.cpp" />
+    <ClCompile Include="..\gpu\soft.cpp" />
+    <ClCompile Include="..\Gte.cpp" />
+    <ClCompile Include="..\iso\cdriso.cpp" />
+    <ClCompile Include="..\iso\Win32\Win32.cpp" />
+    <ClCompile Include="..\ix86\ix86.cpp" />
+    <ClCompile Include="..\LuaEngine.cpp">
+      <CompileAs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Default</CompileAs>
+    </ClCompile>
+    <ClCompile Include="..\Mdec.cpp" />
+    <ClCompile Include="..\metaspu\metaspu.cpp" />
+    <ClCompile Include="..\metaspu\SndOut.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\3dnow_win.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\AAFilter.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\cpu_detect_x86_win.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\FIFOSampleBuffer.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\FIRFilter.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\mmx_optimized.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\RateTransposer.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\SoundTouch.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\sse_optimized.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\TDStretch.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\WavFile.cpp" />
+    <ClCompile Include="..\metaspu\Timestretcher.cpp" />
+    <ClCompile Include="..\metaspu\win32\ConfigSoundtouch.cpp" />
+    <ClCompile Include="..\Misc.cpp" />
+    <ClCompile Include="..\movie.cpp" />
+    <ClCompile Include="..\plugins.cpp" />
+    <ClCompile Include="..\PsxBios.cpp" />
+    <ClCompile Include="..\PsxCounters.cpp" />
+    <ClCompile Include="..\PsxDma.cpp" />
+    <ClCompile Include="..\PsxHLE.cpp" />
+    <ClCompile Include="..\PsxHw.cpp" />
+    <ClCompile Include="..\PsxInterpreter.cpp" />
+    <ClCompile Include="..\PsxMem.cpp" />
+    <ClCompile Include="..\R3000A.cpp" />
+    <ClCompile Include="..\Sio.cpp" />
+    <ClCompile Include="..\spu\adsr.cpp" />
+    <ClCompile Include="..\spu\cfg.cpp" />
+    <ClCompile Include="..\spu\dsound.cpp" />
+    <ClCompile Include="..\spu\freeze.cpp">
+      <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">false</PreprocessToFile>
+      <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">false</PreprocessSuppressLineNumbers>
+    </ClCompile>
+    <ClCompile Include="..\spu\gauss_i.cpp" />
+    <ClCompile Include="..\spu\record.cpp" />
+    <ClCompile Include="..\spu\registers.cpp" />
+    <ClCompile Include="..\spu\reverb.cpp" />
+    <ClCompile Include="..\spu\spu.cpp" />
+    <ClCompile Include="..\spu\stdafx.cpp" />
+    <ClCompile Include="..\spu\xa.cpp" />
+    <ClCompile Include="AboutDlg.cpp" />
+    <ClCompile Include="analog.cpp" />
+    <ClCompile Include="ConfigurePlugins.cpp" />
+    <ClCompile Include="cueparse.cpp" />
+    <ClCompile Include="CWindow.cpp" />
+    <ClCompile Include="luaconsole.cpp" />
+    <ClCompile Include="maphkeys.cpp" />
+    <ClCompile Include="memcheat.cpp" />
+    <ClCompile Include="memView.cpp" />
+    <ClCompile Include="moviewin.cpp" />
+    <ClCompile Include="padwin.cpp" />
+    <ClCompile Include="plugin.cpp" />
+    <ClCompile Include="ramwatch.cpp" />
+    <ClCompile Include="ram_search.cpp" />
+    <ClCompile Include="recentmenu.cpp" />
+    <ClCompile Include="WndMain.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\CdRom.h" />
+    <ClInclude Include="..\cheat.h" />
+    <ClInclude Include="..\Coff.h" />
+    <ClInclude Include="..\Debug.h" />
+    <ClInclude Include="..\Decode_XA.h" />
+    <ClInclude Include="..\emufile.h" />
+    <ClInclude Include="..\gpu\draw.h" />
+    <ClInclude Include="..\gpu\DrawString.h" />
+    <ClInclude Include="..\gpu\DrawStringFont.h" />
+    <ClInclude Include="..\gpu\externals.h" />
+    <ClInclude Include="..\gpu\fps.h" />
+    <ClInclude Include="..\gpu\gpu.h" />
+    <ClInclude Include="..\gpu\gpu_cfg.h" />
+    <ClInclude Include="..\gpu\gpu_record.h" />
+    <ClInclude Include="..\gpu\hq2x.h" />
+    <ClInclude Include="..\gpu\hq3x.h" />
+    <ClInclude Include="..\gpu\interp.h" />
+    <ClInclude Include="..\gpu\menu.h" />
+    <ClInclude Include="..\gpu\mingw_d3d.h" />
+    <ClInclude Include="..\gpu\mingw_d3dtypes.h" />
+    <ClInclude Include="..\gpu\mingw_ddraw.h" />
+    <ClInclude Include="..\gpu\prim.h" />
+    <ClInclude Include="..\gpu\psemu.h" />
+    <ClInclude Include="..\gpu\resource.h" />
+    <ClInclude Include="..\gpu\soft.h" />
+    <ClInclude Include="..\gpu\stdafx.h" />
+    <ClInclude Include="..\Gte.h" />
+    <ClInclude Include="..\iso\cdriso.h" />
+    <ClInclude Include="..\ix86\iGte.h" />
+    <ClInclude Include="..\ix86\ix86.h" />
+    <ClInclude Include="..\LuaEngine.h" />
+    <ClInclude Include="..\Mdec.h" />
+    <ClInclude Include="..\metaspu\metaspu.h" />
+    <ClInclude Include="..\metaspu\SndOut.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\AAFilter.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\BPMDetect.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\cpu_detect.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\FIFOSampleBuffer.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\FIFOSamplePipe.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\FIRFilter.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\RateTransposer.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\SoundTouch.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\STTypes.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\TDStretch.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\WavFile.h" />
+    <ClInclude Include="..\metaspu\win32\Dialogs.h" />
+    <ClInclude Include="..\Misc.h" />
+    <ClInclude Include="..\movie.h" />
+    <ClInclude Include="..\plugins.h" />
+    <ClInclude Include="..\PSEmu_Plugin_Defs.h" />
+    <ClInclude Include="..\PsxBios.h" />
+    <ClInclude Include="..\PsxCommon.h" />
+    <ClInclude Include="..\PsxCounters.h" />
+    <ClInclude Include="..\PsxDma.h" />
+    <ClInclude Include="..\PsxHLE.h" />
+    <ClInclude Include="..\PsxHw.h" />
+    <ClInclude Include="..\PsxMem.h" />
+    <ClInclude Include="..\R3000A.h" />
+    <ClInclude Include="..\Sio.h" />
+    <ClInclude Include="..\spu\adsr.h" />
+    <ClInclude Include="..\spu\cfg.h" />
+    <ClInclude Include="..\spu\dsoundoss.h" />
+    <ClInclude Include="..\spu\externals.h" />
+    <ClInclude Include="..\spu\gauss_i.h" />
+    <ClInclude Include="..\spu\record.h" />
+    <ClInclude Include="..\spu\registers.h" />
+    <ClInclude Include="..\spu\reverb.h" />
+    <ClInclude Include="..\spu\spu.h" />
+    <ClInclude Include="..\spu\stdafx.h" />
+    <ClInclude Include="..\spu\xa.h" />
+    <ClInclude Include="..\System.h" />
+    <ClInclude Include="..\version.h" />
+    <ClInclude Include="AboutDlg.h" />
+    <ClInclude Include="analog.h" />
+    <ClInclude Include="cueparse.h" />
+    <ClInclude Include="CWindow.h" />
+    <ClInclude Include="directx\dinput.h" />
+    <ClInclude Include="maphkeys.h" />
+    <ClInclude Include="memView.h" />
+    <ClInclude Include="moviewin.h" />
+    <ClInclude Include="padwin.h" />
+    <ClInclude Include="plugin.h" />
+    <ClInclude Include="ramwatch.h" />
+    <ClInclude Include="ram_search.h" />
+    <ClInclude Include="recentmenu.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="Win32.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Docs\ChangeLog.txt" />
+    <Text Include="..\Docs\CodingStyle.txt" />
+    <Text Include="..\Docs\License.txt" />
+    <Text Include="..\Docs\Readme.txt" />
+    <Text Include="..\Docs\ToDo.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\gpu\gpuPeopsSoft.rc" />
+    <ResourceCompile Include="psxjin.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\gpu\hq2x16.asm">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\hq2x32.asm">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\hq3x16.asm">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\hq3x32.asm">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -O9999 -I..\gpu\ -w-orphan-labels -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\i386.asm">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">nasmw.exe -I..\gpu\ -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">nasmw.exe -I..\gpu\ -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">nasmw.exe -I..\gpu\ -f win32 -D__WIN32__ -D__i386__ "%(FullPath)" -o "$(IntDir)%(Filename).obj"
+</Command>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(IntDir)%(Filename).obj;%(Outputs)</Outputs>
+    </CustomBuild>
+    <None Include="..\gpu\macros.inc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\gpu\res\gpu.bmp" />
+    <Image Include="psxjin.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

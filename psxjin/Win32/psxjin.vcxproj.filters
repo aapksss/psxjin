@@ -1,0 +1,608 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Win32">
+      <UniqueIdentifier>{f086c389-cde5-41a7-919c-8a4f2e30a3e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Bios">
+      <UniqueIdentifier>{8b1f793e-a4fa-48ff-bd95-b38757301609}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CdRom">
+      <UniqueIdentifier>{28e41b37-4e09-4d24-824e-2c6abd52f01d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GPU-SPU-SIO">
+      <UniqueIdentifier>{dd35ac6c-97c9-4eae-a586-2c16d67194c3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Debugger">
+      <UniqueIdentifier>{017fde36-ff65-43a2-8f25-07804954e467}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GTE">
+      <UniqueIdentifier>{463fad87-d6b2-482d-9fff-6e0f9aca1bc1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Memory">
+      <UniqueIdentifier>{4c81c050-ede4-4073-abae-dfe023e9a5a5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Plugins system">
+      <UniqueIdentifier>{53b30349-05df-4944-b808-0ac74bcda1fa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CPU">
+      <UniqueIdentifier>{d941ee4e-0024-4c8e-af15-03b0b1868c8c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Hardware registers">
+      <UniqueIdentifier>{3b0abbec-8c11-46cf-9aba-3a0d0810f4c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DMA">
+      <UniqueIdentifier>{2345dbb4-7094-43e0-af4c-8a7ccff2057e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Mdec">
+      <UniqueIdentifier>{2d77328c-6f46-4ce8-99cc-6921f7ba64b6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Misc">
+      <UniqueIdentifier>{27b0ff30-ee24-4cb0-ae0b-8d9f9e3a7016}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Counters">
+      <UniqueIdentifier>{6f37b2d4-0679-4685-b3aa-e7ecce3d1b46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ix86">
+      <UniqueIdentifier>{42acde36-b41d-4417-97dd-a73d62afafb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="HLE">
+      <UniqueIdentifier>{facdc082-9faa-4b10-8656-6192641e56ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Docs">
+      <UniqueIdentifier>{3a897071-eb3a-484c-83b4-40dae1f9abd7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="spu">
+      <UniqueIdentifier>{7efd47c1-c151-4c52-bc5d-cd63fd01a360}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="iso">
+      <UniqueIdentifier>{0c5ea21a-9cc5-46fb-a6ac-26b4e59b1d05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="iso\Win32">
+      <UniqueIdentifier>{a408c502-0585-4675-b3fe-7086406ba616}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="metaspu">
+      <UniqueIdentifier>{9fc9e14a-2df5-4952-a336-ad140fd8054a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="metaspu\win32">
+      <UniqueIdentifier>{b84c500f-72e3-4ee7-b5ba-62ea44e81d62}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="metaspu\SoundTouch">
+      <UniqueIdentifier>{a890bb26-fcad-45eb-90af-f76fa0d86a6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="gpu">
+      <UniqueIdentifier>{67654e22-7ddf-44dc-b550-2450100ab5b8}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AboutDlg.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="CWindow.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="luaconsole.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="maphkeys.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="memcheat.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="memView.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="moviewin.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="padwin.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="ram_search.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="ramwatch.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="recentmenu.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="WndMain.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PsxBios.cpp">
+      <Filter>Bios</Filter>
+    </ClCompile>
+    <ClCompile Include="..\CdRom.cpp">
+      <Filter>CdRom</Filter>
+    </ClCompile>
+    <ClCompile Include="cueparse.cpp">
+      <Filter>CdRom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Decode_XA.cpp">
+      <Filter>CdRom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sio.cpp">
+      <Filter>GPU-SPU-SIO</Filter>
+    </ClCompile>
+    <ClCompile Include="..\DisR3000A.cpp">
+      <Filter>Debugger</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Gte.cpp">
+      <Filter>GTE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PsxMem.cpp">
+      <Filter>Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigurePlugins.cpp">
+      <Filter>Plugins system</Filter>
+    </ClCompile>
+    <ClCompile Include="plugin.cpp">
+      <Filter>Plugins system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\plugins.cpp">
+      <Filter>Plugins system</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PsxInterpreter.cpp">
+      <Filter>CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\R3000A.cpp">
+      <Filter>CPU</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PsxHw.cpp">
+      <Filter>Hardware registers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PsxDma.cpp">
+      <Filter>DMA</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Mdec.cpp">
+      <Filter>Mdec</Filter>
+    </ClCompile>
+    <ClCompile Include="..\cheat.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\emufile.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\LuaEngine.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Misc.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\movie.cpp">
+      <Filter>Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PsxCounters.cpp">
+      <Filter>Counters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\ix86\ix86.cpp">
+      <Filter>ix86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\PsxHLE.cpp">
+      <Filter>HLE</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\adsr.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\cfg.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\dsound.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\freeze.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\gauss_i.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\record.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\registers.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\reverb.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\spu.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\stdafx.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\xa.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\iso\cdriso.cpp">
+      <Filter>iso</Filter>
+    </ClCompile>
+    <ClCompile Include="..\iso\Win32\Win32.cpp">
+      <Filter>iso\Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\metaspu.cpp">
+      <Filter>metaspu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SndOut.cpp">
+      <Filter>metaspu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\Timestretcher.cpp">
+      <Filter>metaspu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\win32\ConfigSoundtouch.cpp">
+      <Filter>metaspu\win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\3dnow_win.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\AAFilter.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\cpu_detect_x86_win.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\FIFOSampleBuffer.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\FIRFilter.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\mmx_optimized.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\RateTransposer.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\SoundTouch.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\sse_optimized.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\TDStretch.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\WavFile.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\cstuff.c">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\draw.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\DrawString.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\fps.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\gpu.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\gpu_cfg.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\gpu_record.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\menu.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\prim.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\soft.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="analog.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="AboutDlg.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="CWindow.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="directx\dinput.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="maphkeys.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="memView.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="moviewin.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="padwin.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="ram_search.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="ramwatch.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="recentmenu.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="Win32.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PsxBios.h">
+      <Filter>Bios</Filter>
+    </ClInclude>
+    <ClInclude Include="..\CdRom.h">
+      <Filter>CdRom</Filter>
+    </ClInclude>
+    <ClInclude Include="cueparse.h">
+      <Filter>CdRom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Decode_XA.h">
+      <Filter>CdRom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sio.h">
+      <Filter>GPU-SPU-SIO</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Debug.h">
+      <Filter>Debugger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Gte.h">
+      <Filter>GTE</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PsxMem.h">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="plugin.h">
+      <Filter>Plugins system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\plugins.h">
+      <Filter>Plugins system</Filter>
+    </ClInclude>
+    <ClInclude Include="..\R3000A.h">
+      <Filter>CPU</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PsxHw.h">
+      <Filter>Hardware registers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PsxDma.h">
+      <Filter>DMA</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Mdec.h">
+      <Filter>Mdec</Filter>
+    </ClInclude>
+    <ClInclude Include="..\cheat.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Coff.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\emufile.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\LuaEngine.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Misc.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\movie.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\System.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\version.h">
+      <Filter>Misc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PsxCounters.h">
+      <Filter>Counters</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ix86\iGte.h">
+      <Filter>ix86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\ix86\ix86.h">
+      <Filter>ix86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\PsxHLE.h">
+      <Filter>HLE</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\adsr.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\cfg.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\dsoundoss.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\externals.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\gauss_i.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\record.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\registers.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\reverb.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\spu.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\stdafx.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\xa.h">
+      <Filter>spu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\iso\cdriso.h">
+      <Filter>iso</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\metaspu.h">
+      <Filter>metaspu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SndOut.h">
+      <Filter>metaspu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\win32\Dialogs.h">
+      <Filter>metaspu\win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\AAFilter.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\BPMDetect.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\cpu_detect.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\FIFOSampleBuffer.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\FIFOSamplePipe.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\FIRFilter.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\RateTransposer.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\SoundTouch.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\STTypes.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\TDStretch.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\WavFile.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\draw.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\DrawString.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\DrawStringFont.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\externals.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\fps.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\gpu.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\gpu_cfg.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\gpu_record.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\hq2x.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\hq3x.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\interp.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\menu.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\mingw_d3d.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\mingw_d3dtypes.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\mingw_ddraw.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\prim.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\psemu.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\resource.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\soft.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\stdafx.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="analog.h" />
+    <ClInclude Include="..\PSEmu_Plugin_Defs.h" />
+    <ClInclude Include="..\PsxCommon.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\Docs\ChangeLog.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="..\Docs\CodingStyle.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="..\Docs\License.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="..\Docs\Readme.txt">
+      <Filter>Docs</Filter>
+    </Text>
+    <Text Include="..\Docs\ToDo.txt">
+      <Filter>Docs</Filter>
+    </Text>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\gpu\gpuPeopsSoft.rc">
+      <Filter>gpu</Filter>
+    </ResourceCompile>
+    <ResourceCompile Include="psxjin.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\gpu\macros.inc">
+      <Filter>gpu</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\gpu\res\gpu.bmp" />
+    <Image Include="psxjin.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="..\gpu\hq2x16.asm">
+      <Filter>gpu</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\hq2x32.asm">
+      <Filter>gpu</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\hq3x16.asm">
+      <Filter>gpu</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\hq3x32.asm">
+      <Filter>gpu</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\gpu\i386.asm">
+      <Filter>gpu</Filter>
+    </CustomBuild>
+  </ItemGroup>
+</Project>
