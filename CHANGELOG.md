@@ -6,6 +6,7 @@ Changes in v2.0.3 (NOT COMPLETE YET)
 - Updated documentation<br>
 - Organized and cleaned up repository<br>
 - Fixed some issues with moving from SVN to GIT<br>
+- Updated some libraries and applications in the build process
 - Bug fixes, improvements, and updates<br>
 
 Changes in v2.0.2
