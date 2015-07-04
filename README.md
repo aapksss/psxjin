@@ -71,22 +71,11 @@ mz<br>
 The PCSX team:<br>
 
 Linuzappz<br>
-Email: linuzappz@pcsx.net
-
 Shadow<br>
-Email: shadow@pcsx.net
-
 Pete Bernett<br>
-Email: psswitch@online.de
-
 NoComp<br>
-Email: NoComp@mailcity.com
-
 Nik3d<br>
-Email: None found
-
 Akumax<br>
-Email: akumax@pcsx.net
 
 The PSXjin team would like to thank:
 
