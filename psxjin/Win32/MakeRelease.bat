@@ -1,9 +1,10 @@
+@echo off
 del /s ..\output\psxjin.zip
 upx ..\output\psxjin-release.exe
 IF ERRORLEVEL 1 IF NOT ERRORLEVEL 2 GOTO UPXFailed
 cd ..\output
 copy psxjin-release.exe psxjin.exe
-..\win32\zip -X -9 -r ..\output\PSXjin.zip psxjin.exe bios\*.txt lua51.dll psxjin-instructions.txt plugins\*.dll Docs\*.txt
+..\win32\zip -X -9 -r ..\output\PSXjin.zip psxjin.exe lua51.dll
 cd ..\win32
 GOTO end
 
@@ -15,3 +16,4 @@ echo Close it or let it finish before trying this script again.
 pause
 
 :end
+pause
