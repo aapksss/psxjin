@@ -27,7 +27,7 @@ PSXjin is an overhaul of the PCSX-rr fork of the PCSX emulator. Compared to prev
 
 <h1>How the emulator works:</h1>
 
-- Put a BIOS in BIOS directory (recommended: scph1000.bin for NTSC-J games, scph1001.bin for NTSC games, and scph1002.bin for PAL games) [optional]
+- Put a BIOS in BIOS directory (recommended: SCPH**00.bin or SCPH**03.bin for NTSC-J games, SCPH**01.bin for NTSC-U games, and SCPH**02.bin for PAL games, whereas the SCPH1001.bin is the one recommended for NTSC-U games by TASVideos)
 - Open the emulator
 - Select "Open CD"" and pick a valid file type
 
