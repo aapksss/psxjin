@@ -1,5 +1,5 @@
 #
-# PCSX Makefile for Win32-mingw
+# PSXjin Makefile for Win32-mingw
 #
 
 #DEBUG = 1
