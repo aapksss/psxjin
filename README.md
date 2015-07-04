@@ -23,11 +23,11 @@ PSXjin is an original PlayStation emulator.
 
 What does that really mean? It means that it emulates the way that a PS1 works and tries to translate PS1 machine language to PC language. This is very hard to do and we try as hard as we can to achieve the best emulator we possibly can.
 
-PSXjin is an overhaul of the PCSX-rr fork of the PCSX emulator. Compared to previous forks, PSXjin uses virtually no plugins (only an input plugin is needed), a simple to use GUI, and a new SPU core.
+PSXjin is an overhaul of the PCSX-rr fork of the PCSX emulator. Compared to previous forks, PSXjin uses virtually no plugins at all, a simple to use GUI, and a new SPU core.
 
 <h1>How the emulator works:</h1>
 
-- Put a BIOS in BIOS directory (recommended: SCPHXX00.bin or SCPHXX03.bin for NTSC-J games, SCPHXX01.bin for NTSC-U games, and SCPH**02.bin for PAL games, whereas the SCPH1001.bin is the one recommended for NTSC-U games by TASVideos)
+- Put a BIOS in BIOS directory (recommended: SCPHXX00.bin or SCPHXX03.bin for NTSC-J games, SCPHXX01.bin for NTSC-U games, and SCPHXX02.bin for PAL games, whereas the SCPH1001.bin is the one recommended for NTSC-U games by TASVideos)
 - Open the emulator
 - Select "Open CD"" and pick a valid file type
 
