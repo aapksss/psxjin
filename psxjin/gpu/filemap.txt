@@ -1,4 +1,4 @@
-#########################################################################
+File map
 
 - gpu.c	/ gpu.h
   plugin interface functions and main dma/register emulation
@@ -56,6 +56,3 @@
 
 - resource.h
   Windows resource header
-
-#########################################################################
-

@@ -1,1 +1,0 @@
-bios goes here (scph1001.bin)
