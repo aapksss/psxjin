@@ -111,7 +111,7 @@
       <Culture>0x0000</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng-2008-x32.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng16.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\output\psxjin-debug.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>./includes;./lua/lib;zlib;libpng;directx;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -174,7 +174,7 @@
       <Culture>0x0000</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng-2008-x32.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng16.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\output\psxjin-release.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>./includes;./lua/lib;zlib;libpng;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -240,7 +240,7 @@
       <Culture>0x0000</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng-2008-x32.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>directx/ddraw.lib;directx/dxguid.lib;directx/dinput8.lib;vfw32.lib;shlwapi.lib;winmm.lib;odbc32.lib;odbccp32.lib;comctl32.lib;lua51.lib;zlib-2008-x32.lib;libpng16.lib;directx/dsound.lib;directx/dxerr8.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>..\output\psxjin-releaseFastbuild.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>./includes;./lua/lib;zlib;libpng;libbzip2;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
