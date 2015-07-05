@@ -27,6 +27,9 @@
 #include <png.h>
 #include "win32.h"
 
+#define png_infopp_NULL (png_infopp)NULL
+#define int_p_NULL (int*)NULL
+
 #define _IN_GPU
 
 #include "gpu_record.h"
