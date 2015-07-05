@@ -5723,4 +5723,3 @@ extern "C"
 #pragma warning(default:4201)
 
 #endif //__DDRAW_INCLUDED__
-

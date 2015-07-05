@@ -25,10 +25,7 @@ public:
   std::map<int,CueTimestamp> indexes;
 };
 
-
-
   typedef std::map<int,CueTrack> TTrackMap;
-
 
 class CueData
 {
@@ -42,7 +39,5 @@ public:
   int cueparser(char* Filename);
   void CopyToConfig();
 };
-
-
 
 #endif //_CUEPARSE_H_

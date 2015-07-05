@@ -1,5 +1,5 @@
-/* SPU2-X, A plugin for Emulating the Sound Processing Unit of the Playstation 2
- * Developed and maintained by the PSXjin2 Development Team.
+/* SPU2-X, a plugin for emulating the Sound Processing Unit of the PlayStation 2
+ * Developed and maintained by the PSXjin2 Development Team. < Is this a real emulator/team? I though there was only PSXjin?
  * 
  * Original portions from SPU2ghz are (c) 2008 by David Quintana [gigaherz]
  *
@@ -15,12 +15,12 @@
  * along with SPU2-X.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-//TODO - need to make a generic way for saving these configs and add in the windows
-//rc configurator
+//TODO - need to make a generic way for saving these configures and add in the windows
+//rc configure
 
 //#include "types.h" //desmume
 //#include "Global.h" //?
-#include "PsxCommon.h" //PSXJIN
+#include "PsxCommon.h"
 #include "Dialogs.h"
 
 #include "../metaspu.h"

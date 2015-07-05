@@ -1,13 +1,14 @@
-//xa.cpp
-//original (C) 2002 by Pete Bernert
-//nearly entirely rewritten for pcsxrr by zeromus
+/* xa.cpp
+original (C) 2002 by Pete Bernert
+nearly entirely rewritten for pcsxrr by zeromus
 
-//This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation; either version 2 of the License, or
-//(at your option) any later version. See also the license.txt file for
-//additional informations.                                              
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version. See also the license.txt file for
+additional information.
 
+*/
 
 #include "stdafx.h"
 #include "PsxCommon.h"
@@ -17,19 +18,19 @@
 
 s32 _Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio);
 
-//this code is really naive. it's probably all wrong, i'm not good at this kind of stuff.
+//this code is really naive. It's probably all wrong, I'm not good at this kind of stuff.
 //really ought to make a circular buffer.
 //alternatively we could keep these in the blocks they originally came in
 //instead of splitting them all into samples.
 //the timing logic is terribly slow.
 //going for a simple reference implementation here.
-//but it is a little strange because the blocks can be different samplerates.
+//but it is a little strange because the blocks can be different sample rates.
 //another reason for implementing it this way is so that the xa_queue can represent some kind of reliable hardware state
-//and the spu can fetch samples from it at whatever rate it needs to (whatever rate, one day, the user has specified)
-//instead of resampling everything as soon as it is received.
+//and the SPU can fetch samples from it at whatever rate it needs to (whatever rate, one day, the user has specified)
+//instead of re-sampling everything as soon as it is received.
 //
 //there may be something wrong with the interpolation, but it is hard to tell, since I think there is also
-//something wrong with the xa adpcm decoding.
+//something wrong with the XA ADPCM decoding.
 xa_queue::xa_queue()
 	: counter(0)
 	, lastFrac(0)

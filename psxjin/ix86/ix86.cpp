@@ -1,12 +1,11 @@
 /*
  * ix86 core v0.5.1
  *  Authors: linuzappz <linuzappz@pcsx.net>
- *           alexey silinov
+ *           Alexey Silinov
  */
 
 #include <stdio.h>
 #include <string.h>
-
 #include "ix86.h"
 
 // global variables
@@ -1793,7 +1792,7 @@ void PI2FDRtoR(int to,int from)
 
 
 /*
-	3DNOW Extension intructions 
+	3DNOW! extension instructions
 */
 
 void PFMAXMtoR(int to,int from)
@@ -1825,6 +1824,3 @@ void PFMINRtoR(int to,int from)
 	ModRM(3, to, from);
 	write8(0x94);
 }
-
-
-

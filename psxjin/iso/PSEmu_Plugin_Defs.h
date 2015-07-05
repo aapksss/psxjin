@@ -5,13 +5,12 @@
 
 	This file can be used only to develop PSEmu Plugins
 	Other usage is highly prohibited.
+	
+	IMPORTANT!!!
+	if you want to add return codes (any errors or warnings) just drop mail to
+	plugin@psemu.com
+
 */
-
-
-// IMPORTANT!!!
-
-// if you want to add return codes (any errors or warnings) just drop mail to
-// plugin@psemu.com
 
 #ifndef _PSEMU_PLUGIN_DEFS_H
 #define _PSEMU_PLUGIN_DEFS_H
@@ -308,6 +307,5 @@ typedef struct {
    void NETkeypressed(int key)
     key is on win32 a VK_?? keycode, and over linux a XK_?? (X11) keycode.
 */
-
 
 #endif // _PSEMU_PLUGIN_DEFS_H

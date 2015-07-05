@@ -1,5 +1,5 @@
 /* 
-Copyright (C) 2009-2010 DeSmuME team
+Copyright (C) 2009-2015 DeSmuME team
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-//don't use emufile for files bigger than 2GB! you have been warned! some day this will be fixed.
+// Don't use emufile for files bigger than 2GB! You have been warned! Some day this will be fixed.
 
 #ifndef EMUFILE_H
 #define EMUFILE_H

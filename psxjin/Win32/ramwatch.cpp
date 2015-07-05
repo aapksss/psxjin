@@ -1,4 +1,3 @@
-
 #include "../PsxCommon.h"
 #ifdef WIN32
 #include "Win32.h"

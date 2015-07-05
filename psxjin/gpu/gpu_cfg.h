@@ -35,4 +35,3 @@ void ReadWinSizeConfig(void);
 BOOL CALLBACK SoftDlgProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM lParam );
 
 #endif // _GPU_CFG_H_
-

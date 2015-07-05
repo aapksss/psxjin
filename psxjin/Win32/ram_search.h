@@ -1,7 +1,6 @@
 #ifndef RAM_SEARCH_H
 #define RAM_SEARCH_H
 
-
 extern char rs_type_size;
 extern int ResultCount;
 typedef unsigned int HWAddressType;

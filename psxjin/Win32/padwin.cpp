@@ -7,13 +7,10 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
-
 #include "dinput.h"
-
 #include "PSXCommon.h"
 #include "plugins.h"
 #include "resource.h"
-
 
 HWND hTargetWnd;
 
@@ -870,7 +867,6 @@ LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARA
 	}
 	return 0;
 }
-
 
 void PADconfigure (void)
 {			

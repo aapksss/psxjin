@@ -398,5 +398,3 @@ void xa_decode_t::load(EMUFILE* fp) {
 	for(int i=0;i<16384;i++)
 		fp->read16le(&pcm[i]);
 }
-
-

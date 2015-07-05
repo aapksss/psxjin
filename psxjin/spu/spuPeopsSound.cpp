@@ -39,4 +39,3 @@ BOOL APIENTRY DllMain( HANDLE hModule,
 	hInst=(HINSTANCE)hModule;
 	return TRUE;
 }
-

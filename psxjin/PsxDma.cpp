@@ -1,21 +1,3 @@
-/*  PSXjin - Pc Psx Emulator
- *  Copyright (C) 1999-2003  PSXjin Team
- *
- *  This program is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2 of the License, or
- *  (at your option) any later version.
- *
- *  This program is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with this program; if not, write to the Free Software
- *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
- */
-
 #include "PsxCommon.h"
 
 // Dma0/1 in Mdec.c
@@ -26,7 +8,7 @@ void psxDma4(u32 madr, u32 bcr, u32 chcr) { // SPU
 	u32 size;
 
 	switch (chcr) {
-		case 0x01000201: //cpu to spu transfer
+		case 0x01000201: // CPU to SPU transfer
 #ifdef PSXDMA_LOG
 			PSXDMA_LOG("*** DMA4 SPU - mem2spu *** %lx addr = %lx size = %lx\n", chcr, madr, bcr);
 #endif
@@ -105,7 +87,7 @@ void psxDma2(u32 madr, u32 bcr, u32 chcr) { // GPU
 			return;
 //			break;
 
-		case 0x01000401: // dma chain
+		case 0x01000401: // DMA chain
 #ifdef PSXDMA_LOG
 			PSXDMA_LOG("*** DMA 2 - GPU dma chain *** %lx addr = %lx size = %lx\n", chcr, madr, bcr);
 #endif
@@ -162,4 +144,3 @@ void psxDma6(u32 madr, u32 bcr, u32 chcr) {
 	HW_DMA6_CHCR &= ~0x01000000;
 	DMA_INTERRUPT(6);
 }
-

@@ -3,7 +3,7 @@
 /// Win32 version of the x86 CPU detect routine.
 ///
 /// This file is to be compiled in Windows platform with Microsoft Visual C++ 
-/// Compiler. Please see 'cpu_detect_x86_gcc.cpp' for the gcc compiler version 
+/// Compiler. Please see 'cpu_detect_x86_gcc.cpp' for the GCC compiler version 
 /// for all GNU platforms.
 ///
 /// Author        : Copyright (c) Olli Parviainen

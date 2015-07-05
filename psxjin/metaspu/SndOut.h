@@ -1,5 +1,5 @@
-/* SPU2-X, A plugin for Emulating the Sound Processing Unit of the Playstation 2
- * Developed and maintained by the PSXjin2 Development Team.
+/* SPU2-X, a plugin for emulating the Sound Processing Unit of the PlayStation 2
+ * Developed and maintained by the PSXjin2 Development Team. < Is that a real emulator/team? I thought there was only PSXjin?
  * 
  * Original portions from SPU2ghz are (c) 2008 by David Quintana [gigaherz]
  *
@@ -458,7 +458,7 @@ public:
 		//  If the SPU2 gets even the least bit out of sync with the SndOut device,
 		//  the readpos of the circular buffer will overtake the writepos,
 		//  leading to a prolonged period of hopscotching read/write accesses (ie,
-		//  lots of staticy crap sound for several seconds).
+		//  lots of crappy sound for several seconds).
 		//
 		// Fix:
 		//  If the read position overtakes the write position, abort the

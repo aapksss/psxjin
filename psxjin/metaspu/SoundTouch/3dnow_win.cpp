@@ -18,7 +18,7 @@
 /// already make a difference.
 /// 
 /// This file is to be compiled in Windows platform with Microsoft Visual C++ 
-/// Compiler. Please see '3dnow_gcc.cpp' for the gcc compiler version for all
+/// Compiler. Please see '3dnow_gcc.cpp' for the GCC compiler version for all
 /// GNU platforms (if file supplied).
 ///
 /// NOTICE: If using Visual Studio 6.0, you'll need to install the "Visual C++ 
@@ -345,6 +345,5 @@ uint FIRFilter3DNow::evaluateFilterStereo(float *dest, const float *src, const u
 
     return count;
 }
-
 
 #endif  // ALLOW_3DNOW

@@ -1,7 +1,7 @@
 /*
  * ix86 definitions v0.5.1
  *  Authors: linuzappz <linuzappz@pcsx.net>
- *           alexey silinov
+ *           Alexey Silinov
  */
 
 #ifndef __IX86_H__
@@ -639,9 +639,8 @@ void PUNPCKHDQRtoR(int to,int from);
 void PUNPCKLDQRtoR(int to,int from);
 
 
-
 /*
-	SSE	intructions 
+	SSE	instructions 
 */
 void MOVAPSMtoR(int to,int from);
 void MOVAPSRtoM(int to,int from);
@@ -658,24 +657,3 @@ void ANDPSRtoR(int to,int from);
 
 
 #endif /* __IX86_H__ */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

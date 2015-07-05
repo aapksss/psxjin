@@ -2114,4 +2114,3 @@ typedef enum _D3DVERTEXBLENDFLAGS D3DVERTEXBLENDFLAGS;
 #pragma warning(default:4201)
 
 #endif /* _D3DTYPES_H_ */
-

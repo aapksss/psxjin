@@ -1,11 +1,11 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// 
-/// Sample rate transposer. Changes sample rate by using linear interpolation 
+/// Sample rate transpose code. Changes sample rate by using linear interpolation 
 /// together with anti-alias filtering (first order interpolation with anti-
 /// alias filtering should be quite adequate for this application).
 ///
 /// Use either of the derived classes of 'RateTransposerInteger' or 
-/// 'RateTransposerFloat' for corresponding integer/floating point tranposing
+/// 'RateTransposerFloat' for corresponding integer/floating point transposing
 /// algorithm implementation.
 ///
 /// Author        : Copyright (c) Olli Parviainen

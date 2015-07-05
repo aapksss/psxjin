@@ -107,4 +107,3 @@ clean:
 	-$(RM) $(TARGETDIR)*.o
 	-$(RM) $(TARGETDIR)*.res
 	-$(RM) $(TARGETDIR)$(TARGET).dll
-

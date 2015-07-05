@@ -23,10 +23,6 @@
 extern "C" {
 #endif
 
-
-
-
-
 /*
  *  To build applications for older versions of DirectInput
  *
@@ -4414,4 +4410,3 @@ typedef void (WINAPI* LPFNSHOWJOYCPL)( HWND hWnd );
 #endif  /* _INC_MMDDK */
 
 #endif /* DIJ_RINGZERO */
-

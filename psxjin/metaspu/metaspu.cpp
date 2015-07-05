@@ -19,8 +19,9 @@
 #include <vector>
 #include <assert.h>
 
-//for pcsx2 method
-//(havent bothered to get it compiling in gcc yet)
+// for pcsx2 method
+// haven't bothered to get it compiling in GCC yet
+
 #ifdef _MSC_VER
 #include "SndOut.h"
 #endif

@@ -191,5 +191,4 @@ BOOL CALLBACK RecordDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-////////////////////////////////////////////////////////////////////////
 #endif

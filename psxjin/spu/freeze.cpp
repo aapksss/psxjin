@@ -157,11 +157,10 @@ void SPUfreeze_new(EMUFILE* fp)
 
 	SPU_core->xaqueue.freeze(fp);
 
-	//a bit weird to do this here, but i wanted to have a more solid XA state saver
-	//and the cdr freeze sucks. I made sure this saves and loads after the cdr state
+	//a bit weird to do this here, but I wanted to have a more solid XA state saver
+	//and the CDR freeze sucks. I made sure this saves and loads after the CDR state
 	cdr.Xa.save(fp);
 
 	const u32 endtag = 0xBAADF00D;
 	fp->write32le(endtag);
 }
-

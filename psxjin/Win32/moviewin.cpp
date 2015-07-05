@@ -8,8 +8,6 @@
 #include "Win32.h"
 #include "../movie.h"
 
-//------------------------------------------------------
-
 char szFilter[1024];
 char szChoice[256];
 OPENFILENAME ofn;

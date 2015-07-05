@@ -1,7 +1,7 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
 // Used by gpuPeopsSoft.rc
-//
+
 #define IDS_INFO0                       1
 #define IDS_INFO1                       2
 #define IDS_INFO2                       3
@@ -115,7 +115,7 @@
 #define IDC_COMBO1                      2087
 
 // Next default values for new objects
-// 
+
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        143

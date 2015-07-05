@@ -1,5 +1,5 @@
 /*
- * Cdrom for Psemu Pro like Emulators
+ * CD-ROM for PSEmu Pro-like emulators
  *
  * By: linuzappz <linuzappz@hotmail.com>
  *
@@ -39,7 +39,6 @@ char *methods[] = {
 };
 
 char *LibName = "TAS ISO Plugin";
-
 
 
 long CDRinit(void) {
@@ -290,14 +289,14 @@ unsigned char* CDRgetBuffer(void) {
 	return pbuffer;
 }
 
-// plays cdda audio
+// plays CDDA audio
 // sector : byte 0 - minute ; byte 1 - second ; byte 2 - frame
-// does NOT uses bcd format
+// does NOT use bcd format
 long CDRplay(unsigned char *sector) {
 	return 0;
 }
 
-// stops cdda audio
+// stops CDDA audio
 long CDRstop(void) {
 	return 0;
 }

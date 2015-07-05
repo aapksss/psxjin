@@ -43,5 +43,3 @@
 //void auxprintf (LPCTSTR pFormat, ...);
 
 #define INLINE __inline
-
-

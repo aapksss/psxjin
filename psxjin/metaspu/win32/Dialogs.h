@@ -1,5 +1,5 @@
-/* SPU2-X, A plugin for Emulating the Sound Processing Unit of the Playstation 2
- * Developed and maintained by the PSXjin2 Development Team.
+/* SPU2-X, a plugin for emulating the Sound Processing Unit of the PlayStation 2
+ * Developed and maintained by the PSXjin2 Development Team. < Is this a real emulator/team? I thought there was only PSXjin?
  * 
  * Original portions from SPU2ghz are (c) 2008 by David Quintana [gigaherz]
  *
@@ -45,27 +45,27 @@ namespace SoundtouchCfg
 	extern BOOL CALLBACK DialogProc(HWND hWnd,UINT uMsg,WPARAM wParam,LPARAM lParam);
 	extern void ApplySettings( soundtouch::SoundTouch& sndtouch );
 }
-//
+
+
 //extern int		SendDialogMsg( HWND hwnd, int dlgId, UINT code, WPARAM wParam, LPARAM lParam);
 //extern HRESULT	GUIDFromString( const char *str, LPGUID guid );
-//
+
 //extern void		AssignSliderValue( HWND idcwnd, HWND hwndDisplay, int value );
 //extern void		AssignSliderValue( HWND hWnd, int idc, int editbox, int value );
 //extern int		GetSliderValue( HWND hWnd, int idc );
 //extern BOOL		DoHandleScrollMessage( HWND hwndDisplay, WPARAM wParam, LPARAM lParam );
-//
+
 //extern bool		CfgFindName( const TCHAR *Section, const TCHAR* Name);
-//
+
 //extern void		CfgWriteBool(const TCHAR* Section, const TCHAR* Name, bool Value);
 //extern void		CfgWriteInt(const TCHAR* Section, const TCHAR* Name, int Value);
 //extern void		CfgWriteStr(const TCHAR* Section, const TCHAR* Name, const wstring& Data);
-//
+
 //extern bool		CfgReadBool(const TCHAR *Section,const TCHAR* Name, bool Default);
 //extern void		CfgReadStr(const TCHAR* Section, const TCHAR* Name, wstring& Data, int DataSize, const TCHAR* Default);
 //extern void		CfgReadStr(const TCHAR* Section, const TCHAR* Name, TCHAR* Data, int DataSize, const TCHAR* Default);
 //extern int		CfgReadInt(const TCHAR* Section, const TCHAR* Name,int Default);
-//
-//
+
 //// Items Specific to DirectSound
 //#define STRFY(x) #x
 //#define verifyc(x) Verifyc(x,STRFY(x))

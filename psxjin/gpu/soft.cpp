@@ -9399,5 +9399,3 @@ void DrawSoftwareLineFlat(long rgb)
 					Line_E_NE_Flat(x0, y0, x1, y1, colour);
 		}
 }
-
-///////////////////////////////////////////////////////////////////////

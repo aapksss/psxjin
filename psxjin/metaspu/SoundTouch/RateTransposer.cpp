@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 /// 
-/// Sample rate transposer. Changes sample rate by using linear interpolation 
+/// Sample rate transpose code. Changes sample rate by using linear interpolation 
 /// together with anti-alias filtering (first order interpolation with anti-
 /// alias filtering should be quite adequate for this application)
 ///

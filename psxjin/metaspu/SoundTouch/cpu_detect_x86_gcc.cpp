@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// gcc version of the x86 CPU detect routine.
+/// GCC version of the x86 CPU detect routine.
 ///
 /// This file is to be compiled on any platform with the GNU C compiler.
 /// Compiler. Please see 'cpu_detect_x86_win.cpp' for the x86 Windows version 

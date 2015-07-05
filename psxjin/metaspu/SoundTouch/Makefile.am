@@ -39,4 +39,3 @@ AM_CXXFLAGS=-O3 -msse -fcheck-new
 
 # other linking flags to add
 #libSoundTouch_la_LIBADD=
-

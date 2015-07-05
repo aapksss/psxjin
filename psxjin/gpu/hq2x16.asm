@@ -1946,4 +1946,3 @@ FuncTable2
     dd ..@cross4, ..@flag0,  ..@flag0,  ..@flag0,
     dd ..@cross8, ..@flag0,  ..@flag0,  ..@flag0,
     dd ..@flag0,  ..@flag0,  ..@flag0,  ..@flag0
-

@@ -2316,9 +2316,9 @@ DEFINE_GUID(GUID_DSFX_STANDARD_I3DL2REVERB, 0xef985e71, 0xd5c7, 0x42d4, 0xba, 0x
 // Waves Reverberation {87FC0268-9A55-4360-95AA-004A1D9DE26C}
 DEFINE_GUID(GUID_DSFX_WAVES_REVERB, 0x87fc0268, 0x9a55, 0x4360, 0x95, 0xaa, 0x00, 0x4a, 0x1d, 0x9d, 0xe2, 0x6c);
 
-//
+
 // DirectSound Capture Effect Algorithms
-//
+
 
 
 // Acoustic Echo Canceller {BF963D80-C559-11D0-8A2B-00A0C9255AC1}
@@ -2346,9 +2346,6 @@ DEFINE_GUID(GUID_DSCFX_SYSTEM_NS, 0x5ab0882e, 0x7274, 0x4516, 0x87, 0x7d, 0x4e, 
 #endif // __DSOUND_INCLUDED__
 
 
-
 #ifdef __cplusplus
 };
 #endif // __cplusplus
-
-

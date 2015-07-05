@@ -1,4 +1,3 @@
-
 #define PCSXRR_VERSION 20
 
 #define PCSXRR_NAME "PSXjin"
@@ -30,6 +29,8 @@
 #define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
 #define _Py_STRINGIZE2(X) #X
 //re: http://72.14.203.104/search?q=cache:HG-okth5NGkJ:mail.python.org/pipermail/python-checkins/2002-November/030704.html+_msc_ver+compiler+version+string&hl=en&gl=us&ct=clnk&cd=5
+
+// What the heck is that URL? I can't get it to load, nor can I get it to stay on that IP. I believe the domain has been purchased...
 #else
 // TODO: make for others compilers
 #define PCSXRR_COMPILER ""

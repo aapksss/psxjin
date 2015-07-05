@@ -5,13 +5,13 @@
 
 	This file can be used only to develop PSEmu Plugins
 	Other usage is highly prohibited.
+	
+	IMPORTANT!!!
+	if you want to add return codes (any errors or warnings) just drop an email to
+	plugin@psemu.com
+	
+	NOTE: is the email/website still active? Is PSEmu still active?
 */
-
-
-// IMPORTANT!!!
-
-// if you want to add return codes (any errors or warnings) just drop mail to
-// plugin@psemu.com
 
 #ifndef _PSEMU_PLUGIN_DEFS_H
 #define _PSEMU_PLUGIN_DEFS_H
@@ -183,7 +183,7 @@ typedef struct
 
 
 
-// sucess, everything configured, and went OK.
+// success, everything configured, and went OK.
 #define PSE_PAD_ERR_SUCCESS			0
 // general plugin failure (undefined error)
 #define PSE_PAD_ERR_FAILURE			-1
@@ -208,8 +208,5 @@ typedef struct
 /* Modes bits for NETsendData/NETrecvData */
 #define PSE_NET_BLOCKING	0x00000000
 #define PSE_NET_NONBLOCKING	0x00000001
-
-
-
 
 #endif // _PSEMU_PLUGIN_DEFS_H

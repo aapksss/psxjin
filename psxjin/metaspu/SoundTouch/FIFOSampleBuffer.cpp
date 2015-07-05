@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// A buffer class for temporarily storaging sound samples, operates as a 
+/// A buffer class for temporarily storing sound samples, operates as a 
 /// first-in-first-out pipe.
 ///
 /// Samples are added to the end of the sample buffer with the 'putSamples' 

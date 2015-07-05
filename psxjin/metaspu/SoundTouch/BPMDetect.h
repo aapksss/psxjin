@@ -1,13 +1,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// Beats-per-minute (BPM) detection routine.
+/// beats-per-minute (BPM) detection routine
 ///
 /// The beat detection algorithm works as follows:
 /// - Use function 'inputSamples' to input a chunks of samples to the class for
 ///   analysis. It's a good idea to enter a large sound file or stream in smallish
 ///   chunks of around few kilosamples in order not to extinguish too much RAM memory.
 /// - Input sound data is decimated to approx 500 Hz to reduce calculation burden,
-///   which is basically ok as low (bass) frequencies mostly determine the beat rate.
+///   which is basically OK as low (bass) frequencies mostly determine the beat rate.
 ///   Simple averaging is used for anti-alias filtering because the resulting signal
 ///   quality isn't of that high importance.
 /// - Decimated sound data is enveloped, i.e. the amplitude shape is detected by
@@ -16,9 +16,9 @@
 ///   leave only notable peaks there.
 /// - Repeating sound patterns (e.g. beats) are detected by calculating short-term 
 ///   autocorrelation function of the enveloped signal.
-/// - After whole sound data file has been analyzed as above, the bpm level is 
+/// - After whole sound data file has been analyzed as above, the BPM level is 
 ///   detected by function 'getBpm' that finds the highest peak of the autocorrelation 
-///   function, calculates it's precise location and converts this reading to bpm's.
+///   function, calculates it's precise location and converts this reading to BPM's.
 ///
 /// Author        : Copyright (c) Olli Parviainen
 /// Author e-mail : oparviai 'at' iki.fi

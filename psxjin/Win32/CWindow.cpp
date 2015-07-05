@@ -1,6 +1,3 @@
-//This file was copied and adapted from DeSmuME: http://sourceforge.net/projects/desmume/
-//Authors: DeSmuME team
-
 /*  Copyright (C) 2006 yopyop
     Copyright (C) 2006-2010 DeSmuME team
 

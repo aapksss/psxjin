@@ -1,4 +1,3 @@
-
 // mode flags
 
 #define DSM_NORMAL		0

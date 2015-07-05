@@ -1,6 +1,3 @@
-//MemView dialog was copied and adapted from DeSmuME: http://sourceforge.net/projects/desmume/
-//Authors: DeSmuME team
-
 /*  Copyright (C) 2006 yopyop
     yopyop156@ifrance.com
     yopyop156.ifrance.com
