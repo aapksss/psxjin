@@ -58,7 +58,6 @@ int dispInput = 0;
 int dispAnalog = 0;
 int dispFrameCounter = 0;
 int dispAllText = 0;
-//
 
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
@@ -1219,7 +1218,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_HELP_TUTORIAL:
-					ShellExecute(NULL, "open", "http://code.google.com/p/psxjin/wiki/QuickTutorial", NULL, NULL, SW_SHOWNORMAL);
+					ShellExecute(NULL, "open", "https://github.com/piorrro33/psxjin", NULL, NULL, SW_SHOWNORMAL);
 					break;
 
 				case ID_HELP_ABOUT:
