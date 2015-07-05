@@ -68,7 +68,6 @@ Temporary Items
 
 # Visual Studio files #
 ######################
-*.[Oo]bj
 *.user
 *.aps
 *.pch
@@ -80,10 +79,8 @@ Temporary Items
 *.suo
 *.tlb
 *.tlh
-*.bak
 *.[Cc]ache
 *.ilk
-*.log
 *.lib
 *.sbr
 *.sdf
