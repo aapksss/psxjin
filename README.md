@@ -57,6 +57,8 @@ No matter what BIOS you use, in theory every officially licensed original PlaySt
 
 The reason people recommend one BIOS over another is based on the features of the actual hardware the BIOS ran on. So, in the case of which North American BIOS to use, most people choose to use the SCPH-1001 BIOS because it had the most hardware features. They also choose this because there were no attempts at defeating piracy-enabling modchips in this BIOS (those didn't come until later). It also had parallel and serial ports which could be used for homebrew, dumps, etc. It can run nearly any homebrew, utilize the serial and parallel ports, etc.
 
+There is also the fact that the SCPH-1001 is probably the most common PS1 console. Thus, by using that you are ensuring that it is a well-tested machine you are playing on.
+
 The general consensus is that the most recommended BIOS is always the first launch console BIOS for the region that is the same as the game you are playing. So, if I want to play Metal Gear Solid, and I have the North American version, then you want to use the SCPH-1001 BIOS. If you want to play the Japanese version, then you would use the SCPH-1000 BIOS. And so on and so forth.
 
 The BIOS files for development and special editions of the console have not been dumped, at least as far as we know, so that isn't really an issue that you should have to worry about.
