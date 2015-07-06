@@ -19,7 +19,6 @@
 
 // What the heck is that URL? I can't get it to load, nor can I get it to stay on that IP. I believe the domain has been purchased...
 //re: Removed the weird URL. It pointed out to something on Python website, I couldn't tell you what it was about..
-//test git VS
 #else
 // TODO: make for others compilers
 #define PCSXRR_COMPILER ""
