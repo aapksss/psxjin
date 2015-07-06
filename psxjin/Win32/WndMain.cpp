@@ -1218,7 +1218,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					return TRUE;
 
 				case ID_HELP_TUTORIAL:
-					ShellExecute(NULL, "open", "https://github.com/piorrro33/psxjin", NULL, NULL, SW_SHOWNORMAL);
+					ShellExecute(NULL, "open", "https://github.com/piorrro33/psxjin/wiki/Quick-Tutorial", NULL, NULL, SW_SHOWNORMAL);
 					break;
 
 				case ID_HELP_ABOUT:
