@@ -2,9 +2,9 @@
 #define __PLUGINS_H__
 
 #include "Win32\plugin.h"
-#include "PSEmu_Plugin_Defs.h"
+#include "PSEmuPluginDefs.h"
 #include "PsxCommon.h"
-#include "Decode_XA.h"
+#include "DecodeXA.h"
 #include "CdRom.h"
 
 #include "iso/cdriso.h"

@@ -40,9 +40,9 @@
 // the d3dx.lib (old libs: d3dim.lib dxguid.lib)
 
 
-#include "mingw_ddraw.h"
-#include "mingw_d3dtypes.h"
-#include "mingw_d3d.h"
+#include "mingwddraw.h"
+#include "mingwd3dtypes.h"
+#include "mingwd3d.h"
 
 // stupid intel compiler warning on extern __inline funcs
 //#pragma warning (disable:864)

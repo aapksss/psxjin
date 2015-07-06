@@ -27,7 +27,7 @@
 #ifndef _METASPU_H_
 #define _METASPU_H_
 
-#include "metaspu_types.h"
+#include "metasputypes.h"
 
 #include <algorithm>
 

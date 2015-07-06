@@ -37,7 +37,7 @@
 #include "spu.h"
 #include "adsr.h"
 #include "reverb.h"
-#include "gauss_i.h"
+#include "gaussi.h"
 #include "metaspu/metaspu.h"
 #include "xa.h"
 #include "movie.h"

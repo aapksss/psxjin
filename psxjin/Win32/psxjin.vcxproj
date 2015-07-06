@@ -269,7 +269,7 @@
   <ItemGroup>
     <ClCompile Include="..\CdRom.cpp" />
     <ClCompile Include="..\cheat.cpp" />
-    <ClCompile Include="..\Decode_XA.cpp" />
+    <ClCompile Include="..\DecodeXA.cpp" />
     <ClCompile Include="..\DisR3000A.cpp" />
     <ClCompile Include="..\emufile.cpp" />
     <ClCompile Include="..\gpu\cstuff.c" />
@@ -277,8 +277,8 @@
     <ClCompile Include="..\gpu\DrawString.cpp" />
     <ClCompile Include="..\gpu\fps.cpp" />
     <ClCompile Include="..\gpu\gpu.cpp" />
-    <ClCompile Include="..\gpu\gpu_cfg.cpp" />
-    <ClCompile Include="..\gpu\gpu_record.cpp" />
+    <ClCompile Include="..\gpu\gpucfg.cpp" />
+    <ClCompile Include="..\gpu\gpurecord.cpp" />
     <ClCompile Include="..\gpu\menu.cpp" />
     <ClCompile Include="..\gpu\prim.cpp" />
     <ClCompile Include="..\gpu\soft.cpp" />
@@ -292,15 +292,15 @@
     <ClCompile Include="..\Mdec.cpp" />
     <ClCompile Include="..\metaspu\metaspu.cpp" />
     <ClCompile Include="..\metaspu\SndOut.cpp" />
-    <ClCompile Include="..\metaspu\SoundTouch\3dnow_win.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\3dnowwin.cpp" />
     <ClCompile Include="..\metaspu\SoundTouch\AAFilter.cpp" />
-    <ClCompile Include="..\metaspu\SoundTouch\cpu_detect_x86_win.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\cpudetectx86win.cpp" />
     <ClCompile Include="..\metaspu\SoundTouch\FIFOSampleBuffer.cpp" />
     <ClCompile Include="..\metaspu\SoundTouch\FIRFilter.cpp" />
-    <ClCompile Include="..\metaspu\SoundTouch\mmx_optimized.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\mmxoptimized.cpp" />
     <ClCompile Include="..\metaspu\SoundTouch\RateTransposer.cpp" />
     <ClCompile Include="..\metaspu\SoundTouch\SoundTouch.cpp" />
-    <ClCompile Include="..\metaspu\SoundTouch\sse_optimized.cpp" />
+    <ClCompile Include="..\metaspu\SoundTouch\sseoptimized.cpp" />
     <ClCompile Include="..\metaspu\SoundTouch\TDStretch.cpp" />
     <ClCompile Include="..\metaspu\SoundTouch\WavFile.cpp" />
     <ClCompile Include="..\metaspu\Timestretcher.cpp" />
@@ -324,7 +324,7 @@
       <PreprocessToFile Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">false</PreprocessToFile>
       <PreprocessSuppressLineNumbers Condition="'$(Configuration)|$(Platform)'=='Release FastBuild|Win32'">false</PreprocessSuppressLineNumbers>
     </ClCompile>
-    <ClCompile Include="..\spu\gauss_i.cpp" />
+    <ClCompile Include="..\spu\gaussi.cpp" />
     <ClCompile Include="..\spu\record.cpp" />
     <ClCompile Include="..\spu\registers.cpp" />
     <ClCompile Include="..\spu\reverb.cpp" />
@@ -344,7 +344,7 @@
     <ClCompile Include="padwin.cpp" />
     <ClCompile Include="plugin.cpp" />
     <ClCompile Include="ramwatch.cpp" />
-    <ClCompile Include="ram_search.cpp" />
+    <ClCompile Include="ramsearch.cpp" />
     <ClCompile Include="recentmenu.cpp" />
     <ClCompile Include="WndMain.cpp" />
   </ItemGroup>
@@ -362,7 +362,7 @@
     <ClInclude Include="..\gpu\fps.h" />
     <ClInclude Include="..\gpu\gpu.h" />
     <ClInclude Include="..\gpu\gpu_cfg.h" />
-    <ClInclude Include="..\gpu\gpu_record.h" />
+    <ClInclude Include="..\gpu\gpurecord.h" />
     <ClInclude Include="..\gpu\hq2x.h" />
     <ClInclude Include="..\gpu\hq3x.h" />
     <ClInclude Include="..\gpu\interp.h" />
@@ -385,7 +385,7 @@
     <ClInclude Include="..\metaspu\SndOut.h" />
     <ClInclude Include="..\metaspu\SoundTouch\AAFilter.h" />
     <ClInclude Include="..\metaspu\SoundTouch\BPMDetect.h" />
-    <ClInclude Include="..\metaspu\SoundTouch\cpu_detect.h" />
+    <ClInclude Include="..\metaspu\SoundTouch\cpudetect.h" />
     <ClInclude Include="..\metaspu\SoundTouch\FIFOSampleBuffer.h" />
     <ClInclude Include="..\metaspu\SoundTouch\FIFOSamplePipe.h" />
     <ClInclude Include="..\metaspu\SoundTouch\FIRFilter.h" />
@@ -432,7 +432,7 @@
     <ClInclude Include="padwin.h" />
     <ClInclude Include="plugin.h" />
     <ClInclude Include="ramwatch.h" />
-    <ClInclude Include="ram_search.h" />
+    <ClInclude Include="ramsearch.h" />
     <ClInclude Include="recentmenu.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="Win32.h" />

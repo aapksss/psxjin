@@ -14,7 +14,7 @@
 #include "Win32.h"
 #include "resource.h"
 #include "maphkeys.h"
-#include "ram_search.h"
+#include "ramsearch.h"
 #include "ramwatch.h"
 #include "../spu/spu.h"
 #include "analog.h"

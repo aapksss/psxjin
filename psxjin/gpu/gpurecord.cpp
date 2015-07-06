@@ -37,7 +37,7 @@
 #include <vfw.h>
 #include <math.h>
 #include "externals.h"
-#include "gpu_record.h"
+#include "gpurecord.h"
 #include "gpu.h"
 #include "PsxCommon.h"
 

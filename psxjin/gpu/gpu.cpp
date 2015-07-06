@@ -32,12 +32,12 @@
 
 #define _IN_GPU
 
-#include "gpu_record.h"
+#include "gpurecord.h"
 
 #include "externals.h"
 #include "gpu.h"
 #include "draw.h"
-#include "gpu_cfg.h"
+#include "gpucfg.h"
 #include "prim.h"
 #include "psemu.h"
 #include "menu.h"

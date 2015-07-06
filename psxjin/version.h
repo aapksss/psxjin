@@ -16,9 +16,6 @@
 #define _Py_STRINGIZE(X) _Py_STRINGIZE1((X))
 #define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
 #define _Py_STRINGIZE2(X) #X
-
-// What the heck is that URL? I can't get it to load, nor can I get it to stay on that IP. I believe the domain has been purchased...
-//re: Removed the weird URL. It pointed out to something on Python website, I couldn't tell you what it was about..
 #else
 // TODO: make for others compilers
 #define PCSXRR_COMPILER ""

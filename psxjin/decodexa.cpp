@@ -8,7 +8,7 @@
 #include <stdio.h>
 
 #include "CdRom.h"
-#include "Decode_XA.h"
+#include "DecodeXA.h"
 
 #define FIXED
 

@@ -79,7 +79,7 @@
 #include "SoundTouch.h"
 #include "TDStretch.h"
 #include "RateTransposer.h"
-#include "cpu_detect.h"
+#include "cpudetect.h"
 
 using namespace soundtouch;
 

@@ -45,7 +45,7 @@
 #include <stdlib.h>
 #include <stdexcept>
 #include "FIRFilter.h"
-#include "cpu_detect.h"
+#include "cpudetect.h"
 
 using namespace soundtouch;
 

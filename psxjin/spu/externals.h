@@ -31,7 +31,7 @@
 #define _SPU_EXTERNALS_H
 
 #include "PsxCommon.h"
-#include "Decode_XA.h"
+#include "DecodeXA.h"
 
 /////////////////////////////////////////////////////////
 // generic defines

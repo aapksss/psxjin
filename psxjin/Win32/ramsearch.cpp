@@ -32,7 +32,7 @@
 #endif
 
 #include "resource.h"
-#include "ram_search.h"
+#include "ramsearch.h"
 #include "ramwatch.h"
 #include <assert.h>
 #include <commctrl.h>

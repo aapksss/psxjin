@@ -40,7 +40,7 @@
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "cpu_detect.h"
+#include "cpudetect.h"
 
 #ifndef _WIN32
 #error wrong platform - this source code file is exclusively for Win32 platform

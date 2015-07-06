@@ -33,7 +33,7 @@ THE SOFTWARE.
 #include <string>
 #include <stdarg.h>
 
-#include "emufile_types.h"
+#include "emufiletypes.h"
 
 #ifdef _MSC_VER
 #include <io.h>

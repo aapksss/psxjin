@@ -49,7 +49,7 @@
 #include <assert.h>
 
 #include "STTypes.h"
-#include "cpu_detect.h"
+#include "cpudetect.h"
 #include "TDStretch.h"
 
 using namespace soundtouch;

@@ -2,7 +2,7 @@
 #define __CDROM_H__
 
 #include "PsxCommon.h"
-#include "Decode_XA.h"
+#include "DecodeXA.h"
 
 struct cdrStruct{
 	unsigned char OCUP;

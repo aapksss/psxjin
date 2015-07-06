@@ -11,7 +11,7 @@
 #include <io.h>
 #include "resource.h"
 #include "AboutDlg.h"
-#include "gpu/gpu_record.h"
+#include "gpu/gpurecord.h"
 #include "../version.h"
 #include "PsxCommon.h"
 #include "plugin.h"
@@ -20,7 +20,7 @@
 #include "../cheat.h"
 #include "../movie.h"
 #include "moviewin.h"
-#include "ram_search.h"
+#include "ramsearch.h"
 #include "ramwatch.h"
 #include "CWindow.h"
 #include "memView.h"

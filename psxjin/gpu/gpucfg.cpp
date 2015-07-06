@@ -21,12 +21,12 @@
 #define _IN_CFG
 
 #include "stdafx.h"
-#include "gpu_record.h"
+#include "gpurecord.h"
 #include <vfw.h>
 #include <stdio.h>
 
 #include "externals.h"
-#include "gpu_cfg.h"
+#include "gpucfg.h"
 #include "gpu.h"
 
 /////////////////////////////////////////////////////////////////////////////

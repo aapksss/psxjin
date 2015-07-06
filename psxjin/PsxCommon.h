@@ -323,7 +323,7 @@ char *GetSavestateFilename(int newState);
 #include "Sio.h"
 #include "spu/Spu.h"
 #include "plugins.h"
-//#include "Decode_XA.h"
+//#include "DecodeXA.h"
 #include "Misc.h"
 #include "Debug.h"
 #include "Gte.h"

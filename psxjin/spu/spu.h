@@ -28,7 +28,7 @@
 #define _SPU_H_
 
 #include "PsxCommon.h"
-#include "Decode_XA.h"
+#include "DecodeXA.h"
 #include "emufile.h"
 #include "xa.h"
 

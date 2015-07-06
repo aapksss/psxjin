@@ -2,7 +2,7 @@
 
 #include "PsxCommon.h"
 #include "Win32/Win32.h"
-#include "Win32/ram_search.h"
+#include "Win32/ramsearch.h"
 #include "Win32/ramwatch.h"
 
 

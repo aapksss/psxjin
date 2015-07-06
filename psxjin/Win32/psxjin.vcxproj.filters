@@ -99,9 +99,6 @@
     <ClCompile Include="padwin.cpp">
       <Filter>Win32</Filter>
     </ClCompile>
-    <ClCompile Include="ram_search.cpp">
-      <Filter>Win32</Filter>
-    </ClCompile>
     <ClCompile Include="ramwatch.cpp">
       <Filter>Win32</Filter>
     </ClCompile>
@@ -118,9 +115,6 @@
       <Filter>CdRom</Filter>
     </ClCompile>
     <ClCompile Include="cueparse.cpp">
-      <Filter>CdRom</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Decode_XA.cpp">
       <Filter>CdRom</Filter>
     </ClCompile>
     <ClCompile Include="..\Sio.cpp">
@@ -195,9 +189,6 @@
     <ClCompile Include="..\spu\freeze.cpp">
       <Filter>spu</Filter>
     </ClCompile>
-    <ClCompile Include="..\spu\gauss_i.cpp">
-      <Filter>spu</Filter>
-    </ClCompile>
     <ClCompile Include="..\spu\record.cpp">
       <Filter>spu</Filter>
     </ClCompile>
@@ -234,13 +225,7 @@
     <ClCompile Include="..\metaspu\win32\ConfigSoundtouch.cpp">
       <Filter>metaspu\win32</Filter>
     </ClCompile>
-    <ClCompile Include="..\metaspu\SoundTouch\3dnow_win.cpp">
-      <Filter>metaspu\SoundTouch</Filter>
-    </ClCompile>
     <ClCompile Include="..\metaspu\SoundTouch\AAFilter.cpp">
-      <Filter>metaspu\SoundTouch</Filter>
-    </ClCompile>
-    <ClCompile Include="..\metaspu\SoundTouch\cpu_detect_x86_win.cpp">
       <Filter>metaspu\SoundTouch</Filter>
     </ClCompile>
     <ClCompile Include="..\metaspu\SoundTouch\FIFOSampleBuffer.cpp">
@@ -249,16 +234,10 @@
     <ClCompile Include="..\metaspu\SoundTouch\FIRFilter.cpp">
       <Filter>metaspu\SoundTouch</Filter>
     </ClCompile>
-    <ClCompile Include="..\metaspu\SoundTouch\mmx_optimized.cpp">
-      <Filter>metaspu\SoundTouch</Filter>
-    </ClCompile>
     <ClCompile Include="..\metaspu\SoundTouch\RateTransposer.cpp">
       <Filter>metaspu\SoundTouch</Filter>
     </ClCompile>
     <ClCompile Include="..\metaspu\SoundTouch\SoundTouch.cpp">
-      <Filter>metaspu\SoundTouch</Filter>
-    </ClCompile>
-    <ClCompile Include="..\metaspu\SoundTouch\sse_optimized.cpp">
       <Filter>metaspu\SoundTouch</Filter>
     </ClCompile>
     <ClCompile Include="..\metaspu\SoundTouch\TDStretch.cpp">
@@ -282,12 +261,6 @@
     <ClCompile Include="..\gpu\gpu.cpp">
       <Filter>gpu</Filter>
     </ClCompile>
-    <ClCompile Include="..\gpu\gpu_cfg.cpp">
-      <Filter>gpu</Filter>
-    </ClCompile>
-    <ClCompile Include="..\gpu\gpu_record.cpp">
-      <Filter>gpu</Filter>
-    </ClCompile>
     <ClCompile Include="..\gpu\menu.cpp">
       <Filter>gpu</Filter>
     </ClCompile>
@@ -298,6 +271,33 @@
       <Filter>gpu</Filter>
     </ClCompile>
     <ClCompile Include="analog.cpp" />
+    <ClCompile Include="..\DecodeXA.cpp">
+      <Filter>CdRom</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\gpucfg.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\gpu\gpurecord.cpp">
+      <Filter>gpu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\3dnowwin.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\cpudetectx86win.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\mmxoptimized.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="..\metaspu\SoundTouch\sseoptimized.cpp">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClCompile>
+    <ClCompile Include="ramsearch.cpp">
+      <Filter>Win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\spu\gaussi.cpp">
+      <Filter>spu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AboutDlg.h">
@@ -319,9 +319,6 @@
       <Filter>Win32</Filter>
     </ClInclude>
     <ClInclude Include="padwin.h">
-      <Filter>Win32</Filter>
-    </ClInclude>
-    <ClInclude Include="ram_search.h">
       <Filter>Win32</Filter>
     </ClInclude>
     <ClInclude Include="ramwatch.h">
@@ -465,9 +462,6 @@
     <ClInclude Include="..\metaspu\SoundTouch\BPMDetect.h">
       <Filter>metaspu\SoundTouch</Filter>
     </ClInclude>
-    <ClInclude Include="..\metaspu\SoundTouch\cpu_detect.h">
-      <Filter>metaspu\SoundTouch</Filter>
-    </ClInclude>
     <ClInclude Include="..\metaspu\SoundTouch\FIFOSampleBuffer.h">
       <Filter>metaspu\SoundTouch</Filter>
     </ClInclude>
@@ -513,9 +507,6 @@
     <ClInclude Include="..\gpu\gpu_cfg.h">
       <Filter>gpu</Filter>
     </ClInclude>
-    <ClInclude Include="..\gpu\gpu_record.h">
-      <Filter>gpu</Filter>
-    </ClInclude>
     <ClInclude Include="..\gpu\hq2x.h">
       <Filter>gpu</Filter>
     </ClInclude>
@@ -555,6 +546,15 @@
     <ClInclude Include="analog.h" />
     <ClInclude Include="..\PSEmu_Plugin_Defs.h" />
     <ClInclude Include="..\PsxCommon.h" />
+    <ClInclude Include="ramsearch.h">
+      <Filter>Win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\metaspu\SoundTouch\cpudetect.h">
+      <Filter>metaspu\SoundTouch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\gpurecord.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Text Include="..\Docs\ChangeLog.txt">
