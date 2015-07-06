@@ -33,7 +33,7 @@ PSXjin is an overhaul of the PCSX-rr fork of the PCSX emulator. Compared to prev
 - Open the emulator
 - Select "Open CD"" and pick a valid file type
 
-BIOS Guide:
+BIOS Guide:<br>
 https://github.com/piorrro33/psxjin/wiki/Original-PlayStation-BIOS-Guide
 
 CPU Options:
