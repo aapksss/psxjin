@@ -353,7 +353,7 @@
     <ClInclude Include="..\cheat.h" />
     <ClInclude Include="..\Coff.h" />
     <ClInclude Include="..\Debug.h" />
-    <ClInclude Include="..\Decode_XA.h" />
+    <ClInclude Include="..\DecodeXA.h" />
     <ClInclude Include="..\emufile.h" />
     <ClInclude Include="..\gpu\draw.h" />
     <ClInclude Include="..\gpu\DrawString.h" />
@@ -361,15 +361,15 @@
     <ClInclude Include="..\gpu\externals.h" />
     <ClInclude Include="..\gpu\fps.h" />
     <ClInclude Include="..\gpu\gpu.h" />
-    <ClInclude Include="..\gpu\gpu_cfg.h" />
+    <ClInclude Include="..\gpu\gpucfg.h" />
     <ClInclude Include="..\gpu\gpurecord.h" />
     <ClInclude Include="..\gpu\hq2x.h" />
     <ClInclude Include="..\gpu\hq3x.h" />
     <ClInclude Include="..\gpu\interp.h" />
     <ClInclude Include="..\gpu\menu.h" />
-    <ClInclude Include="..\gpu\mingw_d3d.h" />
-    <ClInclude Include="..\gpu\mingw_d3dtypes.h" />
-    <ClInclude Include="..\gpu\mingw_ddraw.h" />
+    <ClInclude Include="..\gpu\mingwd3d.h" />
+    <ClInclude Include="..\gpu\mingwd3dtypes.h" />
+    <ClInclude Include="..\gpu\mingwddraw.h" />
     <ClInclude Include="..\gpu\prim.h" />
     <ClInclude Include="..\gpu\psemu.h" />
     <ClInclude Include="..\gpu\resource.h" />
@@ -412,7 +412,7 @@
     <ClInclude Include="..\spu\cfg.h" />
     <ClInclude Include="..\spu\dsoundoss.h" />
     <ClInclude Include="..\spu\externals.h" />
-    <ClInclude Include="..\spu\gauss_i.h" />
+    <ClInclude Include="..\spu\gaussi.h" />
     <ClInclude Include="..\spu\record.h" />
     <ClInclude Include="..\spu\registers.h" />
     <ClInclude Include="..\spu\reverb.h" />

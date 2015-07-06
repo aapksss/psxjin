@@ -342,9 +342,6 @@
     <ClInclude Include="cueparse.h">
       <Filter>CdRom</Filter>
     </ClInclude>
-    <ClInclude Include="..\Decode_XA.h">
-      <Filter>CdRom</Filter>
-    </ClInclude>
     <ClInclude Include="..\Sio.h">
       <Filter>GPU-SPU-SIO</Filter>
     </ClInclude>
@@ -421,9 +418,6 @@
       <Filter>spu</Filter>
     </ClInclude>
     <ClInclude Include="..\spu\externals.h">
-      <Filter>spu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\spu\gauss_i.h">
       <Filter>spu</Filter>
     </ClInclude>
     <ClInclude Include="..\spu\record.h">
@@ -504,9 +498,6 @@
     <ClInclude Include="..\gpu\gpu.h">
       <Filter>gpu</Filter>
     </ClInclude>
-    <ClInclude Include="..\gpu\gpu_cfg.h">
-      <Filter>gpu</Filter>
-    </ClInclude>
     <ClInclude Include="..\gpu\hq2x.h">
       <Filter>gpu</Filter>
     </ClInclude>
@@ -517,15 +508,6 @@
       <Filter>gpu</Filter>
     </ClInclude>
     <ClInclude Include="..\gpu\menu.h">
-      <Filter>gpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\gpu\mingw_d3d.h">
-      <Filter>gpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\gpu\mingw_d3dtypes.h">
-      <Filter>gpu</Filter>
-    </ClInclude>
-    <ClInclude Include="..\gpu\mingw_ddraw.h">
       <Filter>gpu</Filter>
     </ClInclude>
     <ClInclude Include="..\gpu\prim.h">
@@ -554,6 +536,24 @@
     </ClInclude>
     <ClInclude Include="..\gpu\gpurecord.h">
       <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\DecodeXA.h">
+      <Filter>CdRom</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\gpucfg.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\mingwd3d.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\mingwd3dtypes.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\gpu\mingwddraw.h">
+      <Filter>gpu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\spu\gaussi.h">
+      <Filter>spu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
