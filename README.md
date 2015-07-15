@@ -65,50 +65,12 @@ Choose between automatic region detection, or choose it yourself
 
 <h1>Credits:</h1>
 <i>
-The PSXjin team:<br>
-zeromus<br>
-adelikat<br>
-Darkkobold<br>
-
-The PCSX-rr team:<br>
-mz<br>
-
-The PCSX team:<br>
-
-Linuzappz<br>
-Shadow<br>
-Pete Bernett<br>
-NoComp<br>
-Nik3d<br>
-Akumax<br>
-
-The PSXjin team would like to thank:
-
-Ancient: for beta testing PCSX and bothering me to correct it<br>
-Roor: help on CD-ROM decoding routine<br>
-Duddie<br>
-Tratax<br>
-Kazzuya: for the great work on PSEMU, and for the XA decoder<br>
-Calb: for help coding<br>
-Twin: for the bot on #pcsx on efnet, and for help coding<br>
-Lewpy: for plugin work<br>
-Psychojak: for beta testing PSXjin and donating a large amount of games to Shadow<br>
-JNS: for adding PEC support to PSXjin<br>
-Antiloop: for help coding<br>
-Segu: he knows what for<br>
-Null: he also knows<br>
-Bobbi<br>
-cdburnout: for putting PSXjin news on their site and for hosting us<br>
-D[j]: for hosting us<br>
-Now3d: for code help and information<br>
-Ricardo Diaz: Linux version may never have been released without his help<br>
-Nuno Felicio: beta testing, suggestions and Portuguese documentation<br>
-Shunt: for help coding<br>
-Taka: contributing fixes for PSXjin<br>
-jang2k: contributing fixes for PSXjin<br>
-
-Last but not least:<br>
-
-James: for all the friendly support<br>
-Dimitris: for being a good friend to me<br>
-Joan: The woman that made me crazy the last couple months<br>
+The original PSXjin team<br>
+The PCSX team<br>
+The PCSX-df team<br>
+The PCSX-Reloaded team<br>
+The PCSX-rr team<br>
+The ePSXe team<br>
+The pSX team<br>
+Martin Korth for his great PS1 documents<br>
+</i>
