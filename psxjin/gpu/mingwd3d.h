@@ -1,11 +1,5 @@
-/*
-	File:   d3d.h
-	Content:    Direct3D include file
-*/
-
 #ifndef _D3D_H_
 #define _D3D_H_
-
 
 #include <stdlib.h>
 
@@ -18,9 +12,8 @@
 #define DIRECT3D_VERSION         0x0700
 #endif
 
-/*
- * Interface IID's
- */
+// Interface IID's
+ 
 #if defined( _WIN32 ) && !defined( _NO_COM)
 DEFINE_GUID( IID_IDirect3D,             0x3BBA0080,0x2421,0x11CF,0xA3,0x1A,0x00,0xAA,0x00,0xB9,0x33,0x56 );
 #if(DIRECT3D_VERSION >= 0x0500)
@@ -48,9 +41,7 @@ DEFINE_GUID( IID_IDirect3DNullDevice, 0x8767df22, 0xbacc, 0x11d1, 0x89, 0x69, 0x
 DEFINE_GUID( IID_IDirect3DTnLHalDevice, 0xf5049e78, 0x4861, 0x11d2, 0xa4, 0x7, 0x0, 0xa0, 0xc9, 0x6, 0x29, 0xa8);
 #endif /* DIRECT3D_VERSION >= 0x0700 */
 
-/*
- * Internal Guid to distinguish requested MMX from MMX being used as an RGB rasterizer
- */
+// Internal GUID to distinguish requested MMX from MMX being used as an RGB rasterizer
 
 DEFINE_GUID( IID_IDirect3DDevice,       0x64108800,0x957d,0X11d0,0x89,0xab,0x00,0xa0,0xc9,0x05,0x41,0x29 );
 #if(DIRECT3D_VERSION >= 0x0500)
@@ -182,26 +173,26 @@ typedef struct IDirect3DVertexBuffer7 *LPDIRECT3DVERTEXBUFFER7;
 #include "d3dtypes.h"
 #include "d3dcaps.h"
 
-
 #ifdef __cplusplus
 extern "C"
 {
 #endif
 
-	/*
-	 * Direct3D interfaces
-	 */
+// Direct3D interfaces
+
 #undef INTERFACE
 #define INTERFACE IDirect3D
 
 	DECLARE_INTERFACE_(IDirect3D, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3D methods ***/
+		// IDirect3D methods
+		
 		STDMETHOD(Initialize)(THIS_ REFCLSID) PURE;
 		STDMETHOD(EnumDevices)(THIS_ LPD3DENUMDEVICESCALLBACK,LPVOID) PURE;
 		STDMETHOD(CreateLight)(THIS_ LPDIRECT3DLIGHT*,IUnknown*) PURE;
@@ -240,12 +231,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3D2, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3D2 methods ***/
+		// IDirect3D2 methods
+		
 		STDMETHOD(EnumDevices)(THIS_ LPD3DENUMDEVICESCALLBACK,LPVOID) PURE;
 		STDMETHOD(CreateLight)(THIS_ LPDIRECT3DLIGHT*,IUnknown*) PURE;
 		STDMETHOD(CreateMaterial)(THIS_ LPDIRECT3DMATERIAL2*,IUnknown*) PURE;
@@ -285,12 +278,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3D3, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3D3 methods ***/
+		// IDirect3D3 methods
+		
 		STDMETHOD(EnumDevices)(THIS_ LPD3DENUMDEVICESCALLBACK,LPVOID) PURE;
 		STDMETHOD(CreateLight)(THIS_ LPDIRECT3DLIGHT*,LPUNKNOWN) PURE;
 		STDMETHOD(CreateMaterial)(THIS_ LPDIRECT3DMATERIAL3*,LPUNKNOWN) PURE;
@@ -339,12 +334,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3D7, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3D7 methods ***/
+		// IDirect3D7 methods
+		
 		STDMETHOD(EnumDevices)(THIS_ LPD3DENUMDEVICESCALLBACK7,LPVOID) PURE;
 		STDMETHOD(CreateDevice)(THIS_ REFCLSID,LPDIRECTDRAWSURFACE7,LPDIRECT3DDEVICE7*) PURE;
 		STDMETHOD(CreateVertexBuffer)(THIS_ LPD3DVERTEXBUFFERDESC,LPDIRECT3DVERTEXBUFFER7*,DWORD) PURE;
@@ -374,20 +371,22 @@ extern "C"
 #define IDirect3D7_EvictManagedTextures(p) (p)->EvictManagedTextures()
 #endif
 #endif /* DIRECT3D_VERSION >= 0x0700 */
-	/*
-	 * Direct3D Device interfaces
-	 */
+
+// Direct3D device interfaces
+
 #undef INTERFACE
 #define INTERFACE IDirect3DDevice
 
 	DECLARE_INTERFACE_(IDirect3DDevice, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DDevice methods ***/
+		// IDirect3DDevice methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3D,LPGUID,LPD3DDEVICEDESC) PURE;
 		STDMETHOD(GetCaps)(THIS_ LPD3DDEVICEDESC,LPD3DDEVICEDESC) PURE;
 		STDMETHOD(SwapTextureHandles)(THIS_ LPDIRECT3DTEXTURE,LPDIRECT3DTEXTURE) PURE;
@@ -465,12 +464,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DDevice2, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DDevice2 methods ***/
+		// IDirect3DDevice2 methods
+		
 		STDMETHOD(GetCaps)(THIS_ LPD3DDEVICEDESC,LPD3DDEVICEDESC) PURE;
 		STDMETHOD(SwapTextureHandles)(THIS_ LPDIRECT3DTEXTURE2,LPDIRECT3DTEXTURE2) PURE;
 		STDMETHOD(GetStats)(THIS_ LPD3DSTATS) PURE;
@@ -582,12 +583,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DDevice3, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DDevice3 methods ***/
+		// IDirect3DDevice3 methods
+		
 		STDMETHOD(GetCaps)(THIS_ LPD3DDEVICEDESC,LPD3DDEVICEDESC) PURE;
 		STDMETHOD(GetStats)(THIS_ LPD3DSTATS) PURE;
 		STDMETHOD(AddViewport)(THIS_ LPDIRECT3DVIEWPORT3) PURE;
@@ -726,12 +729,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DDevice7, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DDevice7 methods ***/
+		// IDirect3DDevice7 methods
+		
 		STDMETHOD(GetCaps)(THIS_ LPD3DDEVICEDESC7) PURE;
 		STDMETHOD(EnumTextureFormats)(THIS_ LPD3DENUMPIXELFORMATSCALLBACK,LPVOID) PURE;
 		STDMETHOD(BeginScene)(THIS) PURE;
@@ -885,20 +890,21 @@ extern "C"
 #endif
 #endif /* DIRECT3D_VERSION >= 0x0700 */
 
-	/*
-	 * Execute Buffer interface
-	 */
+// Execute buffer interface
+
 #undef INTERFACE
 #define INTERFACE IDirect3DExecuteBuffer
 
 	DECLARE_INTERFACE_(IDirect3DExecuteBuffer, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DExecuteBuffer methods ***/
+		// IDirect3DExecuteBuffer methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3DDEVICE,LPD3DEXECUTEBUFFERDESC) PURE;
 		STDMETHOD(Lock)(THIS_ LPD3DEXECUTEBUFFERDESC) PURE;
 		STDMETHOD(Unlock)(THIS) PURE;
@@ -934,20 +940,21 @@ extern "C"
 #define IDirect3DExecuteBuffer_Optimize(p,a) (p)->Optimize(a)
 #endif
 
-	/*
-	 * Light interfaces
-	 */
+// Light interfaces
+
 #undef INTERFACE
 #define INTERFACE IDirect3DLight
 
 	DECLARE_INTERFACE_(IDirect3DLight, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DLight methods ***/
+		// IDirect3DLight methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3D) PURE;
 		STDMETHOD(SetLight)(THIS_ LPD3DLIGHT) PURE;
 		STDMETHOD(GetLight)(THIS_ LPD3DLIGHT) PURE;
@@ -971,20 +978,21 @@ extern "C"
 #define IDirect3DLight_GetLight(p,a) (p)->GetLight(a)
 #endif
 
-	/*
-	 * Material interfaces
-	 */
+// Material interfaces
+
 #undef INTERFACE
 #define INTERFACE IDirect3DMaterial
 
 	DECLARE_INTERFACE_(IDirect3DMaterial, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DMaterial methods ***/
+		// IDirect3DMaterial methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3D) PURE;
 		STDMETHOD(SetMaterial)(THIS_ LPD3DMATERIAL) PURE;
 		STDMETHOD(GetMaterial)(THIS_ LPD3DMATERIAL) PURE;
@@ -1023,12 +1031,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DMaterial2, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DMaterial2 methods ***/
+		// IDirect3DMaterial2 methods
+		
 		STDMETHOD(SetMaterial)(THIS_ LPD3DMATERIAL) PURE;
 		STDMETHOD(GetMaterial)(THIS_ LPD3DMATERIAL) PURE;
 		STDMETHOD(GetHandle)(THIS_ LPDIRECT3DDEVICE2,LPD3DMATERIALHANDLE) PURE;
@@ -1059,12 +1069,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DMaterial3, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DMaterial3 methods ***/
+		// IDirect3DMaterial3 methods
+		
 		STDMETHOD(SetMaterial)(THIS_ LPD3DMATERIAL) PURE;
 		STDMETHOD(GetMaterial)(THIS_ LPD3DMATERIAL) PURE;
 		STDMETHOD(GetHandle)(THIS_ LPDIRECT3DDEVICE3,LPD3DMATERIALHANDLE) PURE;
@@ -1089,20 +1101,21 @@ extern "C"
 #endif
 #endif /* DIRECT3D_VERSION >= 0x0600 */
 
-	/*
-	 * Texture interfaces
-	 */
+// Texture interfaces
+
 #undef INTERFACE
 #define INTERFACE IDirect3DTexture
 
 	DECLARE_INTERFACE_(IDirect3DTexture, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DTexture methods ***/
+		// IDirect3DTexture methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3DDEVICE,LPDIRECTDRAWSURFACE) PURE;
 		STDMETHOD(GetHandle)(THIS_ LPDIRECT3DDEVICE,LPD3DTEXTUREHANDLE) PURE;
 		STDMETHOD(PaletteChanged)(THIS_ DWORD,DWORD) PURE;
@@ -1138,12 +1151,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DTexture2, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DTexture2 methods ***/
+		// IDirect3DTexture2 methods
+		
 		STDMETHOD(GetHandle)(THIS_ LPDIRECT3DDEVICE2,LPD3DTEXTUREHANDLE) PURE;
 		STDMETHOD(PaletteChanged)(THIS_ DWORD,DWORD) PURE;
 		STDMETHOD(Load)(THIS_ LPDIRECT3DTEXTURE2) PURE;
@@ -1168,20 +1183,21 @@ extern "C"
 #endif
 #endif /* DIRECT3D_VERSION >= 0x0500 */
 
-	/*
-	 * Viewport interfaces
-	 */
+// Viewport interfaces
+
 #undef INTERFACE
 #define INTERFACE IDirect3DViewport
 
 	DECLARE_INTERFACE_(IDirect3DViewport, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DViewport methods ***/
+		// IDirect3DViewport methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3D) PURE;
 		STDMETHOD(GetViewport)(THIS_ LPD3DVIEWPORT) PURE;
 		STDMETHOD(SetViewport)(THIS_ LPD3DVIEWPORT) PURE;
@@ -1241,12 +1257,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DViewport2, IDirect3DViewport)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DViewport methods ***/
+		// IDirect3DViewport methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3D) PURE;
 		STDMETHOD(GetViewport)(THIS_ LPD3DVIEWPORT) PURE;
 		STDMETHOD(SetViewport)(THIS_ LPD3DVIEWPORT) PURE;
@@ -1314,12 +1332,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DViewport3, IDirect3DViewport2)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DViewport2 methods ***/
+		// IDirect3DViewport2 methods
+		
 		STDMETHOD(Initialize)(THIS_ LPDIRECT3D) PURE;
 		STDMETHOD(GetViewport)(THIS_ LPD3DVIEWPORT) PURE;
 		STDMETHOD(SetViewport)(THIS_ LPD3DVIEWPORT) PURE;
@@ -1395,12 +1415,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DVertexBuffer, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DVertexBuffer methods ***/
+		// IDirect3DVertexBuffer methods
+		
 		STDMETHOD(Lock)(THIS_ DWORD,LPVOID*,LPDWORD) PURE;
 		STDMETHOD(Unlock)(THIS) PURE;
 		STDMETHOD(ProcessVertices)(THIS_ DWORD,DWORD,DWORD,LPDIRECT3DVERTEXBUFFER,DWORD,LPDIRECT3DDEVICE3,DWORD) PURE;
@@ -1437,12 +1459,14 @@ extern "C"
 
 	DECLARE_INTERFACE_(IDirect3DVertexBuffer7, IUnknown)
 	{
-		/*** IUnknown methods ***/
+		// IUnknown methods
+		
 		STDMETHOD(QueryInterface)(THIS_ REFIID riid, LPVOID * ppvObj) PURE;
 		STDMETHOD_(ULONG,AddRef)(THIS) PURE;
 		STDMETHOD_(ULONG,Release)(THIS) PURE;
 
-		/*** IDirect3DVertexBuffer7 methods ***/
+		// IDirect3DVertexBuffer7 methods
+		
 		STDMETHOD(Lock)(THIS_ DWORD,LPVOID*,LPDWORD) PURE;
 		STDMETHOD(Unlock)(THIS) PURE;
 		STDMETHOD(ProcessVertices)(THIS_ DWORD,DWORD,DWORD,LPDIRECT3DVERTEXBUFFER7,DWORD,LPDIRECT3DDEVICE7,DWORD) PURE;
@@ -1477,91 +1501,77 @@ extern "C"
 #endif /* DIRECT3D_VERSION >= 0x0700 */
 
 #if(DIRECT3D_VERSION >= 0x0500)
-	/****************************************************************************
-	 *
-	 * Flags for IDirect3DDevice::NextViewport
-	 *
-	 ****************************************************************************/
 
-	/*
-	 * Return the next viewport
-	 */
+// Flags for IDirect3DDevice::NextViewport
+
+// Return the next viewport
+
 #define D3DNEXT_NEXT    0x00000001l
 
-	/*
-	 * Return the first viewport
-	 */
+// Return the first viewport
+
 #define D3DNEXT_HEAD    0x00000002l
 
-	/*
-	 * Return the last viewport
-	 */
+// Return the last viewport
+
 #define D3DNEXT_TAIL    0x00000004l
 
+/*
+Flags for DrawPrimitive/DrawIndexedPrimitive
+Also valid for Begin/BeginIndexed
+Also valid for VertexBuffer::CreateVertexBuffer
+Wait until the device is ready to draw the primitive
+This will cause DP to not return DDERR_WASSTILLDRAWING
+*/
 
-	/****************************************************************************
-	 *
-	 * Flags for DrawPrimitive/DrawIndexedPrimitive
-	 *   Also valid for Begin/BeginIndexed
-	 *   Also valid for VertexBuffer::CreateVertexBuffer
-	 ****************************************************************************/
-
-	/*
-	 * Wait until the device is ready to draw the primitive
-	 * This will cause DP to not return DDERR_WASSTILLDRAWING
-	 */
 #define D3DDP_WAIT                  0x00000001l
 #endif /* DIRECT3D_VERSION >= 0x0500 */
 
 #if (DIRECT3D_VERSION == 0x0500)
-	/*
-	 * Hint that it is acceptable to render the primitive out of order.
-	 */
+
+// Hint that it is acceptable to render the primitive out of order
+
 #define D3DDP_OUTOFORDER            0x00000002l
 #endif
 
 
 #if(DIRECT3D_VERSION >= 0x0500)
-	/*
-	 * Hint that the primitives have been clipped by the application.
-	 */
+
+// Hint that the primitives have been clipped by the application
+
 #define D3DDP_DONOTCLIP             0x00000004l
 
-	/*
-	 * Hint that the extents need not be updated.
-	 */
+// Hint that the extents don't need to be updated
+
 #define D3DDP_DONOTUPDATEEXTENTS    0x00000008l
 #endif /* DIRECT3D_VERSION >= 0x0500 */
 
 #if(DIRECT3D_VERSION >= 0x0600)
 
-	/*
-	 * Hint that the lighting should not be applied on vertices.
-	 */
+// Hint that the lighting should not be applied on vertices
 
 #define D3DDP_DONOTLIGHT            0x00000010l
 
 #endif /* DIRECT3D_VERSION >= 0x0600 */
 
-	/*
-	 * Direct3D Errors
-	 * DirectDraw error codes are used when errors not specified here.
-	 */
+/*
+Direct3D Errors
+DirectDraw error codes are used when errors not specified here
+*/
+
 #define D3D_OK              DD_OK
 #define D3DERR_BADMAJORVERSION      MAKE_DDHRESULT(700)
 #define D3DERR_BADMINORVERSION      MAKE_DDHRESULT(701)
 
 #if(DIRECT3D_VERSION >= 0x0500)
-	/*
-	 * An invalid device was requested by the application.
-	 */
+
+// An invalid device was requested by the application
+
 #define D3DERR_INVALID_DEVICE   MAKE_DDHRESULT(705)
 #define D3DERR_INITFAILED       MAKE_DDHRESULT(706)
 
-	/*
-	 * SetRenderTarget attempted on a device that was
-	 * QI'd off the render target.
-	 */
+// SetRenderTarget attempted on a device that was QI'd off the render target
+
 #define D3DERR_DEVICEAGGREGATED MAKE_DDHRESULT(707)
 #endif /* DIRECT3D_VERSION >= 0x0500 */
 
@@ -1636,9 +1646,8 @@ extern "C"
 #if(DIRECT3D_VERSION >= 0x0600)
 #define D3DERR_INVALIDVERTEXFORMAT              MAKE_DDHRESULT(2048)
 
-	/*
-	 * Attempted to CreateTexture on a surface that had a color key
-	 */
+// Attempted to CreateTexture on a surface that had a color key
+
 #define D3DERR_COLORKEYATTACHED                 MAKE_DDHRESULT(2050)
 
 #define D3DERR_VERTEXBUFFEROPTIMIZED            MAKE_DDHRESULT(2060)
@@ -1671,7 +1680,6 @@ extern "C"
 #define D3DERR_INBEGINSTATEBLOCK        MAKE_DDHRESULT(2101)
 #define D3DERR_NOTINBEGINSTATEBLOCK     MAKE_DDHRESULT(2102)
 #endif /* DIRECT3D_VERSION >= 0x0700 */
-
 
 #ifdef __cplusplus
 };

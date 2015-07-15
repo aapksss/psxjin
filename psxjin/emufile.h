@@ -49,7 +49,7 @@ public:
 	{}
 
 
-	//returns a new EMUFILE which is guranteed to be in memory. the EMUFILE you call this on may be deleted. use the returned EMUFILE in its place
+	// returns a new EMUFILE which is guaranteed to be in memory. the EMUFILE you call this on may be deleted. Use the returned EMUFILE in its place...
 	virtual EMUFILE* memwrap() = 0;
 
 	virtual ~EMUFILE() {}
@@ -67,7 +67,7 @@ public:
 
 	void unget() { fseek(-1,SEEK_CUR); }
 
-	//virtuals
+	// virtuals
 public:
 
 	virtual FILE *get_fp() = 0;
@@ -79,8 +79,8 @@ public:
 
 	virtual size_t _fread(const void *ptr, size_t bytes) = 0;
 
-	//removing these return values for now so we can find any code that might be using them and make sure
-	//they handle the return values correctly
+	// removing these return values for now so we can find any code that might be using them and make sure
+	// they handle the return values correctly
 
 	virtual void fwrite(const void *ptr, size_t bytes) = 0;
 
@@ -118,7 +118,7 @@ public:
 	virtual void truncate(s32 length) = 0;
 };
 
-//todo - handle read-only specially?
+// To do - handle read-only specially?
 class EMUFILE_MEMORY : public EMUFILE { 
 protected:
 	std::vector<u8> *vec;
@@ -170,7 +170,7 @@ public:
 		va_list argptr;
 		va_start(argptr, format);
 
-		//we dont generate straight into the buffer because it will null terminate (one more byte than we want)
+		// we don't generate straight into the buffer because it will null terminate (one more byte than we want)
 		int amt = vsnprintf(0,0,format,argptr);
 		char* tempbuf = new char[amt+1];
 
@@ -188,10 +188,10 @@ public:
 	virtual int fgetc() {
 		u8 temp;
 
-		//need an optimized codepath
-		//if(_fread(&temp,1) != 1)
+		// need an optimized code path
+		// if(_fread(&temp,1) != 1)
 		//	return EOF;
-		//else return temp;
+		// else return temp;
 		u32 remain = len-pos;
 		if(remain<1) {
 			failbit = true;
@@ -203,8 +203,8 @@ public:
 	}
 	virtual int fputc(int c) {
 		u8 temp = (u8)c;
-		//TODO
-		//if(fwrite(&temp,1)!=1) return EOF;
+		// To do
+		// if(fwrite(&temp,1)!=1) return EOF;
 		fwrite(&temp,1);
 
 		return 0;
@@ -212,8 +212,8 @@ public:
 
 	virtual size_t _fread(const void *ptr, size_t bytes);
 
-	//removing these return values for now so we can find any code that might be using them and make sure
-	//they handle the return values correctly
+	// removing these return values for now so we can find any code that might be using them and make sure
+	// they handle the return values correctly
 
 	virtual void fwrite(const void *ptr, size_t bytes){
 		reserve(pos+(s32)bytes);
@@ -223,7 +223,7 @@ public:
 	}
 
 	virtual int fseek(int offset, int origin){ 
-		//work differently for read-only...?
+		// works differently for read-only?
 		switch(origin) {
 			case SEEK_SET:
 				pos = offset;
@@ -313,8 +313,8 @@ public:
 		return ret;
 	}
 
-	//removing these return values for now so we can find any code that might be using them and make sure
-	//they handle the return values correctly
+	// removing these return values for now so we can find any code that might be using them and make sure
+	// they handle the return values correctly
 
 	virtual void fwrite(const void *ptr, size_t bytes){
 		size_t ret = ::fwrite((void*)ptr, 1, bytes, fp);

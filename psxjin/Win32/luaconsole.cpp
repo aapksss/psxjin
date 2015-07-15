@@ -1,6 +1,6 @@
-#include "../PsxCommon.h"
+#include "../psxcommon.h"
 #ifdef WIN32
-#include "Win32.h"
+#include "win32.h"
 #endif
 
 #include "resource.h"
@@ -16,11 +16,11 @@ struct ControlLayoutInfo
 {
 	int controlID;
 	
-	enum LayoutType // what to do when the containing window resizes
+	enum LayoutType // What to do when the containing window resizes
 	{
-		NONE, // leave the control where it was
-		RESIZE_END, // resize the control
-		MOVE_START, // move the control
+		NONE, // Leave the control where it was
+		RESIZE_END, // Re-size the control
+		MOVE_START, // Move the control
 	};
 	LayoutType horizontalLayout;
 	LayoutType verticalLayout;
@@ -53,7 +53,7 @@ void PrintToWindowConsole(int hDlgAsInt, const char* str)
 	int length = GetWindowTextLength(hConsole);
 	if(length >= 250000)
 	{
-		// discard first half of text if it's getting too long
+		// Discard first half of text if it's getting too long
 		SendMessage(hConsole, EM_SETSEL, 0, length/2);
 		SendMessage(hConsole, EM_REPLACESEL, false, (LPARAM)"");
 		length = GetWindowTextLength(hConsole);
@@ -72,10 +72,10 @@ void WinLuaOnStart(int hDlgAsInt)
 	HWND hDlg = (HWND)hDlgAsInt;
 	//LuaPerWindowInfo& info = LuaWindowInfo[hDlg];
 	//info.started = true;
-	EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_LUABROWSE), false); // disable browse while running because it misbehaves if clicked in a frameadvance loop
+	EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_LUABROWSE), false); // Disable browse while running because it misbehaves if clicked in a frame advance loop
 	EnableWindow(GetDlgItem(hDlg, IDC_BUTTON_LUASTOP), true);
 	SetWindowText(GetDlgItem(hDlg, IDC_BUTTON_LUARUN), "Restart");
-	SetWindowText(GetDlgItem(hDlg, IDC_LUACONSOLE), ""); // clear the console
+	SetWindowText(GetDlgItem(hDlg, IDC_LUACONSOLE), ""); // Clear the console
 //	Show_Genesis_Screen(HWnd); // otherwise we might never show the first thing the script draws
 }
 
@@ -85,7 +85,7 @@ void WinLuaOnStop(int hDlgAsInt)
 	//LuaPerWindowInfo& info = LuaWindowInfo[hDlg];
 
 	HWND prevWindow = GetActiveWindow();
-	SetActiveWindow(hDlg); // bring to front among other script/secondary windows, since a stopped script will have some message for the user that would be easier to miss otherwise
+	SetActiveWindow(hDlg); // Bring to front among other script/secondary windows, since a stopped script will have some message for the user that would be easier to miss otherwise
 	if(prevWindow == gApp.hWnd) SetActiveWindow(prevWindow);
 
 	//info.started = false;
@@ -108,7 +108,8 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 
 	case WM_INITDIALOG:
 	{
-		// remove the 30000 character limit from the console control
+		// Remove the 30000 character limit from the console control
+		
 		SendMessage(GetDlgItem(hDlg, IDC_LUACONSOLE),EM_LIMITTEXT,0,0);
 
 		GetWindowRect(gApp.hWnd, &r);
@@ -126,7 +127,8 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		r.top += staggerOffset;
 		r.bottom += staggerOffset;
 
-		// push it away from the main window if we can
+		// Push it away from the main window if we can
+		
 		const int width = (r.right-r.left); 
 		const int width2 = (r2.right-r2.left); 
 		if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
@@ -154,13 +156,13 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 		DragAcceptFiles(hDlg, true);
 		SetDlgItemText(hDlg, IDC_EDIT_LUAPATH, PSXjin_GetLuaScriptName());
 
-		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &LuaConsoleLogFont, 0); // reset with an acceptable font
+		SystemParametersInfo(SPI_GETICONTITLELOGFONT, sizeof(LOGFONT), &LuaConsoleLogFont, 0); // Reset with an acceptable font
 		return true;
 	}	break;
 
 	case WM_SIZE:
 	{
-		// resize or move controls in the window as necessary when the window is resized
+		// Resize or move controls in the window as necessary when the window is resized
 
 		//LuaPerWindowInfo& windowInfo = LuaWindowInfo[hDlg];
 		int prevDlgWidth = windowInfo.width;
@@ -249,9 +251,9 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 
 			case IDC_BUTTON_LUAEDIT:
 			{
-				char Str_Tmp [1024]; // shadow added because the global one is unreliable
+				char Str_Tmp [1024]; // Shadow added because the global one is unreliable
 				SendDlgItemMessage(hDlg,IDC_EDIT_LUAPATH,WM_GETTEXT,(WPARAM)512,(LPARAM)Str_Tmp);
-				// tell the OS to open the file with its associated editor,
+				// Tell the OS to open the file with its associated editor,
 				// without blocking on it or leaving a command window open.
 				if((int)ShellExecute(NULL, "edit", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
 					if((int)ShellExecute(NULL, "open", Str_Tmp, NULL, NULL, SW_SHOWNORMAL) == SE_ERR_NOASSOC)
@@ -270,7 +272,7 @@ INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM l
 				ofn.lpstrFile = szFileName;
 				ofn.lpstrDefExt = "lua";
 				ofn.nMaxFile = MAX_PATH;
-				ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_EXPLORER; // hide previously-ignored read-only checkbox (the real read-only box is in the open-movie dialog itself)
+				ofn.Flags = OFN_HIDEREADONLY | OFN_FILEMUSTEXIST | OFN_EXPLORER; // Hide previously ignored read-only checkbox (the real read-only box is in the open-movie dialog itself)
 				ofn.lpstrInitialDir=".\\";
 				if(GetOpenFileName( &ofn ))
 				{

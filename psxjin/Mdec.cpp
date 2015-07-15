@@ -3,8 +3,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "PsxCommon.h"
-#include "Mdec.h"
+#include "psxcommon.h"
+#include "mdec.h"
 
 #define FIXED
 
@@ -195,7 +195,7 @@ void mdecWrite1(u32 data) {
 #ifdef CDR_LOG
 	CDR_LOG("mdec1 write %lx\n", data);
 #endif
-	if (data&0x80000000) { // mdec reset
+	if (data&0x80000000) { // MDEC reset
 		mdec.command = 0;
 		mdec.status = 0;
 	}
@@ -208,7 +208,8 @@ u32 mdecRead0(void) {
 	return mdec.command;
 }
 
-// mdec status:
+// MDEC status:
+
 #define MDEC_BUSY	0x20000000
 #define MDEC_DREQ	0x18000000
 #define MDEC_FIFO	0xc0000000
@@ -290,13 +291,13 @@ void mdec1Interrupt() {
 	CDR_LOG("mdec1Interrupt\n");
 #endif
 	if (HW_DMA1_CHCR & 0x01000000) {
-		// Set a fixed value totaly arbitrarie
-		// another sound value is PSXCLK / 60 or
-		// PSXCLK / 50 since the bug happend
+		// Set a fixed value totally arbitrarily
+		// Another sound value is PSXCLK / 60 or
+		// PSXCLK / 50 since the bug happened
 		// at end of frame. PSXCLK / 1000 seems
 		// good for FF9.
 		// (for FF9 need < ~28000)
-		// CAUTION: commented interrupt-handling may lead to problems, keep an eye ;-)
+		// CAUTION: commented interrupt-handling may lead to problems
 		MDECOUTDMA_INT(PSXCLK / 1000);
 //		psxRegs.interrupt|= 0x02000000;
 //		psxRegs.intCycle[5+24+1]*= 8;
@@ -350,7 +351,7 @@ unsigned short* rl2blk(int *blk,unsigned short *mdec_rl) {
 
 	memset (blk, 0, 6*DCTSIZE2*4);
 	iqtab = iq_uv;
-	for(i=0;i<6;i++) {	// decode blocks (Cr,Cb,Y1,Y2,Y3,Y4)
+	for(i=0;i<6;i++) {	// Decode blocks (Cr,Cb,Y1,Y2,Y3,Y4)
 		if (i>1) iqtab = iq_y;
 
 		// zigzag transformation

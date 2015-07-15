@@ -1,38 +1,10 @@
-/***************************************************************************
-                          zn.c  -  description
-                             -------------------
-    begin                : Sat Jan 31 2004
-    copyright            : (C) 2004 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2004/01/31 - Pete
-// - added zn interface
-//
-//*************************************************************************//
-
 #include "stdafx.h"
 
 #define _IN_ZN
 
 #include "externals.h"
 
-// --------------------------------------------------- //
-// - psx gpu plugin interface prototypes-------------- //
-// --------------------------------------------------- //
+// PS1 GPU plugin interface prototypes
 
 #ifdef _WINDOWS
 long CALLBACK GPUopen(HWND hwndGPU);
@@ -66,19 +38,13 @@ void CALLBACK GPUshowScreenPic(unsigned char * pMem);
 void CALLBACK GPUkeypressed(int keycode);
 #endif
 
-// --------------------------------------------------- //
-// - zn gpu interface -------------------------------- //
-// --------------------------------------------------- //
+// ZN GPU interface
 
 unsigned long dwGPUVersion=0;
 int           iGPUHeight=512;
 int           iGPUHeightMask=511;
 int           GlobalTextIL=0;
 int           iTileCheat=0;
-
-// --------------------------------------------------- //
-// --------------------------------------------------- //
-// --------------------------------------------------- //
 
 typedef struct GPUOTAG
 {
@@ -90,33 +56,23 @@ typedef struct GPUOTAG
 	const char*    CfgFile;        // NULL terminated string
 } GPUConfiguration_t;
 
-// --------------------------------------------------- //
-// --------------------------------------------------- //
-// --------------------------------------------------- //
-
 void CALLBACK ZN_GPUdisplayFlags(unsigned long dwFlags)
 {
 	GPUdisplayFlags(dwFlags);
 }
-
-// --------------------------------------------------- //
 
 void CALLBACK ZN_GPUmakeSnapshot(void)
 {
 	GPUmakeSnapshot();
 }
 
-// --------------------------------------------------- //
-
 long CALLBACK ZN_GPUinit()
-{                                                      // we always set the vram size to 2MB, if the ZN interface is used
+{                                                      // We always set the VRAM size to 2MB, if the ZN interface is used
 	iGPUHeight=1024;
 	iGPUHeightMask=1023;
 
 	return GPUinit();
 }
-
-// --------------------------------------------------- //
 
 //extern char * pConfigFile;
 
@@ -129,7 +85,7 @@ long CALLBACK ZN_GPUopen(void * vcfg)
 	if (cfg->Version!=1) return -1;
 
 #ifdef _WINDOWS
-	//pConfigFile=(char *)cfg->CfgFile;                     // only used in this open, so we can store this temp pointer here without danger... don't access it later, though!
+	//pConfigFile=(char *)cfg->CfgFile;                     // Only used in this open, so we can store this temp pointer here without danger...don't access it later, though
 	lret=GPUopen((HWND)cfg->hWnd);
 #else
 	lret=GPUopen(&cfg->hWnd,cfg->GameName,cfg->CfgFile);
@@ -142,7 +98,7 @@ long CALLBACK ZN_GPUopen(void * vcfg)
 	  iTileCheat=1;
 	*/
 
-// some ZN games seem to erase the cluts with a 'white' TileS... strange..
+// Some ZN games seem to erase the cluts with a 'white' TileS which is strange
 // I've added a cheat to avoid this issue. We can set it globally (for
 // all ZiNc games) without much risk
 
@@ -153,42 +109,30 @@ long CALLBACK ZN_GPUopen(void * vcfg)
 	return lret;
 }
 
-// --------------------------------------------------- //
-
 long CALLBACK ZN_GPUclose()
 {
 	return GPUclose();
 }
-
-// --------------------------------------------------- //
 
 long CALLBACK ZN_GPUshutdown()
 {
 	return GPUshutdown();
 }
 
-// --------------------------------------------------- //
-
 void CALLBACK ZN_GPUupdateLace(void)
 {
 	GPUupdateLace();
 }
-
-// --------------------------------------------------- //
 
 unsigned long CALLBACK ZN_GPUreadStatus(void)
 {
 	return GPUreadStatus();
 }
 
-// --------------------------------------------------- //
-
 void CALLBACK ZN_GPUwriteStatus(unsigned long gdata)
 {
 	GPUwriteStatus(gdata);
 }
-
-// --------------------------------------------------- //
 
 long CALLBACK ZN_GPUdmaSliceOut(unsigned long *baseAddrL, unsigned long addr, unsigned long iSize)
 {
@@ -196,77 +140,56 @@ long CALLBACK ZN_GPUdmaSliceOut(unsigned long *baseAddrL, unsigned long addr, un
 	return 0;
 }
 
-// --------------------------------------------------- //
-
 unsigned long CALLBACK ZN_GPUreadData(void)
 {
 	return GPUreadData();
 }
-
-// --------------------------------------------------- //
 
 void CALLBACK ZN_GPUsetMode(unsigned long gdata)
 {
 	GPUsetMode(gdata);
 }
 
-// --------------------------------------------------- //
-
 long CALLBACK ZN_GPUgetMode(void)
 {
 	return GPUgetMode();
 }
-
-// --------------------------------------------------- //
 
 long CALLBACK ZN_GPUdmaSliceIn(unsigned long *baseAddrL, unsigned long addr, unsigned long iSize)
 {
 	GPUwriteDataMem(baseAddrL+addr,iSize);
 	return 0;
 }
-// --------------------------------------------------- //
 
 void CALLBACK ZN_GPUwriteData(unsigned long gdata)
 {
 	GPUwriteDataMem(&gdata,1);
 }
 
-// --------------------------------------------------- //
-
 long CALLBACK ZN_GPUdmaChain(unsigned long * baseAddrL, unsigned long addr)
 {
 	return GPUdmaChain(baseAddrL,addr);
 }
-
-// --------------------------------------------------- //
 
 long CALLBACK ZN_GPUtest(void)
 {
 	return GPUtest();
 }
 
-// --------------------------------------------------- //
-
 long CALLBACK ZN_GPUfreeze(unsigned long ulGetFreezeData,void * pF)
 {
 	return GPUfreeze(ulGetFreezeData,pF);
 }
-
-// --------------------------------------------------- //
 
 void CALLBACK ZN_GPUgetScreenPic(unsigned char * pMem)
 {
 	GPUgetScreenPic(pMem);
 }
 
-// --------------------------------------------------- //
-
 void CALLBACK ZN_GPUshowScreenPic(unsigned char * pMem)
 {
 	GPUshowScreenPic(pMem);
 }
-
-// --------------------------------------------------- //
 
 #ifndef _WINDOWS
 

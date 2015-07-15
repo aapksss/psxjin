@@ -1,6 +1,6 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by gpuPeopsSoft.rc
+// Used by gpupeopssoft.rc
 
 #define IDS_INFO0                       1
 #define IDS_INFO1                       2

@@ -5,7 +5,7 @@
 
 #define MCD_SIZE	(1024 * 8 * 16)
 
-// Status Flags
+// Status flags
 #define TX_RDY		0x0001
 #define RX_RDY		0x0002
 #define TX_EMPTY	0x0004
@@ -17,7 +17,7 @@
 #define CTS			0x0100
 #define IRQ			0x0200
 
-// Control Flags
+// Control flags
 #define TX_PERM		0x0001
 #define DTR			0x0002
 #define RX_PERM		0x0004

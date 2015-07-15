@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "padwin.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4244)
@@ -144,7 +144,7 @@ long CDR__play(unsigned char *sector) { return 0; }
 long CDR__stop(void) { return 0; }
 
 long CDRgetStatus(struct CdrStat *stat) {
-//long CDR__getStatus(struct CdrStat *stat) {
+// long CDR__getStatus(struct CdrStat *stat) {
 	if (cdOpenCase < 0)
 		stat->Status = 0x10;
 	else
@@ -161,7 +161,7 @@ unsigned long CDR_fakeStatus() {
 }
 
 char* CDR__getDriveLetter(void) { return NULL; }
-//unsigned char* CDR__getBufferSub(void) { return NULL; }
+// unsigned char* CDR__getBufferSub(void) { return NULL; }
 unsigned char* CDRgetBufferSub(void) { return NULL; }
 long CDR__configure(void) { return 0; }
 long CDR__test(void) { return 0; }
@@ -183,7 +183,7 @@ static int bufcount, bufc;
 PadDataS padd1, padd2;
 
 
-//Older, simpler version of pad polling - for Standard Pads or MultiTAP
+// Older, simpler version of pad polling - for standard controllers or the MultiTAP
 unsigned char _PADstartPoll_old(PadDataS *pad) {
 	bufc = 0;		
 	switch (pad->controllerType) {
@@ -195,7 +195,7 @@ unsigned char _PADstartPoll_old(PadDataS *pad) {
 			memcpy(buf, mousepar, 7);
 			bufcount = 6;
 			break;
-		case PSE_PAD_TYPE_NEGCON: // npc101/npc104(slph00001/slph00069)
+		case PSE_PAD_TYPE_NEGCON: // NPC101/NPC104 (SLPH00001/SLPH00069)
 			analogpar[1] = 0x23;
 			analogpar[3] = pad->buttonStatus & 0xff;
 			analogpar[4] = pad->buttonStatus >> 8;
@@ -206,7 +206,7 @@ unsigned char _PADstartPoll_old(PadDataS *pad) {
 			memcpy(buf, analogpar, 9);
 			bufcount = 8;
 			break;
-		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+		case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150
 			analogpar[1] = 0x73;
 			analogpar[3] = pad->buttonStatus & 0xff;
 			analogpar[4] = pad->buttonStatus >> 8;
@@ -217,7 +217,7 @@ unsigned char _PADstartPoll_old(PadDataS *pad) {
 			memcpy(buf, analogpar, 9);
 			bufcount = 8;
 			break;
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+		case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110
 			analogpar[1] = 0x53;
 			analogpar[3] = pad->buttonStatus & 0xff;
 			analogpar[4] = pad->buttonStatus >> 8;
@@ -244,7 +244,6 @@ unsigned char _PADstartPoll_old(PadDataS *pad) {
 	return buf[bufc++];
 }
 
-
 unsigned char _xPADstartPoll(PadDataS *padd) {
 	bufc = 0;
 	PadDataS pad[4];
@@ -261,7 +260,7 @@ unsigned char _xPADstartPoll(PadDataS *padd) {
 				mtappar[3+psize*i+4] = pad[i].moveX;
 				mtappar[3+psize*i+5] = pad[i].moveY;								
 				break;
-			case PSE_PAD_TYPE_NEGCON: // npc101/npc104(slph00001/slph00069)
+			case PSE_PAD_TYPE_NEGCON: // NPC101/NPC104 (SLPH00001/SLPH00069)
 				mtappar[3+psize*i] = 0x23;
 				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
 				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;
@@ -270,7 +269,7 @@ unsigned char _xPADstartPoll(PadDataS *padd) {
 				mtappar[3+psize*i+6] = pad[i].leftJoyX;
 				mtappar[3+psize*i+7] = pad[i].leftJoyY;		
 				break;
-			case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+			case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150
 				mtappar[3+psize*i] = 0x73;
 				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
 				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;
@@ -279,7 +278,7 @@ unsigned char _xPADstartPoll(PadDataS *padd) {
 				mtappar[3+psize*i+6] = pad[i].leftJoyX;
 				mtappar[3+psize*i+7] = pad[i].leftJoyY;			
 				break;
-			case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+			case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110
 				mtappar[3+psize*i] = 0x53;
 				mtappar[3+psize*i+2] = pad[i].buttonStatus & 0xff;
 				mtappar[3+psize*i+3] = pad[i].buttonStatus >> 8;
@@ -339,17 +338,17 @@ unsigned char _PADstartPoll(PadDataS *pad)
 	printf("Polling Pad %d\n", Config.PadState.curPad);
 	if (pad->controllerType == PSE_PAD_TYPE_NONE)
 	{		
-//		printf("NoPad %d\n",Config.PadState.curPad);
+   // printf("NoPad %d\n",Config.PadState.curPad);
 		return 0xff;
 	}
 	else if (!Config.UsingAnalogHack || (pad->controllerType == PSE_PAD_TYPE_STANDARD))
 	{		
-//		printf("Here %d\n", Config.PadState.curPad);
+    // printf("Here %d\n", Config.PadState.curPad);
 		return _PADstartPoll_old(pad);
 	}
 	else 
 	{			
-	//	printf("Hack %d\n",Config.PadState.curPad);
+	// printf("Hack %d\n",Config.PadState.curPad);
 		PADstartPoll_SSS(pad);
 		Config.PadState.curByte = 0;
 		return 0;
@@ -357,10 +356,10 @@ unsigned char _PADstartPoll(PadDataS *pad)
 }
 
 unsigned char PAD1_startPoll(int pad) {
-	PadDataS padd; //Pad that is read in
-	PadDataS Mpadds[4]; //Place to store all 4 pads data
+	PadDataS padd; // Controller that is read in
+	PadDataS Mpadds[4]; // Place to store all 4 controllers data
 	Config.PadState.curPad = 0;
-	PadDataS epadd; //Set up an empty pad to fill the buffer
+	PadDataS epadd; // Set up an empty controller to fill the buffer
 	epadd.buttonStatus = 0xffff;
 	epadd.leftJoyX = 128;
 	epadd.leftJoyY = 128;
@@ -368,9 +367,9 @@ unsigned char PAD1_startPoll(int pad) {
 	epadd.rightJoyY = 128;	
 	epadd.moveX = 0;
 	epadd.moveY = 0;
-	epadd.controllerType = Movie.padType1;		
+	epadd.controllerType = Movie.padType1;
 	UpdateState(Config.PadState.curPad);
-	PAD1_readPort1(&padd);	
+	PAD1_readPort1(&padd);
 	if (padd.controllerType != PSE_PAD_TYPE_MOUSE)
 	{
 		padd.moveX = 0;
@@ -402,16 +401,16 @@ unsigned char PAD1_startPoll(int pad) {
 		
 		if (Config.AutoFireFrame) 
 		{			
-			padd.buttonStatus &= (Config.Pad1AutoFire ^ 0xffff); //Force pad on  and value with zero, force to zero. 
+			padd.buttonStatus &= (Config.Pad1AutoFire ^ 0xffff); // Force controller on and value with zero, and force to zero
 		}
 		else
 		{
-			padd.buttonStatus |= (Config.Pad1AutoFire); //Force pad off, or value with one;
+			padd.buttonStatus |= (Config.Pad1AutoFire); // Force controller off, or value with one
 		}
 	}
 	if (Config.EnableAutoHold)
 	{		
-		padd.buttonStatus &= (Config.Pad1AutoHold ^ 0xffff); //Force pad on  and value with zero, force to zero. 			
+		padd.buttonStatus &= (Config.Pad1AutoHold ^ 0xffff); // Force controller on and value with zero, and force to zero
 	}
 	if(PSXjin_LuaUsingJoypad(0)) padd.buttonStatus = PSXjin_LuaReadJoypad(0)^0xffff;
 	LuaAnalogJoy* luaAnalogJoy = PSXjin_LuaReadAnalogJoy(0);
@@ -423,9 +422,9 @@ unsigned char PAD1_startPoll(int pad) {
 	}  
 
 
-/* movie stuff start */	
+// Movie stuff start
 	if (!Movie.Port1_Mtap) {
-		if (iJoysToPoll == 2) { // only poll once each frame
+		if (iJoysToPoll == 2) { // Only poll once each frame
 			if (Movie.mode == MOVIEMODE_RECORD)
 			{
 				if (Movie.MultiTrack) 
@@ -470,7 +469,7 @@ unsigned char PAD1_startPoll(int pad) {
 			return _PADstartPoll(&padd);
 		}
 	} else {
-		if (iJoysToPoll == 2) { // only poll once each frame		
+		if (iJoysToPoll == 2) { // Only poll once each frame
 			for (int Player = 0; Player < 4; Player++)		
 			{		
 				if (Movie.mode == MOVIEMODE_RECORD) {
@@ -507,21 +506,17 @@ unsigned char PAD1_startPoll(int pad) {
 	}
 }
 
-
-
-
 long CALLBACK PAD1__configure(void) { return 0; }
 void CALLBACK PAD1__about(void) {}
 long CALLBACK PAD1__test(void) { return 0; }
 long CALLBACK PAD1__query(void) { return 3; }
 long CALLBACK PAD1__keypressed() { return 0; }
 
-
 unsigned char PAD2_startPoll(int pad) {
 	PadDataS padd;
 	PadDataS Mpadds[4];
 	Config.PadState.curPad = 1;
-	PadDataS epadd; //empty pad;
+	PadDataS epadd; // Empty controller;
 	epadd.buttonStatus = 0xffff;
 	epadd.leftJoyX = 128;
 	epadd.leftJoyY = 128;
@@ -549,19 +544,19 @@ unsigned char PAD2_startPoll(int pad) {
 	{
 		if (Config.AutoFireFrame) 
 		{			
-			padd.buttonStatus &= (Config.Pad2AutoFire ^ 0xffff); //Force pad on  and value with zero, force to zero. 
+			padd.buttonStatus &= (Config.Pad2AutoFire ^ 0xffff); // Force controller on and value with zero, and force to zero
 		}
 		else
 		{
-			padd.buttonStatus |= (Config.Pad2AutoFire); //Force pad off, or value with one;
+			padd.buttonStatus |= (Config.Pad2AutoFire); // Force controller off, or value with one
 		}
 	}
 	if (Config.EnableAutoHold)
 	{		
-		padd.buttonStatus &= (Config.Pad2AutoHold ^ 0xffff); //Force pad on  and value with zero, force to zero. 			
+		padd.buttonStatus &= (Config.Pad2AutoHold ^ 0xffff); // Force controller on and value with zero, and force to zero
 	}
 	if (Movie.mode != 0)	
-		padd.controllerType = Movie.padType2; //Force Controller to match movie file. 
+		padd.controllerType = Movie.padType2; // Force controller to match movie file
 	else
 		Movie.padType2 = padd.controllerType;
 	if(PSXjin_LuaUsingJoypad(1)) padd.buttonStatus = PSXjin_LuaReadJoypad(1)^0xffff;
@@ -573,9 +568,9 @@ unsigned char PAD2_startPoll(int pad) {
 		padd.rightJoyY = luaAnalogJoy->yright;
 	}
 
-/* movie stuff start */
+// Movie stuff start
 if (!Movie.Port2_Mtap) {
-	if (iJoysToPoll == 1) { // only poll once each frame
+	if (iJoysToPoll == 1) { // Only poll once each frame
 		if (Movie.mode == MOVIEMODE_RECORD)
 		{
 			if (Movie.MultiTrack) 
@@ -613,7 +608,7 @@ if (!Movie.Port2_Mtap) {
 		return _PADstartPoll(&padd);
 	}
 	} else {
-		if (iJoysToPoll == 1) { // only poll once each frame		
+		if (iJoysToPoll == 1) { // Only poll once each frame		
 			for (int Player = 0; Player < 4; Player++)		
 			{		
 				if (Movie.mode == MOVIEMODE_RECORD) {
@@ -650,14 +645,11 @@ if (!Movie.Port2_Mtap) {
 	}
 }
 
-
 long CALLBACK PAD2__configure(void) { return 0; }
 void CALLBACK PAD2__about(void) {}
 long CALLBACK PAD2__test(void) { return 0; }
 long CALLBACK PAD2__query(void) { return 3; }
 long CALLBACK PAD2__keypressed() { return 0; }
-
-
 
 void CALLBACK clearDynarec(void) {
 	psxCpu->Reset();
@@ -665,7 +657,6 @@ void CALLBACK clearDynarec(void) {
 
 int LoadPlugins() {
 	int ret;
-
 
 	ret = CDRinit();
 	if (ret < 0) { SysMessage (_("CDRinit error : %d"), ret); return -1; }
@@ -678,6 +669,5 @@ int LoadPlugins() {
 }
 
 void ReleasePlugins() {
-	GPUshutdown(); //This is the only one that actually does anything. 
-
+	GPUshutdown(); // This is the only one that actually does anything. 
 }

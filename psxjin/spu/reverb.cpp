@@ -1,52 +1,17 @@
-/***************************************************************************
-                          reverb.c  -  description
-                             -------------------
-    begin                : Wed May 15 2002
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2003/01/19 - Pete
-// - added Neill's reverb (see at the end of file)
-//
-// 2002/12/26 - Pete
-// - adjusted reverb handling
-//
-// 2002/08/14 - Pete
-// - added extra reverb
-//
-// 2002/05/15 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
 #include "reverb.h"
 #include "spu.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "externals.h"
 
 
 void StartREVERB(SPU_chan * pChannel)
 {
-	if (pChannel->bReverb && (pChannel->spu->spuCtrl&0x80))              // reverb possible?
+	if (pChannel->bReverb && (pChannel->spu->spuCtrl&0x80))              // Reverb possible?
 	{
 		//if (iUseReverb==1) 
 			pChannel->bRVBActive=1;
 	}
-	else pChannel->bRVBActive=0;                          // else -> no reverb
+	else pChannel->bRVBActive=0;                          // else no reverb
 }
 
 void SPU_struct::REVERB_initSample() {
@@ -55,17 +20,15 @@ void SPU_struct::REVERB_initSample() {
 
 void SPU_struct::StoreREVERB(SPU_chan* pChannel,s32 left,s32 right)
 {
-	//not respecting user's setting right now..
+	// Not respecting user's setting right now
 	//if (iUseReverb==0) return;
 
-	//in pcsxrr this is done earlier
+	// In PCSX-RR this is done earlier
 	//const s32 iRxl=(pChannel->sval*pChannel->iLeftVolume)/0x4000;
 	//const s32 iRxr=(pChannel->sval*pChannel->iRightVolume)/0x4000;
 	sRVBBuf[0] += left;
 	sRVBBuf[1] += right;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 FORCEINLINE int SPU_struct::g_buffer(int iOff)                          // get_buffer content helper: takes care about wraps
 {
@@ -75,8 +38,6 @@ FORCEINLINE int SPU_struct::g_buffer(int iOff)                          // get_b
 	while (iOff<rvb.StartAddr) iOff=0x3ffff-(rvb.StartAddr-iOff);
 	return (int)*(p+iOff);
 }
-
-////////////////////////////////////////////////////////////////////////
 
 FORCEINLINE void SPU_struct::s_buffer(int iOff,int iVal)                // set_buffer content helper: takes care about wraps and clipping
 {
@@ -89,8 +50,6 @@ FORCEINLINE void SPU_struct::s_buffer(int iOff,int iVal)                // set_b
 	*(p+iOff)=(short)iVal;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 FORCEINLINE void SPU_struct::s_buffer1(int iOff,int iVal)                // set_buffer (+1 sample) content helper: takes care about wraps and clipping
 {
 	short * p=(short *)spuMem;
@@ -102,19 +61,19 @@ FORCEINLINE void SPU_struct::s_buffer1(int iOff,int iVal)                // set_
 	*(p+iOff)=(short)iVal;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 int SPU_struct::MixREVERBLeft()
 {
 	//if (iUseReverb==0) return 0;
 
-	//TODO - must fix
+	// To do - must fix
+	// Fix whatever needs fixing
+	
 	iReverbCycle++;
 
-	if(!(iReverbCycle&1))                                         // we work on every second left value: downsample to 22 khz
+	if(!(iReverbCycle&1))                                         // We work on every second left value: downsample to 22 kHz
 	{
 		iReverbCycle = 0;
-		if (spuCtrl&0x80)                                 // -> reverb on? oki
+		if (spuCtrl&0x80)                                 // Reverb on? OK.
 		{
 			int ACC0,ACC1,FB_A0,FB_A1,FB_B0,FB_B1;
 
@@ -170,7 +129,7 @@ int SPU_struct::MixREVERBLeft()
 
 			return rvb.iLastRVBLeft+(rvb.iRVBLeft-rvb.iLastRVBLeft)/2;
 		}
-		else                                              // -> reverb off
+		else                                              // Reverb off
 		{
 			rvb.iLastRVBLeft=rvb.iLastRVBRight=rvb.iRVBLeft=rvb.iRVBRight=0;
 		}
@@ -182,19 +141,17 @@ int SPU_struct::MixREVERBLeft()
 	return rvb.iLastRVBLeft;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 int SPU_struct::MixREVERBRight()
 {
 	//if (iUseReverb==0) return 0;
 	int i=rvb.iLastRVBRight+(rvb.iRVBRight-rvb.iLastRVBRight)/2;
 	rvb.iLastRVBRight=rvb.iRVBRight;
-	// -> just return the last right reverb val (little bit scaled by the previous right val)
+	// Just return the last right reverb value (which is scaled a little bit by the previous right value)
 	return i;
 }
 
-////////////////////////////////////////////////////////////////////////
-
+// Do we need this here, or can we get this document elsewhere?
+// If we can we should remove all this.
 
 /*
 -----------------------------------------------------------------------------

@@ -1,6 +1,6 @@
 #ifndef EMUFILE_TYPES_H
 #define EMUFILE_TYPES_H
 
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 #endif //EMUFILE_TYPES_H

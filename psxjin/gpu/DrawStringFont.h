@@ -1,5 +1,3 @@
-// based on the fixed font made by Tony Saveski
-
 int font_tc[] =
 {
 	0,		0, 		1, 		1,		// 000 -
@@ -137,8 +135,6 @@ int font_tc[] =
 	224,	80, 	239, 	95,		// 126 - ~
 	240,	80, 	255, 	95,		// 127 - crap
 };
-
-
 
 static unsigned char font[] =
 {

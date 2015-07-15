@@ -1,20 +1,21 @@
 #include <windows.h>
 #include <windowsx.h>
 #include <stdio.h>
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "plugin.h"
 #include "resource.h"
-#include "Win32.h"
+#include "win32.h"
 #include "maphkeys.h"
 #include "padwin.h"
 
-int tempDest; //this is for the compiler to not throw in a million of warnings
+int tempDest; // This is for the compiler to not throw in a million of warnings (Sounds like a hack, so maybe check that out)
 
-//adelikat: Changed from storing into the registry to saving into a configure file
+// Changed from storing into the registry to saving into a configure file
+
 void SaveConfig()
 {
 	char Str_Tmp[1024];
-	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\PSXjin.ini";	// To do: make a global for other files
 	
 	WritePrivateProfileString("Plugins", "Bios", Config.Bios, Conf_File);
 	WritePrivateProfileString("Plugins", "MCD1", Config.Mcd1 , Conf_File);
@@ -57,7 +58,7 @@ void SaveConfig()
 
 void LoadConfig()
 {
-	char Conf_File[1024] = ".\\PSXjin.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\PSXjin.ini";	// To do: make a global for other files
 
 	GetPrivateProfileString("Plugins", "Bios", "scph1001.bin", &Config.Bios[0], 256, Conf_File);	
 	GetPrivateProfileString("Plugins", "MCD1", "", &Config.Mcd1[0], 256, Conf_File);
@@ -80,7 +81,6 @@ void LoadConfig()
 		if (temp != 65535)
 			EmuCommandTable[i].key = temp;
 	}
-
 	
 	for (int i = 0; i <= EMUCMDMAX-1; i++) 
 	{
@@ -89,8 +89,6 @@ void LoadConfig()
 			EmuCommandTable[i].keymod = temp;
 	}
 }
-
-/////////////////////////////////////////////////////////
 
 #define ComboAddPlugin(hw, str) { \
 	lp = (char *)malloc(strlen(FindData.cFileName)+8); \
@@ -109,13 +107,8 @@ BOOL OnConfigurePluginsDialog(HWND hW) {
 	char *lp;
 	int i;
 
-	
-
 // BIOS
 
-
-	
-	
 	strcpy(tmpStr, Config.BiosDir);
 	strcat(tmpStr, "*");
 	Find=FindFirstFile(tmpStr, &FindData);
@@ -153,12 +146,10 @@ void CleanUpCombos(HWND hW) {
 	CleanCombo(IDC_LISTBIOS);
 }
 
-
 void OnCancel(HWND hW) {
 	CleanUpCombos(hW);
 	EndDialog(hW,FALSE);
 }
-
 
 char *GetSelBIOS(HWND hW,int id) {
 	HWND hWC = GetDlgItem(hW,id);
@@ -168,12 +159,11 @@ char *GetSelBIOS(HWND hW,int id) {
 	return (char *)ComboBox_GetItemData(hWC, iSel);
 }
 
-
 void OnOK(HWND hW) {
 	char * biosFILE=GetSelBIOS(hW,IDC_LISTBIOS);
 
     if  (biosFILE==NULL) {
-		MessageBox(hW,"BIOS not selected!","Error",MB_OK|MB_ICONERROR);
+		MessageBox(hW,"BIOS not selected","Error",MB_OK|MB_ICONERROR);
 	}
 	else
 	{
@@ -192,11 +182,6 @@ void OnOK(HWND hW) {
 	EndDialog(hW,TRUE);
 }
 
-
-
-
-
-
 BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {
 		case WM_INITDIALOG:
@@ -204,7 +189,7 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 
 			Button_SetText(GetDlgItem(hW, IDOK), _("OK"));
 			Button_SetText(GetDlgItem(hW, IDCANCEL), _("Cancel"));
-			Static_SetText(GetDlgItem(hW, IDC_BIOS), _("Bios"));			
+			Static_SetText(GetDlgItem(hW, IDC_BIOS), _("BIOS"));			
 			return OnConfigurePluginsDialog(hW);
 
 		case WM_COMMAND:
@@ -222,7 +207,6 @@ BOOL CALLBACK ConfigurePluginsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM 
 	}
 	return FALSE;
 }
-
 
 void ConfigurePlugins(HWND hWnd) {
     DialogBox(gApp.hInstance,

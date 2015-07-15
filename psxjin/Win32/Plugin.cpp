@@ -5,13 +5,13 @@
 #include <stdio.h>
 #include <string>
 #include "../plugins.h"
-#include "../PsxCommon.h"
+#include "../psxcommon.h"
 #include "../movie.h"
 #include "../cheat.h"
-#include "../R3000A.h"
+#include "../r3000a.h"
 #include "movie.h"
 #include "padwin.h"
-#include "Win32.h"
+#include "win32.h"
 #include "resource.h"
 #include "maphkeys.h"
 #include "ramsearch.h"
@@ -37,7 +37,7 @@ void PlayMovieFromBeginning()
 		WIN32_StartMovieReplay(Movie.movieFilename);
 	}
 	else
-		GPUdisplayText("*PSXjin*: error: No Movie To Play");
+		GPUdisplayText("*PSXjin*: ERROR: no movie to play");
 	return;
 }
 
@@ -45,48 +45,47 @@ void ReadonlyToggle()
 {
 	Movie.readOnly^=1;
 	if (Movie.readOnly)
-		GPUdisplayText("*PSXjin*: Read-Only mode");
+		GPUdisplayText("*PSXjin*: read-only mode");
 	else
-		GPUdisplayText("*PSXjin*: Read+Write mode");
+		GPUdisplayText("*PSXjin*: read+write mode");
 	return;
 }
-
 
 void CDOpenClose()
 {
 	if (Movie.mode == MOVIEMODE_RECORD)
 	{
-		MovieControl.cdCase ^= 1; //Flip Flag - Not actual status
-		if (cdOpenCase < 0) { //Check if open/closed
-			if (MovieControl.cdCase) //Notifiers of whether or not we are reversing the process. 
-				GPUdisplayText("*PSXjin*: CD Case Will Close On Next Frame");
+		MovieControl.cdCase ^= 1; // Flip Flag - Not actual status
+		if (cdOpenCase < 0) { // Check if open/closed
+			if (MovieControl.cdCase) // Notifiers of whether or not we are reversing the process. 
+				GPUdisplayText("*PSXjin*: CD case will close on next frame");
 			else
-				GPUdisplayText("*PSXjin*: CD Case Won't Close On Next Frame");
+				GPUdisplayText("*PSXjin*: CD case won't close on next frame");
 		}
 		else {
 			if (MovieControl.cdCase)
-				GPUdisplayText("*PSXjin*: CD Case Will Open On Next Frame");
+				GPUdisplayText("*PSXjin*: CD case will open on next frame");
 			else
-				GPUdisplayText("*PSXjin*: CD Case Won't Open On Next Frame");
+				GPUdisplayText("*PSXjin*: CD case won't open on next frame");
 		}
 	}
 	else 
 	{
 		cdOpenCase ^= -1;
 		if (cdOpenCase < 0) {
-			GPUdisplayText(_("*PSXjin*: CD Case Opened"));
+			GPUdisplayText(_("*PSXjin*: CD case opened"));
 			iPause = 1;					
 			SwapCD(IsoFile, &Movie.CdromIds[0]);	
 			Movie.CDSwap = true;
 		}
 		else {
-			GPUdisplayText(_("*PSXjin*: CD Case Closed"));
+			GPUdisplayText(_("*PSXjin*: CD case closed"));
 			Movie.CDSwap = false;
 			CDRclose();
 			CDRopen(IsoFile);
 			CheckCdrom();
 			if (LoadCdrom() == -1)
-				SysMessage(_("Could not load Cdrom"));
+				SysMessage(_("Could not load CD-ROM"));
 		}
 	}
 		return;
@@ -106,7 +105,7 @@ void gpuShowPic() {
 
 		f = gzopen(Text, "rb");
 		if (f != NULL) {
-			gzseek(f, 32, SEEK_SET); // skip header
+			gzseek(f, 32, SEEK_SET); // Skip header
 			gzread(f, pMem, 128*96*3);
 			gzclose(f);
 		}
@@ -131,8 +130,8 @@ void WIN32_SaveState(int newState) {
 	GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 	ret = SaveState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PSXjin*: Saved State %d"), StatesC+1);
-	else sprintf(Text, _("*PSXjin*: Error Saving State %d"), StatesC+1);
+		 sprintf(Text, _("*PSXjin*: saved state %d"), StatesC+1);
+	else sprintf(Text, _("*PSXjin*: Error saving state %d"), StatesC+1);
 	GPUdisplayText(Text);
 	if (ShowPic) { ShowPic = 0; gpuShowPic(); }
 }
@@ -156,9 +155,9 @@ void WIN32_LoadState(int newState) {
 		sprintf(Text, "%ssstates\\%10.10s.%3.3d", szCurrentPath, CdromLabel, StatesC+1);
 	ret = LoadState(Text);
 	if (ret == 0)
-		sprintf(Text, _("*PSXjin*: Loaded State %d"), StatesC+1);
+		sprintf(Text, _("*PSXjin*: loaded state %d"), StatesC+1);
 	else {
-		sprintf(Text, _("*PSXjin*: Error Loading State %d"), StatesC+1);
+		sprintf(Text, _("*PSXjin*: Error loading state %d"), StatesC+1);
 		Movie.mode = previousMode;
 	}
 	GPUdisplayText(Text);
@@ -210,7 +209,7 @@ void PADhandleKey(int key) {
 			StatesC=i-EMUCMD_SELECTSTATE1;
 			GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 			if (ShowPic) { ShowPic = 0; gpuShowPic(); }
-			sprintf(Text, "*PSXjin*: State %d Selected", StatesC+1);
+			sprintf(Text, "*PSXjin*: state %d selected", StatesC+1);
 			GPUdisplayText(Text);
 			return;
 		}
@@ -226,7 +225,7 @@ void PADhandleKey(int key) {
 
 		GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 		if (ShowPic) { ShowPic = 0; gpuShowPic(); }
-		sprintf(Text, "*PSXjin*: State %d Selected", StatesC+1);
+		sprintf(Text, "*PSXjin*: state %d selected", StatesC+1);
 		GPUdisplayText(Text);
 		return;
 	}
@@ -241,7 +240,7 @@ void PADhandleKey(int key) {
 
 		GPUfreeze(2, (GPUFreeze_t *)&StatesC);
 		if (ShowPic) { ShowPic = 0; gpuShowPic(); }
-		sprintf(Text, "*PSXjin*: State %d Selected", StatesC+1);
+		sprintf(Text, "*PSXjin*: state %d selected", StatesC+1);
 		GPUdisplayText(Text);
 		return;
 	}
@@ -463,7 +462,7 @@ void PADhandleKey(int key) {
 		if (Movie.mode == MOVIEMODE_INACTIVE)
 			WIN32_StartMovieRecord();
 		else
-			GPUdisplayText("*PSXjin*: error: Movie Already Active");
+			GPUdisplayText("*PSXjin*: ERROR: movie already active");
 		return;
 	}
 
@@ -473,7 +472,7 @@ void PADhandleKey(int key) {
 		if (Movie.mode == MOVIEMODE_INACTIVE)
 			WIN32_StartMovieReplay(0);
 		else
-			GPUdisplayText("*PSXjin*: error: Movie Already Active");
+			GPUdisplayText("*PSXjin*: ERROR: movie already active");
 		return;
 	}
 
@@ -488,13 +487,13 @@ void PADhandleKey(int key) {
 	{
 		if (Movie.mode != MOVIEMODE_INACTIVE) {
 			MOV_StopMovie();
-			GPUdisplayText("*PSXjin*: Stop Movie");
+			GPUdisplayText("*PSXjin*: stop movie");
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_ENABLED);
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_ENABLED);
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_GRAYED);
 		}
 		else
-			GPUdisplayText("*PSXjin*: error: No Movie To Stop");
+			GPUdisplayText("*PSXjin*: ERROR: no movie to stop");
 		return;
 	}
 
@@ -506,24 +505,24 @@ void PADhandleKey(int key) {
 				MovieControl.cheats ^= 1;
 				if (!cheatsEnabled) {
 					if (MovieControl.cheats)
-						GPUdisplayText("*PSXjin*: Cheats Will Activate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats will activate on next frame");
 					else
-						GPUdisplayText("*PSXjin*: Cheats Won't Activate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats won't activate on next frame");
 				}
 				else {
 					if (MovieControl.cheats)
-						GPUdisplayText("*PSXjin*: Cheats Will Deactivate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats will deactivate on next frame");
 					else
-						GPUdisplayText("*PSXjin*: Cheats Won't Deactivate On Next Frame");
+						GPUdisplayText("*PSXjin*: Cheats won't deactivate on next frame");
 				}
 			}
 		}
 		else {
 			cheatsEnabled ^= 1;
 			if (cheatsEnabled)
-				GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
+				GPUdisplayText(_("*PSXjin*: Cheats enabled"));
 			else
-				GPUdisplayText(_("*PSXjin*: Cheats Disabled"));
+				GPUdisplayText(_("*PSXjin*: Cheats disabled"));
 			PSXjinApplyCheats();
 		}
 		return;
@@ -536,23 +535,23 @@ void PADhandleKey(int key) {
 			MovieControl.sioIrq ^= 1;
 			if (!Config.Sio) {
 				if (MovieControl.sioIrq)
-					GPUdisplayText("*PSXjin*: Sio Irq Will Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: SIO IRQ will activate on next frame");
 				else
-					GPUdisplayText("*PSXjin*: Sio Irq Won't Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: SIO IRQ won't activate on next frame");
 			}
 			else {
 				if (MovieControl.sioIrq)
-					GPUdisplayText("*PSXjin*: Sio Irq Will Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: SIO IRQ will deactivate on next frame");
 				else
-					GPUdisplayText("*PSXjin*: Sio Irq Won't Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: SIO IRQ won't deactivate on next frame");
 			}
 		}
 		else {
 			Config.Sio ^= 0x1;
 			if (Config.Sio)
-				GPUdisplayText(_("*PSXjin*: Sio Irq Always Enabled"));
+				GPUdisplayText(_("*PSXjin*: SIO IRQ always enabled"));
 			else
-				GPUdisplayText(_("*PSXjin*: Sio Irq Not Always Enabled"));
+				GPUdisplayText(_("*PSXjin*: SIO IRQ not always enabled"));
 		}
 		return;
 	}
@@ -564,23 +563,23 @@ void PADhandleKey(int key) {
 			MovieControl.RCntFix ^= 1;
 			if (!Config.RCntFix) {
 				if (MovieControl.RCntFix)
-					GPUdisplayText("*PSXjin*: PE2 Fix Will Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: Parasite Eve 2 hack will activate on next frame");
 				else
-					GPUdisplayText("*PSXjin*: PE2 Fix Won't Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: Parasite Eve 2 hack won't activate on next frame");
 			}
 			else {
 				if (MovieControl.RCntFix)
-					GPUdisplayText("*PSXjin*: PE2 Fix Will Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: Parasite Eve 2 hack will deactivate on next frame");
 				else
-					GPUdisplayText("*PSXjin*: PE2 Fix Won't Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: Parasite Eve 2 hack won't deactivate on next frame");
 			}
 		}
 		else {
 			Config.RCntFix ^= 0x1;
 			if (Config.RCntFix)
-				GPUdisplayText(_("*PSXjin*: Parasite Eve 2 Fix Enabled"));
+				GPUdisplayText(_("*PSXjin*: Parasite Eve 2 hack enabled"));
 			else
-				GPUdisplayText(_("*PSXjin*: Parasite Eve 2 Fix Disabled"));
+				GPUdisplayText(_("*PSXjin*: Parasite Eve 2 hack disabled"));
 		}
 		return;
 	}
@@ -592,23 +591,23 @@ void PADhandleKey(int key) {
 			MovieControl.VSyncWA ^= 1;
 			if (!Config.VSyncWA) {
 				if (MovieControl.VSyncWA)
-					GPUdisplayText("*PSXjin*: RE 2/3 Fix Will Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: Resident Evil 2/3 hack will activate on next frame");
 				else
-					GPUdisplayText("*PSXjin*: RE 2/3 Fix Won't Activate On Next Frame");
+					GPUdisplayText("*PSXjin*: Resident Evil 2/3 hack won't activate on next frame");
 			}
 			else {
 				if (MovieControl.VSyncWA)
-					GPUdisplayText("*PSXjin*: RE 2/3 Fix Will Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: Resident Evil 2/3 hack will deactivate on next frame");
 				else
-					GPUdisplayText("*PSXjin*: RE 2/3 Fix Won't Deactivate On Next Frame");
+					GPUdisplayText("*PSXjin*: Resident Evil 2/3 hack won't deactivate on next frame");
 			}
 		}
 		else {
 			Config.VSyncWA ^= 0x1;
 			if (Config.VSyncWA)
-				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 Fix Enabled"));
+				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 hack enabled"));
 			else
-				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 Fix Disabled"));
+				GPUdisplayText(_("*PSXjin*: Resident Evil 2/3 hack disabled"));
 		}
 		return;
 	}
@@ -645,7 +644,7 @@ void PADhandleKey(int key) {
 		if (iVolume < 5)
 			iVolume++;
 		else if (iVolume > 5)
-			iVolume = 5;		//Meh, just in case
+			iVolume = 5;		// Just in case
 		sprintf(Text, "Sound volume: %d", 5 - iVolume);
 		GPUdisplayText(_(Text));
 		return;
@@ -657,7 +656,7 @@ void PADhandleKey(int key) {
 		if (iVolume > 0)
 			iVolume--;
 		if (iVolume < 0)
-			iVolume = 0;		//Meh, just in case
+			iVolume = 0;		// Just in case
 		sprintf(Text, "Sound volume: %d", 5 - iVolume);
 		GPUdisplayText(_(Text));
 		return;
@@ -705,12 +704,12 @@ void PADhandleKey(int key) {
 			if (Movie.MultiTrack)
 			{
 				Movie.RecordPlayer = Movie.NumPlayers+1;
-				GPUdisplayText("*PSXjin*: MultiTrack Enabled");
+				GPUdisplayText("*PSXjin*: Multi-track enabled");
 			}
 			else
-				GPUdisplayText("*PSXjin*: MultiTrack Disabled");
+				GPUdisplayText("*PSXjin*: Multi-track disabled");
 		}
-		else GPUdisplayText("*PSXjin*: Movie must be loaded to enable multitrack");
+		else GPUdisplayText("*PSXjin*: Movie must be loaded to enable multi-track");
 		return;
 	}
 	if(key == EmuCommandTable[EMUCMD_INCPLAYER].key
@@ -776,25 +775,25 @@ bool OpenPlugins(HWND hWnd) {
 	if(strcmp(IsoFile,""))
 	{
 		ret = CDRopen(IsoFile);
-		if (ret == 2) return false;	//adelikat: using 2 to mean "Do nothing" for when the user cancels the open file dialog
-		if (ret < 0) {/* SysMessage (_("Error Opening CDR Plugin"));*/ return false; }
+		if (ret == 2) return false;	// Using 2 to mean "do nothing" for when the user cancels the open file dialog
+		if (ret < 0) {/* SysMessage (_("Error opening CDR plugin"));*/ return false; }
 	}
 
 	SetCurrentDirectory(PSXjinDir);
 	
 	ret = GPUopen(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening GPU Plugin (%d)"), ret); return false; }
+	if (ret < 0) { SysMessage (_("Error opening GPU plugin (%d)"), ret); return false; }
 	ret = SPUopen(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening SPU Plugin (%d)"), ret); return false; }
+	if (ret < 0) { SysMessage (_("Error opening SPU plugin (%d)"), ret); return false; }
 	ret = PADopen(hWnd);
-	if (ret < 0) { SysMessage (_("Error Opening PAD1 Plugin (%d)"), ret); }
+	if (ret < 0) { SysMessage (_("Error opening PAD1 plugin (%d)"), ret); }
 	
 
 	SetCurrentDirectory(PSXjinDir);
 	//ShowCursor(FALSE);
 	GPUsendFpLuaGui(PSXjin_LuaGui);
 
-	//it is important to call this! plugins expect it!
+	// It is important to call this because plugins expect it
 	ResetPlugins();
 	return true;
 }
@@ -804,9 +803,9 @@ void ClosePlugins() {
 
 	UpdateMenuSlots();
 	ret = CDRclose();
-	if (ret < 0) { SysMessage (_("Error Closing CDR Plugin")); return; }
+	if (ret < 0) { SysMessage (_("Error closing CDR plugin")); return; }
 	ret = GPUclose();
-	if (ret < 0) { SysMessage (_("Error Closing GPU Plugin")); return; }
+	if (ret < 0) { SysMessage (_("Error closing GPU plugin")); return; }
 }
 
 void ResetPlugins() {
@@ -815,7 +814,6 @@ void ResetPlugins() {
 	CDRshutdown();
 	GPUshutdown();
 	SPUshutdown();
-	
 
 	ret = CDRinit();
 	if (ret != 0) { SysMessage (_("CDRinit error: %d"), ret); return; }

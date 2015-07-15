@@ -1,16 +1,16 @@
 #ifndef __SYSTEM_H__
 #define __SYSTEM_H__
 
-int  SysInit();							// Init mem and plugins
-void SysReset();						// Resets mem
-void SysPrintf(char *fmt, ...);			// Printf used by bios syscalls
-void SysMessage(char *fmt, ...);		// Message used to print msg to users
-void *SysLoadLibrary(char *lib);		// Loads Library
-void *SysLoadSym(void *lib, char *sym);	// Loads Symbol from Library
-const char *SysLibError();				// Gets previous error loading sysbols
-void SysCloseLibrary(void *lib);		// Closes Library
-void SysUpdate();						// Called on VBlank (to update i.e. pads)
-void SysRunGui();						// Returns to the Gui
-void SysClose();						// Close mem and plugins
+int  SysInit();							// Initialize memory and plugins
+void SysReset();						// Resets memory
+void SysPrintf(char *fmt, ...);			// Printf used by BIOS syscalls
+void SysMessage(char *fmt, ...);		// Message used to print message to users
+void *SysLoadLibrary(char *lib);		// Loads library
+void *SysLoadSym(void *lib, char *sym);	// Loads symbol from library
+const char *SysLibError();				// Gets previous error loading symbols
+void SysCloseLibrary(void *lib);		// Closes library
+void SysUpdate();						// Called on VBlank (to update controllers, etc)
+void SysRunGui();						// Returns to the GUI
+void SysClose();						// Close memory and plugins
 
 #endif /* __SYSTEM_H__ */

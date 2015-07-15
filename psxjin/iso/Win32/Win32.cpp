@@ -45,7 +45,7 @@ int _GetFile(char *out) {
 
     ofn.lStructSize			= sizeof(OPENFILENAME);
     ofn.hwndOwner			= GetActiveWindow();
-    ofn.lpstrFilter			= "Cd Iso Format (*.iso, *.bin, *.img, *.cue)\0*.iso;*.bin;*.img;*.cue;\0All Files (*.*)\0*.*\0\0";
+    ofn.lpstrFilter			= "CD ISO Format (*.iso, *.bin, *.img, *.cue)\0*.iso;*.bin;*.img;*.cue;\0All Files (*.*)\0*.*\0\0";
 	ofn.lpstrCustomFilter	= NULL;
     ofn.nMaxCustFilter		= 0;
     ofn.nFilterIndex		= 1;
@@ -79,7 +79,7 @@ long SwapCD(char *out, char *in) {
 
     ofn.lStructSize			= sizeof(OPENFILENAME);
     ofn.hwndOwner			= GetActiveWindow();
-    ofn.lpstrFilter			= "Cd Iso Format (*.iso, *.bin, *.img, *.cue)\0*.iso;*.bin;*.img;*.cue;\0All Files (*.*)\0*.*\0\0";
+    ofn.lpstrFilter			= "CD ISO Format (*.iso, *.bin, *.img, *.cue)\0*.iso;*.bin;*.img;*.cue;\0All Files (*.*)\0*.*\0\0";
 	ofn.lpstrCustomFilter	= NULL;
     ofn.nMaxCustFilter		= 0;
     ofn.nFilterIndex		= 1;

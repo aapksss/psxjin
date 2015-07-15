@@ -1,41 +1,10 @@
-/***************************************************************************
-                         externals.h  -  description
-                             -------------------
-    begin                : Wed May 15 2002
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2002/04/04 - Pete
-// - increased channel struct for interpolation
-//
-// 2002/05/15 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
 #ifndef _SPU_EXTERNALS_H
 #define _SPU_EXTERNALS_H
 
-#include "PsxCommon.h"
-#include "DecodeXA.h"
+#include "psxcommon.h"
+#include "decodexa.h"
 
-/////////////////////////////////////////////////////////
-// generic defines
-/////////////////////////////////////////////////////////
+// Generic defines
 
 #define PSE_LT_SPU                  4
 #define PSE_SPU_ERR_SUCCESS         0
@@ -43,24 +12,25 @@
 #define PSE_SPU_ERR_NOTCONFIGURED   PSE_SPU_ERR - 1
 #define PSE_SPU_ERR_INIT            PSE_SPU_ERR - 2
 
-////////////////////////////////////////////////////////////////////////
-// spu defines
-////////////////////////////////////////////////////////////////////////
+// SPU defines
 
-// sound buffer sizes
-// 400 ms complete sound buffer
+// Sound buffer sizes
+// 400ms complete sound buffer
+
 #define SOUNDSIZE   70560
-// 137 ms test buffer... if less than that is buffered, a new upload will happen
+
+// 137ms test buffer...if less than that is buffered, a new upload will happen
+
 #define TESTSIZE    24192
 
-// num of channels
+// Number of channels
+
 #define MAXCHAN     24
 
-///////////////////////////////////////////////////////////
 // struct defines
-///////////////////////////////////////////////////////////
 
-// ADSR INFOS PER CHANNEL
+// ADSR information per channel
+
 typedef struct
 {
 	int            AttackModeExp;
@@ -97,35 +67,27 @@ typedef struct
 	long           lDummy2;
 } ADSRInfoEx;
 
-///////////////////////////////////////////////////////////
+// TMP flags
 
-// Tmp Flags
+// Used for simple interpolation
 
-// used for simple interpolation
 #define FLAG_IPOL0 2
 #define FLAG_IPOL1 4
-
-///////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////
-
 
 #ifdef _WINDOWS
 extern HINSTANCE hInst;
 #define WM_MUTE (WM_USER+543)
 #endif
 
-///////////////////////////////////////////////////////////
 // SPU.C globals
-///////////////////////////////////////////////////////////
 
 #ifndef _IN_SPU
 
-// psx buffers / addresses
+// PS1 buffers/addresses
 
 extern unsigned short  regArea[];
 
-// user settings
+// User settings
 
 extern int        iUseXA;
 extern int        iVolume;
@@ -136,7 +98,7 @@ extern int        iRecordMode;
 extern int        iUseReverb;
 extern int        iUseInterpolation;
 
-// MISC
+// Misc
 
 extern unsigned long dwNoiseVal;
 extern u16 spuIrq;
@@ -153,16 +115,14 @@ extern short *  pS;
 extern int iSpuAsyncWait;
 
 #ifdef _WINDOWS
-extern HWND    hWMain;                               // window handle
+extern HWND    hWMain;    // Window handle
 #endif
 
 extern void (CALLBACK *cddavCallback)(unsigned short,unsigned short);
 
 #endif
 
-///////////////////////////////////////////////////////////
 // CFG.C globals
-///////////////////////////////////////////////////////////
 
 #ifndef _IN_CFG
 
@@ -172,9 +132,7 @@ extern char * pConfigFile;
 
 #endif
 
-///////////////////////////////////////////////////////////
 // DSOUND.C globals
-///////////////////////////////////////////////////////////
 
 #ifndef _IN_DSOUND
 
@@ -185,9 +143,7 @@ extern unsigned long LastPlay;
 
 #endif
 
-///////////////////////////////////////////////////////////
 // RECORD.C globals
-///////////////////////////////////////////////////////////
 
 #ifndef _IN_RECORD
 

@@ -4,17 +4,17 @@
 #include <stdio.h>
 #include <string>
 #include "resource.h"
-#include "PSXCommon.h"
+#include "psxcommon.h"
 #include <math.h>
 #include <algorithm>
 
-//TODO: Enable Analog control should be check/unchecked in INITDIALOG based on some WndMain bool
+// To do: Enable analog control should be check/unchecked in INITDIALOG based on some WndMain bool
+// How to: make sure AllowUserInput is set when the user is allowed to edit the analog panels
+// The analog panels will always redraw themselves from Config.PadLeftX etc. just call UpdateAll() to make them get repainted
+// This, of course, applies even while a movie is playing
+// You should probably change the sliders to work the same as in Mupen tasinput plugin. This hasn't been done.
 
-//HOWTO: make sure AllowUserInput is set when the user is allowed to edit the analog panels
-//the analog panels will always redraw themselves from Config.PadLeftX etc. just call UpdateAll() to make them get repainted
-//this, of course, applies even while a movie is playing
-//
-//you should probably change the sliders to work the same as in mupen tasinput plugin. i sort of like it better. but i didnt do that now
+// We should check if analog control is even really needed (the menu option, not the controller functionality)
 
 HWND AnalogControlHWnd = NULL;
 static bool AllowUserInput = true;
@@ -83,11 +83,13 @@ public:
 			y = Config.PadRightY;
 		}
 
-		//convert to [0,1]
+		// Convert to [0,1]
+		
 		float fx = x/range();
 		float fy = y/range();
 
-		//convert to [0,clientSize]
+		// Convert to [0,clientSize]
+		
 		RECT rect;
 		GetClientRect(hwnd,&rect);
 		POINT pt;
@@ -97,45 +99,54 @@ public:
 		return pt;
 	}
 
-	//receives pixel coordinates, converts to analog coordinates, and sets emulator state
+	// Receives pixel coordinates, converts to analog coordinates, and sets emulator state
+	
 	void userSet(int x, int y, bool shift)
 	{
 		RECT rect;
 		GetClientRect(hwnd,&rect);
 
-		//clamp while converting to [0,1]
+		// Clamp while converting to [0,1]
+		
 		float fx = (float)x/(rect.right-rect.left);
 		float fy = (float)y/(rect.right-rect.left);
 		fx = std::min(std::max(fx,0.0f),1.0f);
 		fy = std::min(std::max(fy,0.0f),1.0f);
 
-		//convert to [-1,1]
+		// Convert to [-1,1]
+		
 		fx = fx*2-1;
 		fy = fy*2-1;
 
-		//convert to polar coordinates
+		// Convert to polar coordinates
+		
 		float r = sqrt(fx*fx+fy*fy);
 		float theta = atan2(fy,fx);
 		
-		//optionally the radius can't be more than 1
+		// Optionally the radius can't be more than 1
+		
 		if(shift)
 			r = std::min(r,1.0f);
 
-		//convert back to cartesian [-1,1]
+		// Convert back to cartesian [-1,1]
+		
 		fx = r*cos(theta);
 		fy = r*sin(theta);
 
 		//printf("%f, %f\n",fx,fy);
 
-		//yes, some of these conversions are redundant. but they make things clear
+		// Yes, some of these conversions are redundant, but they make things clear
+		// Redundant code means less speed and less maintainability. Check this to see if we can get it adjusted, removed, or updated.
 
-		//convert to cartesian integer left[0,255]right and up[0,255]down
+		// Convert to Cartesian integer left[0,255]right and up[0,255]down
+		
 		x = (int)(((fx+1)/2)*range());
 		y = (int)(((fy+1)/2)*range());
 
 		//printf("[%d, %d]\n",x,y);
 		
-		//shove back into emulator state
+		// Shove back into emulator state
+		
 		if(which==0)
 		{
 			Config.PadLeftX = x;
@@ -160,8 +171,8 @@ static void UpdateAll()
 	UpdatePositionText(AnalogControlHWnd);
 }
 
+// wndproc for the AnalogPanel
 
-//wndproc for the AnalogPanel
 LRESULT APIENTRY AnalogPanelProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	AnalogPanel* panel = (AnalogPanel*)GetWindowLong(hW,GWL_USERDATA);
@@ -192,37 +203,42 @@ LRESULT APIENTRY AnalogPanelProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPara
 			RECT rect;
 			GetClientRect(hW,&rect);
 
-			//only paint this control
+			// Only paint this control
+			
 			HRGN rectRgn = CreateRectRgn(rect.left,rect.top,rect.right,rect.bottom);
 			SelectClipRgn(hdc,rectRgn);
 
-			//fill the panel
+			// Fill the panel
+			
 			DeleteObject(SelectObject(hdc,GetStockObject(LTGRAY_BRUSH)));
 			Rectangle(hdc,rect.left,rect.top,rect.right,rect.bottom);
 
-			//draw the baseline ellipse
+			// Draw the baseline ellipse
+			
 			DeleteObject(SelectObject(hdc,GetStockObject(WHITE_BRUSH)));
 			Ellipse(hdc,rect.left,rect.top,rect.right,rect.bottom);
 
 			HPEN hpenOld, hpenBlue, hpenRed;
-			hpenBlue = CreatePen(PS_SOLID, 3, RGB(0, 0, 255)); // these need to be re-created every time...
+			hpenBlue = CreatePen(PS_SOLID, 3, RGB(0, 0, 255)); // These need to be re-created every time
 			hpenRed = CreatePen(PS_SOLID, 7, RGB(255, 0, 0));
 			hpenOld = (HPEN)SelectObject(hdc, hpenBlue);
 
-			//draw the blue line
+			// Draw the blue line
+			
 			MoveToEx(hdc, (rect.left+rect.right)/2, (rect.top+rect.bottom)/2, NULL);
 			POINT pt = panel->getCurPoint();
 			LineTo(hdc, pt.x,pt.y);
 			SelectObject(hdc, hpenOld);
 			DeleteObject(hpenBlue);
 
-			//draw the X/Y axes
+			// Draw the X/Y axes
 			MoveToEx(hdc, rect.left, (rect.top+rect.bottom)>>1, NULL);
 			LineTo(hdc, rect.right, (rect.top+rect.bottom)>>1);
 			MoveToEx(hdc, (rect.left+rect.right)>>1, rect.top, NULL);
 			LineTo(hdc, (rect.left+rect.right)>>1, rect.bottom);
 
-			//draw the little red dot
+			// Draw the little red dot
+			
 			hpenOld = (HPEN)SelectObject(hdc, hpenRed);
 			MoveToEx(hdc, pt.x,pt.y, NULL);
 			LineTo(hdc, pt.x,pt.y);
@@ -260,7 +276,6 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			wpOrigEditProc = (WNDPROC)SetWindowLong(analogPanels[0].hwnd,GWL_WNDPROC,(LONG)AnalogPanelProc);
 			wpOrigEditProc = (WNDPROC)SetWindowLong(analogPanels[1].hwnd,GWL_WNDPROC,(LONG)AnalogPanelProc);
 
-
 			GetWindowRect(gApp.hWnd, &r);
 			dx1 = (r.right - r.left) / 2;
 			dy1 = (r.bottom - r.top) / 2;
@@ -269,7 +284,8 @@ BOOL CALLBACK AnalogControlProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam
 			dx2 = (r2.right - r2.left) / 2;
 			dy2 = (r2.bottom - r2.top) / 2;
 
-			// push it away from the main window if we can
+			// Push it away from the main window if we can
+			
 			const int width = (r.right-r.left); 
 			const int width2 = (r2.right-r2.left); 
 			if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))

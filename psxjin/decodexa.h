@@ -6,7 +6,7 @@
 #ifndef DECODEXA_H
 #define DECODEXA_H
 
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "emufile.h"
 
 class EMUFILE;

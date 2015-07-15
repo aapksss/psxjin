@@ -19,6 +19,7 @@ enum LuaCallID
 void CallRegisteredLuaFunctions(int calltype);
 
 //void PSXjin_LuaWrite(uint32 addr);
+
 void PSXjin_LuaFrameBoundary();
 int PSXjin_LoadLuaCode(const char *filename);
 void PSXjin_ReloadLuaCode();
@@ -30,7 +31,9 @@ uint32 PSXjin_LuaReadJoypad(int);
 int PSXjin_LuaUsingAnalogJoy(int);
 LuaAnalogJoy* PSXjin_LuaReadAnalogJoy(int);
 int PSXjin_LuaSpeed();
+
 //int PSXjin_LuaFrameskip();
+
 int PSXjin_LuaRerecordCountSkip();
 
 void PSXjin_LuaGui(void *s, int width, int height, int bpp, int pitch);
@@ -42,8 +45,9 @@ void PSXjin_LuaEnableGui(uint8 enabled);
 
 char* PSXjin_GetLuaScriptName();
 
-// Record a command-line argument in lua's global "arg" variable for
-// eventual use by the lua script
+// Record a command-line argument in Lua's global "arg" variable for
+// eventual use by the Lua script
+
 void PSXjin_LuaAddArgument(char *arg);
 
 #endif

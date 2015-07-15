@@ -1,31 +1,14 @@
-/*  Copyright 2009-2010 DeSmuME team
-
-	This file is free software: you can redistribute it and/or modify
-	it under the terms of the GNU General Public License as published by
-	the Free Software Foundation, either version 2 of the License, or
-	(at your option) any later version.
-
-	This file is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU General Public License for more details.
-
-	You should have received a copy of the GNU General Public License
-	along with the this software.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #include "metaspu.h"
 #include <queue>
 #include <vector>
 #include <assert.h>
 
-// for pcsx2 method
-// haven't bothered to get it compiling in GCC yet
+// Check to see if anything will compile in GCC
+// Also, apparently this uses a method PCSX2 uses
 
 #ifdef _MSC_VER
-#include "SndOut.h"
+#include "sndout.h"
 #endif
-
 
 template<typename T> inline T _abs(T val)
 {
@@ -44,7 +27,6 @@ template<typename T> inline T moveValueTowards(T val, T target, T incr)
 		val = target;
 	return val;
 }
-
 
 class ZeromusSynchronizer : public ISynchronizingAudioBuffer
 {
@@ -72,7 +54,8 @@ public:
 		}
 	}
 
-	//returns the number of samples actually supplied, which may not match the number requested
+	// Returns the number of samples actually supplied, which may not match the number requested
+	
 	virtual int output_samples(s16* buf, int samples_requested)
 	{
 		int done = 0;
@@ -196,7 +179,7 @@ private:
 
 	std::vector<ssamp> sampleQueue;
 
-	// returns values going between 0 and y-1 in a saw wave pattern, based on x
+	// Returns values going between 0 and y-1 in a saw wave pattern, based on x
 	static FORCEINLINE int pingpong(int x, int y)
 	{
 		x %= 2*y;
@@ -204,7 +187,7 @@ private:
 			x = 2*y - x - 1;
 		return x;
 
-		// in case we want to switch to odd buffer sizes for more sharpness
+		// In case we want to switch to odd buffer sizes for more sharpness
 		//x %= 2*(y-1);
 		//if(x >= y)
 		//	x = 2*(y-1) - x;
@@ -218,7 +201,7 @@ private:
 		if(cur >= end)
 			return rhs;
 
-		// in case we want sine wave interpolation instead of linear here
+		// In case we want sine wave interpolation instead of linear here
 		//float ang = 3.14159f * (float)(cur - start) / (float)(end - start);
 		//cur = start + (int)((1-cosf(ang))*0.5f * (end - start));
 
@@ -263,20 +246,25 @@ public:
 		int queued = sampleQueue.size();
 
 		// I am too lazy to deal with odd numbers
+		// Check this for accuracy
+		
 		audiosize &= ~1;
 		queued &= ~1;
 
-		if(queued > 0x200 && audiosize > 0) // is there any work to do?
+		if(queued > 0x200 && audiosize > 0) // Is there any work to do?
 		{
-			// are we going at normal speed?
-			// or more precisely, are the input and output queues/buffers of similar size?
+			// Are we going at normal speed?
+			// Or more precisely, are the input and output queues/buffers of similar size?
+			
 			if(queued > 900 || audiosize > queued * 2)
 			{
-				// not normal speed. we have to resample it somehow in this case.
+				// Not normal speed. We have to re-sample it somehow in this case
+				
 				if(audiosize <= queued)
 				{
-					// fast forward speed
-					// this is the easy case, just crossfade it and it sounds ok
+					// Fast-forward speed
+					// This is the easy case, just cross-fade it and it sounds OK
+					
 					for(int i = 0; i < audiosize; i++)
 					{
 						int j = i + queued - audiosize;
@@ -286,20 +274,20 @@ public:
 				}
 				else
 				{
-					// slow motion speed
-					// here we take a very different approach,
-					// instead of crossfading it, we select a single sample from the queue
+					// Slow-motion speed
+					// Here we take a very different approach
+					// Instead of cross-fading it, we select a single sample from the queue
 					// and make sure that the index we use to select a sample is constantly moving
 					// and that it starts at the first sample in the queue and ends on the last one.
 					//
 					// hopefully the index doesn't move discontinuously or we'll get slight crackling
 					// (there might still be a minor bug here that causes this occasionally)
 					//
-					// here's a diagram of how the index we sample from moves:
+					// Here's a diagram of how the index we sample from moves:
 					//
 					// queued (this axis represents the index we sample from. the top means the end of the queue)
 					// ^
-					// |   --> audiosize (this axis represents the output index we write to, right meaning forward in output time/position)
+					// |   --> Audio size (this axis represents the output index we write to, right meaning forward in output time/position)
 					// |   A           C       C  end
 					//    A A     B   C C     C
 					//   A   A   A B C   C   C
@@ -307,13 +295,15 @@ public:
 					// A       A           C
 					// start
 					//
-					// yes, this means we are spending some stretches of time playing the sound backwards,
+					// Yes, this means we are spending some stretches of time playing the sound backwards,
 					// but the stretches are short enough that this doesn't sound weird.
-					// this lets us avoid most crackling problems due to the endpoints matching up.
+					// This lets us avoid most crackling problems due to the endpoints matching up.
+					// Check this for accuracy as well
 
-					// first calculate a shorter-than-full window
+					// First calculate a shorter-than-full window
 					// that has minimal slope at the endpoints
 					// (to further reduce crackling, especially in sine waves)
+					
 					int beststart = 0, extraAtEnd = 0;
 					{
 						int bestend = queued;
@@ -354,12 +344,12 @@ public:
 						sampleQueue.erase(sampleQueue.begin(), sampleQueue.begin() + beststart);
 					}
 
-
 					int midpointX = audiosize >> 1;
 					int midpointY = queued >> 1;
 
-					// all we need to do here is calculate the X position of the leftmost "B" in the above diagram.
-					// TODO: we should calculate it with a simple equation like
+					// Check below for accuracy, make micro-optimizations
+					// All we need to do here is calculate the X position of the leftmost "B" in the above diagram.
+					// To do: we should calculate it with a simple equation like
 					//   midpointXOffset = min(something,somethingElse);
 					// but it's a little difficult to work it out exactly
 					// so here's a stupid search for the value for now:
@@ -371,16 +361,17 @@ public:
 						int a = abs(pingpong(midpointX - midpointXOffset, queued) - midpointY) - midpointXOffset;
 						if(((a > 0) != (prevA > 0) || (a < 0) != (prevA < 0)) && prevA != 999999)
 						{
-							if((a + prevA)&1) // there's some sort of off-by-one problem with this search since we're moving diagonally...
-								midpointXOffset++; // but this fixes it most of the time...
-							break; // found it
+							if((a + prevA)&1) // There's some sort of off-by-one problem with this search since we're moving diagonally
+								midpointXOffset++; // But this fixes it most of the time
+							break; // Found it
+							// Check this to see if we can do something better
 						}
 						prevA = a;
 						midpointXOffset--;
 						if(midpointXOffset < 0)
 						{
 							midpointXOffset = 0;
-							break; // failed to find it. the two sides probably meet exactly in the center.
+							break; // Failed to find it, the two sides probably meet exactly in the center
 						}
 					}
 
@@ -389,14 +380,16 @@ public:
 					int leftMidpointY = pingpong(leftMidpointX, queued);
 					int rightMidpointY = (queued-1) - pingpong((int)audiosize-1 - rightMidpointX + queued*2, queued);
 
-					// output the left almost-half of the sound (section "A")
+					// Output the left almost-half of the sound (section "A")
+					
 					for(int x = 0; x < leftMidpointX; x++)
 					{
 						int i = pingpong(x, queued);
 						emit_sample(buf,sampleQueue[i]);
 					}
 
-					// output the middle stretch (section "B")
+					// Output the middle stretch (section "B")
+					
 					int y = leftMidpointY;
 					int dyMidLeft  = (leftMidpointY  < midpointY) ? 1 : -1;
 					int dyMidRight = (rightMidpointY > midpointY) ? 1 : -1;
@@ -405,7 +398,8 @@ public:
 					for(int x = midpointX; x < rightMidpointX; x++, y+=dyMidRight)
 						emit_sample(buf,sampleQueue[y]);
 
-					// output the end of the queued sound (section "C")
+					// Output the end of the queued sound (section "C")
+					
 					for(int x = rightMidpointX; x < audiosize; x++)
 					{
 						int i = (queued-1) - pingpong((int)audiosize-1 - x + queued*2, queued);
@@ -426,14 +420,14 @@ public:
 			}
 			else
 			{
-				// normal speed
-				// just output the samples straightforwardly.
-				//
-				// at almost-full speeds (like 50/60 FPS)
+				// Normal speed
+				// Just output the samples straightforwardly
+				// At almost-full speeds (like 50/60 FPS)
 				// what will happen is that we rapidly fluctuate between entering this branch
 				// and entering the "slow motion speed" branch above.
-				// but that's ok! because all of these branches sound similar enough that we can get away with it.
-				// so the two cases actually complement each other.
+				// But that's OK, because all of these branches sound similar enough that we can get away with it.
+				// So the two cases actually complement each other.
+				// Not sure that is something that I would consider "OK". Research this with real games and tests.
 
 				if(audiosize >= queued)
 				{
@@ -460,8 +454,7 @@ public:
 
 private:
 
-}; //NitsujaSynchronizer
-
+};
 
 #ifdef _MSC_VER
 class PSXjin2Synchronizer : public ISynchronizingAudioBuffer
@@ -502,7 +495,6 @@ public:
 	}
 };
 #endif
-
 
 ISynchronizingAudioBuffer* metaspu_construct(ESynchMethod method)
 {

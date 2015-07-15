@@ -1,36 +1,3 @@
-/***************************************************************************
-                       record.c  -  description
-                             -------------------
-    begin                : Fri Nov 09 2001
-    copyright            : (C) 2001 by Darko Matesic
-    email                : thedarkma@ptt.yu
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2003/04/17 - Avery Lee
-// - repaired AVISetStreamFormat call
-//
-// 2001/12/18 - Darko Matesic
-// - two types of compression (16bit & 24bit)
-// - FPSE 24bit MDEC support
-//
-// 2001/11/09 - Darko Matesic
-// - first revision
-//
-//*************************************************************************//
-
 #include "stdafx.h"
 #include <stdio.h>
 #include <direct.h>
@@ -39,7 +6,7 @@
 #include "externals.h"
 #include "gpurecord.h"
 #include "gpu.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 BOOL			RECORD_RECORDING = FALSE;
 BOOL			RUN_ONCE = FALSE;
@@ -67,8 +34,6 @@ AVICOMPRESSOPTIONS	opts;
 unsigned long		frame;
 unsigned long		skip;
 
-//--------------------------------------------------------------------
-
 BOOL RECORD_Start()
 {
 	char filename[256];
@@ -89,7 +54,7 @@ BOOL RECORD_Start()
 	}
 	if (HIWORD(VideoForWindowsVersion())<0x010a)
 	{
-		MessageBox(NULL,"Video for Windows version is too old !\nAbording Recording.","Error", MB_OK|MB_ICONSTOP);
+		MessageBox(NULL,"Video for Windows version is too old !\nAborting Recording.","Error", MB_OK|MB_ICONSTOP);
 		return FALSE;
 	}
 	if ((data=fopen(filename,"wb"))==NULL) goto error;
@@ -134,8 +99,6 @@ error:
 	return FALSE;
 	}
 
-//--------------------------------------------------------------------
-
 void RECORD_Stop()
 {
 	if (ps) AVIStreamClose(ps);
@@ -143,8 +106,6 @@ void RECORD_Stop()
 	if (pfile) AVIFileClose(pfile);	
 	AVIFileExit();	
 }
-
-//--------------------------------------------------------------------
 
 BOOL RECORD_WriteFrame()
 {
@@ -173,8 +134,6 @@ BOOL RECORD_WriteFrame()
 
 	return TRUE;
 }
-
-//--------------------------------------------------------------------
 
 BOOL RECORD_GetFrame()
 {

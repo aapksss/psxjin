@@ -2,8 +2,8 @@
 #include <string.h>
 #include <stdarg.h>
 //THIS ALL IS FOR THE CDROM REGISTERS HANDLING
-#include "PsxCommon.h"
-#include "CdRom.h"
+#include "psxcommon.h"
+#include "cdrom.h"
 
 // global variables
 cdrStruct cdr;
@@ -428,8 +428,8 @@ void cdrInterrupt() {
 		case CdlID + 0x20:
 			SetResultSize(8);
         	if (CDRgetStatus(&stat) == -1) {
-        		cdr.Result[0] = 0x00; // 0x08 and cdr.Result[1]|0x10 : audio cd, enters cd player
-                cdr.Result[1] = 0x00; // 0x80 leads to the menu in the bios, else loads CD
+        		cdr.Result[0] = 0x00; // 0x08 and cdr.Result[1]|0x10 : audio CD, enters CD player
+                cdr.Result[1] = 0x00; // 0x80 leads to the menu in the BIOS, else loads CD
         	}
         	else {
                 if (stat.Type == 2) {
@@ -578,7 +578,7 @@ void cdrReadInterrupt() {
 		return;
 	}
 
-	//printf("[%12d] committing cd transfer of address %d %d %d %d\n",psxRegs.cycle,cdr.SetSector[0],cdr.SetSector[1],cdr.SetSector[2],cdr.SetSector[3]);
+	//printf("[%12d] committing CD transfer of address %d %d %d %d\n",psxRegs.cycle,cdr.SetSector[0],cdr.SetSector[1],cdr.SetSector[2],cdr.SetSector[3]);
 	memcpy(cdr.Transfer, buf, 2340);
 	cdr.Stat = DataReady;
 
@@ -634,7 +634,7 @@ cdrRead0:
 	bit 3 - unknown
 	bit 4 - unknown
 	bit 5 - 1 result ready
-	bit 6 - 1 dma ready
+	bit 6 - 1 DMA ready
 	bit 7 - 1 command being processed
 */
 
@@ -645,7 +645,7 @@ unsigned char cdrRead0(void) {
     if (cdr.OCUP) cdr.Ctrl|= 0x40;
 //	else cdr.Ctrl&=~0x40;
 
-    // what means the 0x10 and the 0x08 bits? i only saw it used by the bios
+    // what are the 0x10 and the 0x08 bits used for? I only saw it used by the BIOS...
     cdr.Ctrl|=0x18;
 
 #ifdef CDRLOG
@@ -976,11 +976,11 @@ void cdrWrite3(unsigned char rt) {
         if (cdr.Irq) CDRINT(cdr.eCycle);
 		
 
-		//zero's code
-		//rationale: I don't understand what rt == 0x07 && (cdr.Ctrl & 0x1) means but it looks like it is polling for completion.
-        //the old code makes no sense. why schedule an interrupt later if the result is not ready?
-        //trigger an interrupt NOW if it IS.
-		//well, this breaks things unless it is restricted to my XA test case in SoTN, so....
+		// zero's code
+		// rationale: I don't understand what rt == 0x07 && (cdr.Ctrl & 0x1) means but it looks like it is polling for completion.
+        // the old code makes no sense. why schedule an interrupt later if the result is not ready?
+        // trigger an interrupt NOW if it IS.
+		// well, this breaks things unless it is restricted to my XA test case in SoTN, so....
 		if ((cdr.Muted == 1) && (cdr.Mode & 0x40)) {
 			if (cdr.Reading && cdr.ResultReady) 
 			{
@@ -1038,7 +1038,7 @@ void psxDma3(u32 madr, u32 bcr, u32 chcr) {
 				memcpy(ptr, cdr.pTransfer, cdsize);
 				psxCpu->Clear(madr, cdsize/4);
 			} else {
-				// Unusual behaviour on 0-sized DMAs. See https://code.google.com/p/psxjin/issues/detail?id=38
+				// Unusual behavior on 0-sized DMAs. See https://code.google.com/p/psxjin/issues/detail?id=38
 				cdsize = (cdr.Mode & 0x20) ? 0x924 : 0x800;
 				memcpy(ptr, cdr.pTransfer, cdsize);
 				memset(ptr + cdsize, cdr.pTransfer[(cdr.Mode & 0x20) ? 0x920 : 0x7f8], 0x40000 - cdsize);

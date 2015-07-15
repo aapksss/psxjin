@@ -1,8 +1,8 @@
 #include <windows.h>
 #include <windowsx.h>
 #include "resource.h"
-#include "AboutDlg.h"
-#include "PsxCommon.h"
+#include "aboutdlg.h"
+#include "psxcommon.h"
 
 LRESULT WINAPI AboutDlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	switch(uMsg) {

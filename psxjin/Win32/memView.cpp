@@ -1,34 +1,13 @@
-/*  Copyright (C) 2006 yopyop
-    yopyop156@ifrance.com
-    yopyop156.ifrance.com
-
-    This file is part of DeSmuME
-
-    DeSmuME is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    DeSmuME is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with DeSmuME; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-
 #include <list>
 #include <algorithm>
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
 #include <tchar.h>
-#include "../PsxCommon.h"
-#include "CWindow.h"
+#include "../psxcommon.h"
+#include "cwindow.h"
 #include "resource.h"
-#include "memView.h"
+#include "memview.h"
 
 using namespace std;
 
@@ -40,17 +19,15 @@ enum RegionType {
 
 struct MemViewRegion
 {
-	char name[16]; // name of this region (ex. SRAM)
-	HWAddressType hardwareAddress; // hardware address of the start of this region
-	unsigned int size; // number of bytes to the end of this region
+	char name[16]; // Name of this region (ex. SRAM)
+	HWAddressType hardwareAddress; // Hardware address of the start of this region
+	unsigned int size; // Number of bytes to the end of this region
 };
 
 static const MemViewRegion s_ramRegion = { "RAM", 0x000000, 0x200000 };
 
 typedef std::vector<MemViewRegion> MemoryList;
 static MemoryList s_memoryRegions;
-
-//////////////////////////////////////////////////////////////////////////////
 
 uint8_t memRead8 (RegionType regionType, HWAddressType address)
 {
@@ -141,8 +118,6 @@ void memWrite32 (RegionType regionType, HWAddressType address, uint32_t value)
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 CMemView::CMemView()
 	: CToolWindow(IDD_MEM_VIEW, MemView_DlgProc, "Memory View")
 	, region(MEMVIEW_RAM)
@@ -152,7 +127,8 @@ CMemView::CMemView()
 	, selAddress(0x00000000)
 	, selNewVal(0x00000000)
 {
-	// initialize memory regions
+	// Initialize memory regions
+	
 	if (s_memoryRegions.empty())
 	{
 		s_memoryRegions.push_back(s_ramRegion);
@@ -169,8 +145,6 @@ CMemView::~CMemView()
 
 	UnregWndClass("MemView_ViewBox");
 }
-
-//////////////////////////////////////////////////////////////////////////////
 
 INT_PTR CALLBACK MemView_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -299,7 +273,7 @@ INT_PTR CALLBACK MemView_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 				if(error)
 				{
-					MessageBox(hDlg, "Error:\nInvalid address specified.\nThe address must be an hexadecimal value.", "DeSmuME", (MB_OK | MB_ICONERROR));
+					MessageBox(hDlg, "Error:\nInvalid address specified.\nThe address must be a hexadecimal value.", "DeSmuME", (MB_OK | MB_ICONERROR));
 					SetWindowText(GetDlgItem(hDlg, IDC_ADDRESS), "");
 					return 1;
 				}
@@ -473,8 +447,6 @@ INT_PTR CALLBACK MemView_DlgProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 	return 0;
 }
-
-//////////////////////////////////////////////////////////////////////////////
 
 LRESULT MemView_ViewBoxPaint(CMemView* wnd, HWND hCtl, WPARAM wParam, LPARAM lParam)
 {
@@ -771,7 +743,7 @@ LRESULT CALLBACK MemView_ViewBoxProc(HWND hCtl, UINT uMsg, WPARAM wParam, LPARAM
 			SelectObject(hdc, font);
 			ReleaseDC(hCtl, hdc);
 
-			SetFocus(hCtl);				/* Required to receive keyboard messages */
+			SetFocus(hCtl);				// Required to receive keyboard messages
 			wnd->Refresh();
 		}
 		return 1;

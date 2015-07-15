@@ -2,13 +2,13 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "version.h"
 #include "padwin.h"
 
 #ifdef WIN32
 #include <windows.h>
-#include "Win32/moviewin.h"
+#include "win32/moviewin.h"
 #endif
 
 struct MovieType Movie = {};
@@ -16,13 +16,13 @@ struct MovieControlType MovieControl;
 
 
 FILE* fpMovie = 0;
-int iDoPauseAtVSync = 0; //if 1 call pause at next VSync
-int iPause = 0;          //0: keep running emulation | 1: real pause
-int iFrameAdvance = 0;   //1: advance one frame while key is down
-int iGpuHasUpdated = 0;  //has the GPUchain function been called already?
-int iVSyncFlag = 0;      //has a VSync already occured? (we can only save just after a VSync+iGpuHasUpdated)
-int iJoysToPoll = 0;     //2: needs to poll both joypads | 1: only player 2 | 0: already polled both joypads for this frame
-static const char szFileHeader[] = "PJM "; //movie file identifier
+int iDoPauseAtVSync = 0; // if 1 call pause at next VSync
+int iPause = 0;          // 0: keep running emulation | 1: real pause
+int iFrameAdvance = 0;   // 1: advance one frame while key is down
+int iGpuHasUpdated = 0;  // Has the GPUchain function been called already?
+int iVSyncFlag = 0;      // Has a VSync already occurred? (we can only save just after a VSync + iGpuHasUpdated)
+int iJoysToPoll = 0;     // 2: needs to poll both controllers | 1: only player 2 | 0: already polled both controllers for this frame
+static const char szFileHeader[] = "PJM "; // Movie file identifier
 
 int SetBytesPerFrame( MovieType Movie)	
 {
@@ -154,9 +154,9 @@ static void ReserveInputBufferSpace(uint32 spaceNeeded)
 }
 
 
-/*-----------------------------------------------------------------------------
--                              FILE OPERATIONS                                -
------------------------------------------------------------------------------*/
+/*
+File operations
+*/
 
 int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	char readHeader[4];	
@@ -170,20 +170,20 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	if (!fd)
 		return 0;
 
-	fread(readHeader, 1, 4, fd);              //read identifier
-	if (memcmp(readHeader,szFileHeader,4)) {  //not the right file type
+	fread(readHeader, 1, 4, fd);              // Read identifier
+	if (memcmp(readHeader,szFileHeader,4)) {  // Not the right file type
 		fclose(fd);
 		return 0;
 	}
 
-	fread(&tempMovie->formatVersion,1,4,fd);  //file format version number
-	if (tempMovie->formatVersion != MOVIE_VERSION) { //not the right version number
+	fread(&tempMovie->formatVersion,1,4,fd);  // File format version number
+	if (tempMovie->formatVersion != MOVIE_VERSION) { // Not the right version number
 		fclose(fd);
 		return 0;
 	}
-	fread(&tempMovie->emuVersion, 1, 4, fd);  //emulator version number
+	fread(&tempMovie->emuVersion, 1, 4, fd);  // Emulator version number
 
-	fread(&tempMovie->movieFlags, 1, 2, fd);  //read flags
+	fread(&tempMovie->movieFlags, 1, 2, fd);  // Read flags
 	{
 		tempMovie->saveStateIncluded = tempMovie->movieFlags&MOVIE_FLAG_FROM_SAVESTATE;
 		tempMovie->memoryCardIncluded = tempMovie->movieFlags&MOVIE_FLAG_MEMORY_CARDS;
@@ -224,21 +224,21 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 	fread(&tempMovie->cdIdsOffset, 1, 4, fd);
 	fread(&tempMovie->inputOffset, 1, 4, fd);
 
-	// read metadata
+	// Read metadata
 	fread(&nMetaLen, 1, 4, fd);
 	tempMovie->authorInfoOffset = ftell(fd);
 	for(i=0; i<nMetaLen; ++i) {
 		char c = fgetc(fd);
-		if(i >= MOVIE_MAX_METADATA) continue;//movie had more metadata than we support. how?? discard it.
+		if(i >= MOVIE_MAX_METADATA) continue; // Movie had more metadata than we support, discard it
  		tempMovie->authorInfo[i] = c;
  	}
 	tempMovie->authorInfo[MOVIE_MAX_METADATA-1] = '\0';
  
 
 	fseek(fd, tempMovie->cdIdsOffset, SEEK_SET);
-	// read CDs IDs information
-	fread(&tempMovie->CdromCount, 1, 1, fd);                 //total CDs used
-	nCdidsLen = tempMovie->CdromCount*9;                 //CDs IDs
+	// Read CD ID information
+	fread(&tempMovie->CdromCount, 1, 1, fd);                 // Total CDs used
+	nCdidsLen = tempMovie->CdromCount*9;                 // CD ID
 	for(i=0; i<nCdidsLen; ++i) {
 		char c = 0;
 		c |= fgetc(fd) & 0xff;
@@ -251,7 +251,7 @@ int MOV_ReadMovieFile(char* szChoice, struct MovieType *tempMovie) {
 		printf("%d Frames Listed %d totalFrames actual\n", tempMovie->totalFrames, totalFrameCheck);
 		tempMovie->totalFrames = totalFrameCheck;
 	}
-	// done reading file
+	// Done reading file
 	fclose(fd);
 
 	return 1;
@@ -261,13 +261,13 @@ void MOV_WriteMovieFile()
 {
 	int cdidsLen;
 	fseek(fpMovie, 12, SEEK_SET);
-	fwrite(&Movie.movieFlags, 1, 1, fpMovie);    //flags
+	fwrite(&Movie.movieFlags, 1, 1, fpMovie);    // Flags
 	fseek(fpMovie, 16, SEEK_SET);
 	int tempframe = Movie.currentFrame+1;
-	fwrite(&tempframe, 1, 4, fpMovie);  //total frames
-	fwrite(&Movie.rerecordCount, 1, 4, fpMovie); //rerecord count
+	fwrite(&tempframe, 1, 4, fpMovie);  // Total frames
+	fwrite(&Movie.rerecordCount, 1, 4, fpMovie); // Rerecord count
 	fseek(fpMovie, Movie.cdIdsOffset, SEEK_SET);
-	fwrite(&Movie.CdromCount, 1, 1, fpMovie);    //total CDs used
+	fwrite(&Movie.CdromCount, 1, 1, fpMovie);    // Total CDs used
 	cdidsLen = Movie.CdromCount*9;
 	if (cdidsLen > 0) {
 		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
@@ -275,13 +275,13 @@ void MOV_WriteMovieFile()
 		for(i=0; i<cdidsLen; ++i) {
 			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
 		}
-		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
+		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      // CD ID
 		free(cdidsbuf);
 	}
 	fseek(fpMovie, 44, SEEK_SET);
 	Movie.inputOffset = Movie.cdIdsOffset+1+(9*Movie.CdromCount);
-	fwrite(&Movie.inputOffset, 1, 4, fpMovie);   //input offset
-	Movie.totalFrames=Movie.currentFrame+1; //used when toggling read-only mode
+	fwrite(&Movie.inputOffset, 1, 4, fpMovie);   // Input offset
+	Movie.totalFrames=Movie.currentFrame+1; // Used when toggling read-only mode
 	fseek(fpMovie, Movie.inputOffset, SEEK_SET);
 	fwrite(Movie.inputBuffer, 1, Movie.bytesPerFrame*(Movie.totalFrames), fpMovie);
 }
@@ -341,33 +341,33 @@ static void WriteMovieHeader()
 		Movie.movieFlags |= MOVIE_FLAG_RCNTFIX;
 
 	
-	fwrite(&szFileHeader, 1, 4, fpMovie);          //header
-	fwrite(&movieVersion, 1, 4, fpMovie);          //movie version
-	fwrite(&emuVersion, 1, 4, fpMovie);            //emu version
-	fwrite(&Movie.movieFlags, 1, 2, fpMovie);      //flags	
-	fwrite(&Movie.padType1, 1, 1, fpMovie);        //padType1
-	fwrite(&Movie.padType2, 1, 1, fpMovie);        //padType2
-	fwrite(&empty, 1, 4, fpMovie);                 //total frames
-	fwrite(&empty, 1, 4, fpMovie);                 //rerecord count
-	fwrite(&empty, 1, 4, fpMovie);                 //savestate offset
-	fwrite(&empty, 1, 4, fpMovie);                 //memory card 1 offset
-	fwrite(&empty, 1, 4, fpMovie);                 //memory card 2 offset
-	fwrite(&empty, 1, 4, fpMovie);                 //cheat list offset
-	fwrite(&empty, 1, 4, fpMovie);                 //cdIds offset
-	fwrite(&empty, 1, 4, fpMovie);                 //input offset
+	fwrite(&szFileHeader, 1, 4, fpMovie);          // Header
+	fwrite(&movieVersion, 1, 4, fpMovie);          // Movie version
+	fwrite(&emuVersion, 1, 4, fpMovie);            // Emulator version
+	fwrite(&Movie.movieFlags, 1, 2, fpMovie);      // Flags
+	fwrite(&Movie.padType1, 1, 1, fpMovie);        // padType1
+	fwrite(&Movie.padType2, 1, 1, fpMovie);        // padType2
+	fwrite(&empty, 1, 4, fpMovie);                 // Total frames
+	fwrite(&empty, 1, 4, fpMovie);                 // Rerecord count
+	fwrite(&empty, 1, 4, fpMovie);                 // Savestate offset
+	fwrite(&empty, 1, 4, fpMovie);                 // Memory card 1 offset
+	fwrite(&empty, 1, 4, fpMovie);                 // Memory card 2 offset
+	fwrite(&empty, 1, 4, fpMovie);                 // Cheat list offset
+	fwrite(&empty, 1, 4, fpMovie);                 // cdlds offset
+	fwrite(&empty, 1, 4, fpMovie);                 // Input offset
 	
 	int authLen = strnlen(Movie.authorInfo,MOVIE_MAX_METADATA);
 	int temp = 512;
-	fwrite(&temp, 1, 4, fpMovie);             //author info size
+	fwrite(&temp, 1, 4, fpMovie);             // Author info size
 	Movie.authorInfoOffset = ftell(fpMovie);
-	fwrite(Movie.authorInfo, 1, authLen, fpMovie);        //author info		printf(authbuf);
+	fwrite(Movie.authorInfo, 1, authLen, fpMovie);        // Author info		printf(authbuf);
 	for (int i = MOVIE_MAX_METADATA-authLen;i<MOVIE_MAX_METADATA;i++)
 	{
 		fputc(0,fpMovie);
 	}
-	Movie.saveStateOffset = ftell(fpMovie);        //get savestate offset
+	Movie.saveStateOffset = ftell(fpMovie);        // Get savestate offset
 	if (!Movie.saveStateIncluded)
-		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte savestate
+		fwrite(&empty, 1, 4, fpMovie);               // Empty 4-byte savestate
 	else {
 		fclose(fpMovie);
 		SaveStateEmbed(Movie.movieFilename);
@@ -375,9 +375,9 @@ static void WriteMovieHeader()
 		fseek(fpMovie, 0, SEEK_END);
 	}
 	
-	Movie.memoryCard1Offset = ftell(fpMovie);      //get memory card 1 offset
+	Movie.memoryCard1Offset = ftell(fpMovie);      // Get memory card 1 offset
 	if (!Movie.memoryCardIncluded) {
-		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte memory card
+		fwrite(&empty, 1, 4, fpMovie);               // Empty 4-byte memory card
 		SIO_ClearMemoryCardsEmbed();
 	}
 	else {
@@ -386,9 +386,9 @@ static void WriteMovieHeader()
 		fpMovie = fopen(Movie.movieFilename,"r+b");
 		fseek(fpMovie, 0, SEEK_END);
 	}
-	Movie.memoryCard2Offset = ftell(fpMovie);      //get memory card 2 offset
+	Movie.memoryCard2Offset = ftell(fpMovie);      // Get memory card 2 offset
 	if (!Movie.memoryCardIncluded) {
-		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte memory card
+		fwrite(&empty, 1, 4, fpMovie);               // Empty 4-byte memory card
 		SIO_ClearMemoryCardsEmbed();
 	}
 	else {
@@ -399,9 +399,9 @@ static void WriteMovieHeader()
 	}
 	LoadMcds(Config.Mcd1, Config.Mcd2);
 
-	Movie.cheatListOffset = ftell(fpMovie);        //get cheat list offset
+	Movie.cheatListOffset = ftell(fpMovie);        // Get cheat list offset
 	if (!Movie.cheatListIncluded) {
-		fwrite(&empty, 1, 4, fpMovie);               //empty 4-byte cheat list
+		fwrite(&empty, 1, 4, fpMovie);               // Empty 4-byte cheat list
 		CHT_ClearCheatFileEmbed();
 	}
 	else {
@@ -411,8 +411,8 @@ static void WriteMovieHeader()
 		fseek(fpMovie, 0, SEEK_END);
 	}
 
-	Movie.cdIdsOffset = ftell(fpMovie);            //get cdIds offset
-	fwrite(&Movie.CdromCount, 1, 1, fpMovie);      //total CDs used
+	Movie.cdIdsOffset = ftell(fpMovie);            // Get cdIds offset
+	fwrite(&Movie.CdromCount, 1, 1, fpMovie);      // Total CDs used
 	cdidsLen = Movie.CdromCount*9;
 	if (cdidsLen > 0) {
 		unsigned char* cdidsbuf = (unsigned char*)malloc(cdidsLen);
@@ -420,20 +420,20 @@ static void WriteMovieHeader()
 		for(i=0; i<cdidsLen; ++i) {
 			cdidsbuf[i + 0] = Movie.CdromIds[i] & 0xff;
 		}
-		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      //CDs IDs
+		fwrite(cdidsbuf, 1, cdidsLen, fpMovie);      // CD ID
 		free(cdidsbuf);
 	}
 
 	fwrite(&ENDLN, 1, 1, fpMovie);
-	Movie.inputOffset = ftell(fpMovie);            //get input offset
+	Movie.inputOffset = ftell(fpMovie);            // Get input offset
 
 	fseek (fpMovie, 24, SEEK_SET);
-	fwrite(&Movie.saveStateOffset, 1, 4, fpMovie); //write savestate offset
-	fwrite(&Movie.memoryCard1Offset, 1,4,fpMovie); //write memory card 1 offset
-	fwrite(&Movie.memoryCard2Offset, 1,4,fpMovie); //write memory card 2 offset
-	fwrite(&Movie.cheatListOffset, 1, 4, fpMovie); //write cheat list offset
-	fwrite(&Movie.cdIdsOffset, 1, 4, fpMovie);     //write cd ids offset
-	fwrite(&Movie.inputOffset, 1, 4, fpMovie);     //write input offset
+	fwrite(&Movie.saveStateOffset, 1, 4, fpMovie); // Write savestate offset
+	fwrite(&Movie.memoryCard1Offset, 1,4,fpMovie); // Write memory card 1 offset
+	fwrite(&Movie.memoryCard2Offset, 1,4,fpMovie); // Write memory card 2 offset
+	fwrite(&Movie.cheatListOffset, 1, 4, fpMovie); // Write cheat list offset
+	fwrite(&Movie.cdIdsOffset, 1, 4, fpMovie);     // Write CD ID offset
+	fwrite(&Movie.inputOffset, 1, 4, fpMovie);     // Write input offset
 	fseek(fpMovie, 0, SEEK_END);
 }
 
@@ -448,16 +448,15 @@ static void TruncateMovie()
 	}
 }
 
-/*-----------------------------------------------------------------------------
--                            FILE OPERATIONS END                              -
------------------------------------------------------------------------------*/
-
+/*
+FILE OPERATIONS END
+*/
 
 static int StartRecord()
 {
 	fpMovie = fopen(Movie.movieFilename,"w+b");
 	Movie.bytesPerFrame = SetBytesPerFrame(Movie);
-	PadDataS epadd; //empty pad;
+	PadDataS epadd; // Empty pad;
 	epadd.buttonStatus = 0xffff;
 	epadd.padding = 0;
 	epadd.leftJoyX = 128;
@@ -503,7 +502,7 @@ static int StartReplay()
 	else
 		SIO_ClearMemoryCardsEmbed();
 
-	// fill input buffer
+	// Fill input buffer
 	fpMovie = fopen(Movie.movieFilename,"r+b");
 	{
 		fseek(fpMovie, Movie.inputOffset, SEEK_SET);
@@ -592,7 +591,6 @@ void MOV_StopMovie()
 #define inline __inline
 #endif
 
-
 inline static uint8 JoyRead8()
 {
 	uint8 v=Movie.inputBufferPtr[0];
@@ -605,7 +603,6 @@ inline static uint16 JoyRead16()
 	Movie.inputBufferPtr += 2;
 	return v;
 }
-
 
 void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 {
@@ -633,8 +630,8 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 			pad->moveY = atoi((char*)Movie.inputBufferPtr);
 			Movie.inputBufferPtr += 4;		
 			break;
-		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110			
+		case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150
+		case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110
 			for(int i=0;i<16;i++)
 			{
 				pad->buttonStatus <<= 1;
@@ -676,14 +673,14 @@ void MOV_ReadJoy(PadDataS *pad,unsigned char type)
 			pad->moveX = JoyRead8();
 			pad->moveY = JoyRead8();
 			break;
-		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+		case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150
 			pad->buttonStatus = JoyRead16();
 			pad->leftJoyX = JoyRead8();
 			pad->leftJoyY = JoyRead8();
 			pad->rightJoyX = JoyRead8();
 			pad->rightJoyY = JoyRead8();
 			break;
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+		case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110
 			pad->buttonStatus = JoyRead16();
 			pad->leftJoyX = JoyRead8();
 			pad->leftJoyY = JoyRead8();
@@ -721,7 +718,7 @@ void Convert_To_Binary(unsigned char PadType) {
 	int bitmask;
 	short Fixed = 0;		
 	 switch (PadType) {
-		case PSE_PAD_TYPE_MOUSE: // .. 000 000| to 16byte key setting + 
+		case PSE_PAD_TYPE_MOUSE: // .. 000 000| to 16 byte key setting +
 			*NewBufferPtr = 0; 
 			*NewBufferPtr = 0;
 			NewBufferPtr++;
@@ -738,8 +735,8 @@ void Convert_To_Binary(unsigned char PadType) {
 			OldBufferPtr += 4;
 			
 		break;
-		case PSE_PAD_TYPE_ANALOGPAD: // scph1150			
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110							
+		case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150			
+		case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110							
 			for (int j=0; j < 14; j++)
 			{
 				bitmask = (1<<((13-j)+2));				
@@ -797,7 +794,7 @@ void Convert_To_Text(unsigned char PadType) {
 				int bitmask = (1<<(15-i));
 				if(v & bitmask)
 					NewBufferPtr[i] = mouse_mnemonics[i];
-				else //otherwise write an unset bit
+				else // Otherwise write an unset bit
 					NewBufferPtr[i] = '.';
 				}				
 				NewBufferPtr += 2;
@@ -807,14 +804,14 @@ void Convert_To_Text(unsigned char PadType) {
 				NewBufferPtr += size;
 			break;
 			break;
-			case PSE_PAD_TYPE_ANALOGPAD: // scph1150			
-			case PSE_PAD_TYPE_ANALOGJOY: // scph1110	
+			case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150			
+			case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110	
 				for(int i=0;i<16;i++)
 				{			
 				int bitmask = (1<<(15-i));
 				if((v) & bitmask)
 					NewBufferPtr[i] = (uint8)pad_mnemonics[i];
-				else //otherwise write an unset bit
+				else // Otherwise write an unset bit
 					NewBufferPtr[i] = (uint8)'.';
 				}				
 				NewBufferPtr += 16;
@@ -830,7 +827,7 @@ void Convert_To_Text(unsigned char PadType) {
 					int bitmask = (1<<((13-i)+2));
 					if((v) & bitmask)
 						NewBufferPtr[i] = (uint8)pad_mnemonics[i];
-					else //otherwise write an unset bit
+					else // Otherwise write an unset bit
 						NewBufferPtr[i] = (uint8)'.';
 				}								 
 				NewBufferPtr[14] = (uint8)'|';			
@@ -839,7 +836,6 @@ void Convert_To_Text(unsigned char PadType) {
 			}	   
 
 }
-
 
 void MOV_Convert()
 {
@@ -938,7 +934,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			int bitmask = (1<<(15-i));
 			if(pad->buttonStatus & bitmask)
 				Movie.inputBufferPtr[i] = mouse_mnemonics[i];
-			else //otherwise write an unset bit
+			else // Otherwise write an unset bit
 				Movie.inputBufferPtr[i] = '.';
 			}		
 			Movie.inputBufferPtr += 2;
@@ -946,15 +942,15 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			memcpy(Movie.inputBufferPtr,temp,size);
 			Movie.inputBufferPtr += size;
 			break;
-		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+		case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150
+		case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+ANALOG_PAD_SIZE)-Movie.inputBuffer));
 			for(int i=0;i<16;i++)
 			{			
 			int bitmask = (1<<(15-i));
 			if((pad->buttonStatus^0xffff) & bitmask)
 				Movie.inputBufferPtr[i] = (uint8)pad_mnemonics[i];
-			else //otherwise write an unset bit
+			else // Otherwise write an unset bit
 				Movie.inputBufferPtr[i] = (uint8)'.';
 			}				
 			Movie.inputBufferPtr += 16;
@@ -976,7 +972,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			int bitmask = (1<<((13-i)+2));
 			if((pad->buttonStatus^0xffff) & bitmask)
 				Movie.inputBufferPtr[i] = (uint8)pad_mnemonics[i];
-			else //otherwise write an unset bit
+			else // Otherwise write an unset bit
 				Movie.inputBufferPtr[i] = (uint8)'.';
 			}							
 			if((pad->buttonStatus^0xffff) & 1)			
@@ -996,7 +992,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			JoyWrite8(pad->moveX);
 			JoyWrite8(pad->moveY);
 			break;
-		case PSE_PAD_TYPE_ANALOGPAD: // scph1150
+		case PSE_PAD_TYPE_ANALOGPAD: // SCPH-1150
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
 			JoyWrite16(pad->buttonStatus^0xFFFF);
 			JoyWrite8(pad->leftJoyX);
@@ -1004,7 +1000,7 @@ void MOV_WriteJoy(PadDataS *pad,unsigned char type)
 			JoyWrite8(pad->rightJoyX);
 			JoyWrite8(pad->rightJoyY);
 			break;
-		case PSE_PAD_TYPE_ANALOGJOY: // scph1110
+		case PSE_PAD_TYPE_ANALOGJOY: // SCPH-1110
 			ReserveInputBufferSpace((uint32)((Movie.inputBufferPtr+6)-Movie.inputBuffer));
 			JoyWrite16(pad->buttonStatus^0xFFFF);
 			JoyWrite8(pad->leftJoyX);
@@ -1092,9 +1088,9 @@ void MOV_WriteControl() {
 }
 
 void MOV_ProcessControlFlags() {
-	if (MovieControl.cdCase) //This should only get excuted on playback.
+	if (MovieControl.cdCase) // This should only get executed on playback
 	{		
-		cdOpenCase ^= -1; //Flip CDopen Status
+		cdOpenCase ^= -1; // Flip CDopen Status
 		if (cdOpenCase < 0) 
 		{			
 			Movie.currentCdrom++;
@@ -1107,7 +1103,7 @@ void MOV_ProcessControlFlags() {
 			CDRclose();			
 			CDRopen(IsoFile);
 			CheckCdrom();
-			if (LoadCdrom() == -1) SysMessage(_("Could not load Cdrom"));				
+			if (LoadCdrom() == -1) SysMessage(_("Could not load CD-ROM"));				
 			sprintf(Movie.CdromIds, "%s%9.9s", Movie.CdromIds,CdromId);		
 		}
 	}
@@ -1119,7 +1115,7 @@ void MOV_ProcessControlFlags() {
 		SysReset();
 		CheckCdrom();
 		if (LoadCdrom() == -1)
-			SysMessage(_("Could not load Cdrom"));
+			SysMessage(_("Could not load CD-ROM"));
 		psxCpu->Execute();
 	}
 	if ((MovieControl.sioIrq ||
@@ -1147,18 +1143,18 @@ int MovieFreeze(EMUFILE *f, int Mode) {
 	unsigned long bufSize = 0;
 	unsigned long buttonToSend = 0;
 
-	//saving state
+	// Saving state
 	if (Mode == 1)
 		bufSize = Movie.bytesPerFrame * (Movie.currentFrame+1);
 
-	//saving/loading state
+	// Saving/Loading state
 	gzfreezel(&Movie.currentFrame);
 	gzfreezel(&Movie.lagCounter);
 
 	if (Movie.mode == MOVIEMODE_INACTIVE)
 		return 0;
 
-	//saving/loading state
+	// Saving/Loading state
 	gzfreezel(&cdOpenCase);
 	gzfreezel(&cheatsEnabled);
 	gzfreezel(&Movie.irqHacksIncluded);
@@ -1180,13 +1176,13 @@ int MovieFreeze(EMUFILE *f, int Mode) {
 	gzfreeze(tempBuffer, bufSize);
 	if(deleteTempBuffer) delete[] tempBuffer;
 
-	//loading state
+	// Loading state
 	if (Mode == 0) {
 		if (Movie.mode == MOVIEMODE_RECORD && !PSXjin_LuaRerecordCountSkip())
 			Movie.rerecordCount++;
 		Movie.inputBufferPtr = Movie.inputBuffer+(Movie.bytesPerFrame * Movie.currentFrame);
 
-		//update information GPU OSD after loading a savestate
+		// Update information GPU OSD after loading a savestate
 		GPUsetlagcounter(Movie.lagCounter);
 		GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
 		buttonToSend = Movie.lastPads1[0].buttonStatus;

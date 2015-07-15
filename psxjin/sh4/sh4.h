@@ -2,27 +2,28 @@
 #define __SH4_H__
 
 // Basic types
-#include "PsxCommon.h"
 
-/* general defines */
+#include "psxcommon.h"
+
+// General defines
 
 s8  *x86Ptr;
 u8  *j8Ptr[32];
 u16 *j16Ptr[32];
 u8  *immPtr[256];
-u32  immData[256];     // immediate values
+u32  immData[256];     // Immediate values
 u32  immCount;		// Counts the number of immediate values
 
-float rMatrix[16] __attribute__ ((aligned (32)));	// keeps the rotation matrix
-float lMatrix[16] __attribute__ ((aligned (32)));	// keeps the light matrix
-float cMatrix[16] __attribute__ ((aligned (32)));	// keeps the color matrix
-float trVector[4] __attribute__ ((aligned (32)));	// translation vector
-float bkVector[4] __attribute__ ((aligned (32)));	// background vector
-float fcVector[4] __attribute__ ((aligned (32)));	// far color vector
-float control[7]  __attribute__ ((aligned (32)));	// rest of the control register
+float rMatrix[16] __attribute__ ((aligned (32)));	// Keeps the rotation matrix
+float lMatrix[16] __attribute__ ((aligned (32)));	// Keeps the light matrix
+float cMatrix[16] __attribute__ ((aligned (32)));	// Keeps the color matrix
+float trVector[4] __attribute__ ((aligned (32)));	// Translation vector
+float bkVector[4] __attribute__ ((aligned (32)));	// Background vector
+float fcVector[4] __attribute__ ((aligned (32)));	// Far color vector
+float control[7]  __attribute__ ((aligned (32)));	// Rest of the control register
 
-float ir[4]  __attribute__ ((aligned (32)));	// ir vector (clipped)
-float mac[4] __attribute__ ((aligned (32)));	// mac vector
+float ir[4]  __attribute__ ((aligned (32)));	// IR vector (clipped)
+float mac[4] __attribute__ ((aligned (32)));	// Mac vector
 
 void x86Init(char *ptr);
 void x86Shutdown();
@@ -47,157 +48,270 @@ void Align32();
 #define FR2 2
 #define FR3 3
 
-/*******************/
-/* SH4 intructions */
-/*******************/
+// SH4 instructions
 
-/* Transfer Instructions */
+// Transfer instructions
 
-/* mov Rm,Rn */
+// mov Rm,Rn
+
 void MOV(int m, int n);
-/* mov #imm, Rn */
+
+// mov #imm, Rn
+
 void MOVI(int i, int n);
-/* mov.l @(disp,PC),Rn */
+
+// mov.l @(disp,PC),Rn
+
 u8* MOVLI(int d, int n);
-/* mov.l @Rm,Rn */
+
+// mov.l @Rm,Rn
+
 void MOVLL(int m, int n);
-/* mov.l @(disp,GBR),R0 */
+
+// mov.l @(disp,GBR),R0
+
 u8* MOVLLG(int d);
-/* mov.l R0,@(disp,GBR) */
+
+// mov.l R0,@(disp,GBR)
+
 u8* MOVLSG(int d);
-/* mov.l Rm,@Rn */
+
+// mov.l Rm,@Rn
+
 void MOVLS(int m, int n);
-/* mov.l Rm,@-Rn */
+
+// mov.l Rm,@-Rn
+
 void MOVLM(int m, int n);
-/* mov.l @Rm+,Rn */
+
+// mov.l @Rm+,Rn
+
 void MOVLP(int m, int n);
-/* movt Rn */
+
+// movt Rn
+
 void MOVT(int n);
-/* swap.w Rm,Rn */
+
+// swap.w Rm,Rn
+
 void SWAPW(int m, int n);
 
-/* Branch instructions */
+// Branch instructions
 
-/* bra disp */
+// bra disp
+
 u16* BRA(int disp);
-/* bt disp */
+
+// bt disp
+
 u8* BT(int disp);
-/* bf disp */
+
+// bf disp
+
 u8* BF(int disp);
-/* jsr @Rn */
+
+// jsr @Rn
+
 void JSR(int n);
-/* ret */
+
+// ret
+
 void RET();
 
-/* Logical Instructions */
+// Logical instructions
 
-/* and Rm, Rn */
+// and Rm, Rn
+
 void AND(int m, int n);
-/* and #imm, R0 */
+
+// and #imm, R0
+
 void ANDI(int i);
-/* xor Rm, Rn */
+
+// xor Rm, Rn
+
 void XOR(int m, int n);
-/* xor #imm, R0 */
+
+// xor #imm, R0
+
 void XORI(int i);
-/* or Rm, Rn */
+
+// or Rm, Rn
+
 void OR(int m, int n);
-/* not Rm, Rn */
+
+// not Rm, Rn
+
 void NOT(int m, int n);
-/* tst Rm, Rn */
+
+// tst Rm, Rn
+
 void TST(int m, int n);
 
-/* Arithmetic Instructions */
+// Arithmetic instructions
 
-/* add Rm, Rn */
+// add Rm, Rn
+
 void ADD(int m, int n);
-/* sub Rm, Rn */
+
+// sub Rm, Rn
+
 void SUB(int m, int n);
-/* neg Rm, Rn */
+
+// neg Rm, Rn
+
 void NEG(int m, int n);
-/* cmp/eq Rm, Rn */
+
+// cmp/eq Rm, Rn
+
 void CMPEQ(int m, int n);
-/* cmp/gt Rm, Rn */
+
+// cmp/gt Rm, Rn
+
 void CMPGT(int m, int n);
-/* cmp/ge Rm, Rn */
+
+// cmp/ge Rm, Rn
+
 void CMPGE(int m, int n);
-/* cmp/hi Rm, Rn */
+
+// cmp/hi Rm, Rn
+
 void CMPHI(int m, int n);
-/* mul.l Rm, Rn */
+
+// mul.l Rm, Rn
+
 void MULL(int m, int n);
-/* dmuls.l Rm, Rn */
+
+// dmuls.l Rm, Rn
+
 void DMULS(int m, int n);
-/* dmulu.l Rm, Rn */
+
+// dmulu.l Rm, Rn
+
 void DMULU(int m, int n);
-/* exts.b Rm, Rn */
+
+// exts.b Rm, Rn
+
 void EXTSB(int m, int n);
-/* exts.w Rm, Rn */
+
+// exts.w Rm, Rn
+
 void EXTSW(int m, int n);
-/* extu.b Rm, Rn */
+
+// extu.b Rm, Rn
+
 void EXTUB(int m, int n);
-/* extu.w Rm, Rn */
+
+// extu.w Rm, Rn
+
 void EXTUW(int m, int n);
 
-/* Shift Instructions */
+// Shift instructions
 
-/* shld Rm, Rn */
+// shld Rm, Rn
+
 void SHLD(int m, int n);
-/* shad Rm, Rn */
+
+// shad Rm, Rn
+
 void SHAD(int m, int n);
-/* shlr2 Rm, Rn */
+
+// shlr2 Rm, Rn
+
 void SHLR2(int n);
-/* shll8 Rm, Rn */
+
+// shll8 Rm, Rn
+
 void SHLL8(int n);
-/* shlr16 Rm, Rn */
+
+// shlr16 Rm, Rn
+
 void SHLR16(int n);
 
-/* System Control Instructions */
+// System control instructions
 
-/* stc.l gbr,@-Rn */
+// stc.l gbr,@-Rn
+
 void STCMGBR(int n);
-/* ldc.l @Rm+,gbr */
+
+// ldc.l @Rm+,gbr
+
 void LDCMGBR(int m);
-/* ldc Rm,gbr */
+
+// ldc Rm,gbr
+
 void LDCGBR(int m);
-/* sts.l pr,@-Rn */
+
+// sts.l pr,@-Rn
+
 void STSMPR(int n);
-/* lds.l @Rm+,pr */
+
+// lds.l @Rm+,pr
+
 void LDSMPR(int m);
-/* sts.l macl,Rn */
+
+// sts.l macl,Rn
+
 void STSMACL(int n);
-/* sts.l mach,Rn */
+
+// sts.l mach,Rn
+
 void STSMACH(int n);
-/* nop */
+
+// nop
+
 void NOP();
 
-/* Floating-Point Instructions */
+// Floating-point instructions
 
-/* fmov.s FRm, @Rn */
+// fmov.s FRm, @Rn
+
 void FMOV_STORE(int m, int n);
-/* float fpul, FRn */
+
+// float fpul, FRn
+
 void FLOAT(int n);
-/* fdiv FRm, FRn */
+
+// fdiv FRm, FRn
+
 void FDIV(int m, int n);
-/* fmul FRm, FRn */
+
+// fmul FRm, FRn
+
 void FMUL(int m, int n);
-/* ftrc FRm, fpul */
+
+// ftrc FRm, fpul
+
 void FTRC(int m);
-/* fmov.s FRm, @-Rn */
+
+// fmov.s FRm, @-Rn
+
 void FMOV_SAVE(int m, int n);
-/* fmov.s @Rm+, FRn */
+
+// fmov.s @Rm+, FRn
+
 void FMOV_RESTORE(int m, int n);
 
-/* Floating-Point Control Instructions */
+// Floating-point control instructions
 
-/* lds Rm,fpscr */
+// lds Rm,fpscr
+
 void LDSFPSCR(int m);
-/* lds Rm,fpul */
+
+// lds Rm,fpul
+
 void LDSFPUL(int m);
-/* sts.l fpul,Rn */
+
+// sts.l fpul,Rn
+
 void STSFPUL(int n);
-/* sts.l fpscr,Rn */
+
+// sts.l fpscr,Rn
+
 void STSFPSCR(int n);
 
-/* call func */
+// call func
+
 void CALLFunc(u32 func);
 
 void LoadImmediate32(u32 imm, u32 reg);

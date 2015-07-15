@@ -1,23 +1,3 @@
-/*  Copyright (C) 2006 yopyop
-    Copyright (C) 2006-2015 DeSmuME team
-
-    This file is part of DeSmuME
-
-    DeSmuME is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    DeSmuME is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with DeSmuME; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-
 #ifndef CWINDOW_H
 #define CWINDOW_H
 
@@ -27,13 +7,11 @@
 #include <map>
 #include <algorithm>
 
-#include "../PsxCommon.h"
+#include "../psxcommon.h"
 
 extern CRITICAL_SECTION win_execute_sync;
 
-//-----------------------------------------------------------------------------
-//   The Toolkit - RECT wrapper
-//-----------------------------------------------------------------------------
+// The Toolkit - RECT wrapper
 
 class CRect
 {
@@ -61,7 +39,8 @@ private:
 // GetFontQuality()
 // Returns a font quality value that can be passed to 
 // CreateFont(). The value depends on whether font 
-// antialiasing is enabled or not.
+// anti-aliasing is enabled or not
+
 DWORD GetFontQuality();
 
 int DrawText(HDC hDC, char* text, int X, int Y, int Width, int Height, UINT format);
@@ -70,30 +49,29 @@ void GetFontSize(HWND hWnd, HFONT hFont, LPSIZE size);
 // MakeBitmapPseudoTransparent(HBITMAP hBmp, COLORREF cKeyColor, COLORREF cNewKeyColor)
 // Replaces the RGB color cKeyColor with cNewKeyColor in the bitmap hBmp.
 // For use with toolbars and such. Replace a key color (like magenta) with the right
-// system color to make the bitmap pseudo-transparent.
+// system color to make the bitmap pseudo-transparent
+
 void MakeBitmapPseudoTransparent(HBITMAP hBmp, COLORREF cKeyColor, COLORREF cNewKeyColor);
 
-//-----------------------------------------------------------------------------
 // Window class handling
-//-----------------------------------------------------------------------------
 
 // RegWndClass()
-// Registers a window class.
-// Incase the class was already registered, the function
-// just does nothing and returns true.
-// Returns false if registration failed.
+// Registers a window class
+// In case the class was already registered, the function
+// just does nothing and returns true
+// Returns false if registration failed
+
 bool RegWndClass(std::string name, WNDPROC wndProc, UINT style, int extraSize = 0);
 bool RegWndClass(std::string name, WNDPROC wndProc, UINT style, HICON icon, int extraSize = 0);
 
 // UnregWndClass()
-// Unregisters a previously registered window class.
+// Unregisters a previously registered window class
 // This function will silently fail if one or more windows
-// using the class still exist.
+// using the class still exist
+
 void UnregWndClass(std::string name);
 
-//-----------------------------------------------------------------------------
 // Base toolwindow class
-//-----------------------------------------------------------------------------
 
 class CToolWindow
 {
@@ -101,42 +79,51 @@ public:
 	// CToolWindow constructor #1
 	// Creates a window using CreateWindow().
 	// If the window creation failed for whatever reason,
-	// hWnd will be NULL.
+	// hWnd will be NULL
+	
 	CToolWindow(char* className, WNDPROC proc, char* title, int width, int height);
 
 	// CToolWindow constructor #2
 	// Creates a window from a dialog template resource.
 	// If the window creation failed for whatever reason,
-	// hWnd will be NULL.
+	// hWnd will be NULL
+	
 	CToolWindow(int ID, DLGPROC proc, char* title);
 
 	// CToolWindow destructor
-	// Dummy destructor. The derivated toolwindow classes must 
+	// Dummy destructor. The derivate toolwindow classes must 
 	// destroy the window in their own destructors. Thus, they
-	// can unregister any window classes they use.
+	// can unregister any window classes they use
+	
 	virtual ~CToolWindow();
 
-	// this must be called by the derived class constructor. sigh.
+	// This must be called by the derived class constructor
+	
 	void PostInitialize();
 
 	// Show(), Hide()
-	// These ones are quite self-explanatory, I guess.
+	// These ones are quite self-explanatory
+	
 	void Show() { ShowWindow(hWnd, SW_SHOW); }
 	void Hide() { ShowWindow(hWnd, SW_HIDE); }
 
 	// SetTitle()
-	// Changes the title of the window.
+	// Changes the title of the window
+	
 	void SetTitle(char* title) { SetWindowText(hWnd, title); }
 
 	// Refresh()
-	// Refreshes the window. Called by RefreshAllToolWindows().
+	// Refreshes the window. Called by RefreshAllToolWindows()
+	
 	void Refresh() { InvalidateRect(hWnd, NULL, FALSE); }
 
-	// Double-linked toolwindow list.
+	// Double-linked toolwindow list
+	
 	CToolWindow* prev;
 	CToolWindow* next;
 
-	// Handle to the window.
+	// Handle to the window
+	
 	HWND hWnd;
 
 private:
@@ -148,32 +135,32 @@ private:
 	int whichInit;
 };
 
-//-----------------------------------------------------------------------------
 // Toolwindow handling
-//-----------------------------------------------------------------------------
 
 // OpenToolWindow()
-// Adds the CToolWindow instance to the toolwindow list.
-// The instance will be deleted if its hWnd member is NULL.
+// Adds the CToolWindow instance to the toolwindow list
+// The instance will be deleted if its hWnd member is NULL
+
 bool OpenToolWindow(CToolWindow* wnd);
 
 // CloseToolWindow()
 // Removes the CToolWindow instance from the toolwindow list
-// and deletes it.
+// and deletes it
+
 void CloseToolWindow(CToolWindow* wnd);
 
 // CloseAllToolWindows()
-// Deletes all the toolwindows in the list and flushes the list.
+// Deletes all the toolwindows in the list and flushes the list
+
 void CloseAllToolWindows();
 
 // RefreshAllToolWindows()
-// Refreshes all the toolwindows in the list.
-// Called once per frame when the emu is running.
+// Refreshes all the toolwindows in the list
+// Called once per frame when the emu is running
+
 void RefreshAllToolWindows();
 
-//-----------------------------------------------------------------------------
-//   The Toolkit - Toolbar API wrapper
-//-----------------------------------------------------------------------------
+// The Toolkit - Toolbar API wrapper
 
 class CToolBar
 {
@@ -205,16 +192,17 @@ public:
 
 private:
 	HWND hWnd;
+	
 	// We have to keep the bitmaps here because destroying them
-	// directly after use would also destroy the toolbar.
-	// They'll be destroyed when the CToolBar destructor is called.
+	// directly after use would also destroy the toolbar
+	// They'll be destroyed when the CToolBar destructor is called
+	
 	typedef std::pair<int, HBITMAP> TBitmapPair;
 	typedef std::map<int, TBitmapPair> TBitmapList;
 	TBitmapList hBitmaps;
 
 	bool hidden;
 };
-
 
 class WINCLASS
 {

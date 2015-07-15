@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "PsxCommon.h"
-#include "CdRom.h"
+#include "psxcommon.h"
+#include "cdrom.h"
 
-// global variables
+// Global variables
 R3000Acpu *psxCpu;
 psxRegisters psxRegs;
 ExceptionPatches exceptionPatches;
@@ -81,7 +81,7 @@ void psxException(u32 code, u32 bd) {
 	// Ugly hack to prevent the BIOS from (correctly) skipping over GTE ops when an exception is
 	// raised while one is due to be executed. On real hardware, the GTE op is executed in parallel
 	// with the exception being raised, not after its return. See: "GTE opcodes are not unpatched on
-	// exception return" in the bugtracker.
+	// exception return" in the bugtracker. Is this bug still on Google Code? We should check.
 	if (!Config.HLE && (((PSXMu32(psxRegs.CP0.n.EPC) >> 24) & 0xfe) == 0x4a)) {
 		if (exceptionPatches.size() >= 8) {
 			// This should never happen; the official PSX kernel (BIOS) does not handle nested exceptions,
@@ -105,31 +105,31 @@ void psxBranchTest() {
 		psxRcntUpdate();
 
 	if (psxRegs.interrupt) {
-		if ((psxRegs.interrupt & 0x80) && (!Config.Sio)) { // sio
+		if ((psxRegs.interrupt & 0x80) && (!Config.Sio)) { // SIO
 			if ((psxRegs.cycle - psxRegs.intCycle[7]) >= psxRegs.intCycle[7+1]) {
 				psxRegs.interrupt&=~0x80;
 				sioInterrupt();
 			}
 		}
-		if (psxRegs.interrupt & 0x04) { // cdr
+		if (psxRegs.interrupt & 0x04) { // CDR
 			if ((psxRegs.cycle - psxRegs.intCycle[2]) >= psxRegs.intCycle[2+1]) {
 				psxRegs.interrupt&=~0x04;
 				cdrInterrupt();
 			}
 		}
-		if (psxRegs.interrupt & 0x040000) { // cdr read
+		if (psxRegs.interrupt & 0x040000) { // CDR read
 			if ((psxRegs.cycle - psxRegs.intCycle[2+16]) >= psxRegs.intCycle[2+16+1]) {
 				psxRegs.interrupt&=~0x040000;
 				cdrReadInterrupt();
 			}
 		}
-		if (psxRegs.interrupt & 0x01000000) { // gpu dma
+		if (psxRegs.interrupt & 0x01000000) { // GPU DMA
 			if ((psxRegs.cycle - psxRegs.intCycle[3+24]) >= psxRegs.intCycle[3+24+1]) {
 				psxRegs.interrupt&=~0x01000000;
 				gpuInterrupt();
 			}
 		}
-		if (psxRegs.interrupt & 0x02000000) { // mdec out dma
+		if (psxRegs.interrupt & 0x02000000) { // MDEC out DMA
 			if ((psxRegs.cycle - psxRegs.intCycle[5+24]) >= psxRegs.intCycle[5+24+1]) {
 				psxRegs.interrupt&=~0x02000000;
 				mdec1Interrupt();
@@ -153,7 +153,7 @@ void psxBranchTest() {
 			case 0xa0:
 #ifdef PSXBIOS_LOG
 				if (call != 0x28 && call != 0xe) {
-					PSXBIOS_LOG("Bios call a0: %s (%x) %x,%x,%x,%x\n", biosA0n[call], call, psxRegs.GPR.n.a0, psxRegs.GPR.n.a1, psxRegs.GPR.n.a2, psxRegs.GPR.n.a3); }
+					PSXBIOS_LOG("BIOS call a0: %s (%x) %x,%x,%x,%x\n", biosA0n[call], call, psxRegs.GPR.n.a0, psxRegs.GPR.n.a1, psxRegs.GPR.n.a2, psxRegs.GPR.n.a3); }
 #endif
 				if (biosA0[call])
 					biosA0[call]();
@@ -161,14 +161,14 @@ void psxBranchTest() {
 			case 0xb0:
 #ifdef PSXBIOS_LOG
 				if (call != 0x17 && call != 0xb) {
-					PSXBIOS_LOG("Bios call b0: %s (%x) %x,%x,%x,%x\n", biosB0n[call], call, psxRegs.GPR.n.a0, psxRegs.GPR.n.a1, psxRegs.GPR.n.a2, psxRegs.GPR.n.a3); }
+					PSXBIOS_LOG("BIOS call b0: %s (%x) %x,%x,%x,%x\n", biosB0n[call], call, psxRegs.GPR.n.a0, psxRegs.GPR.n.a1, psxRegs.GPR.n.a2, psxRegs.GPR.n.a3); }
 #endif
 				if (biosB0[call])
 					biosB0[call]();
 				break;
 			case 0xc0:
 #ifdef PSXBIOS_LOG
-				PSXBIOS_LOG("Bios call c0: %s (%x) %x,%x,%x,%x\n", biosC0n[call], call, psxRegs.GPR.n.a0, psxRegs.GPR.n.a1, psxRegs.GPR.n.a2, psxRegs.GPR.n.a3);
+				PSXBIOS_LOG("BIOS call c0: %s (%x) %x,%x,%x,%x\n", biosC0n[call], call, psxRegs.GPR.n.a0, psxRegs.GPR.n.a1, psxRegs.GPR.n.a2, psxRegs.GPR.n.a3);
 #endif
 				if (biosC0[call])
 					biosC0[call]();

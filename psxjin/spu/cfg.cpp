@@ -1,39 +1,16 @@
-/***************************************************************************
-                            cfg.c  -  description
-                             -------------------
-    begin                : Wed May 15 2002
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
 #include "stdafx.h"
 
 #define _IN_CFG
 
 #include "externals.h"
 
-////////////////////////////////////////////////////////////////////////
-// WINDOWS CONFIG/ABOUT HANDLING
-////////////////////////////////////////////////////////////////////////
+// Windows configuration/about handling
 
 #ifdef _WINDOWS
 
 #include "resource.h"
 
-
-////////////////////////////////////////////////////////////////////////
-// READ CONFIG: from win registry
-////////////////////////////////////////////////////////////////////////
+// Read configuration: from windows registry
 
 #define MAXMODE 2
 #define MAXMETHOD 2
@@ -72,10 +49,7 @@ void ReadConfig()
 	iUseInterpolation = GetPrivateProfileInt("Sound", "iUseInterpolation", iUseInterpolation, Config.Conf_File);
 }
 
-
-////////////////////////////////////////////////////////////////////////
-// INIT WIN CFG DIALOG
-////////////////////////////////////////////////////////////////////////
+// Initialize windows configuration dialog
 
 BOOL OnInitDSoundDialog(HWND hW)
 {
@@ -89,21 +63,21 @@ BOOL OnInitDSoundDialog(HWND hW)
 	if (iXAPitch)    CheckDlgButton(hW,IDC_XAPITCH,TRUE);
 
 	hWC=GetDlgItem(hW,IDC_USETIMER);
-	tempDest=ComboBox_AddString(hWC, "0: Asynchronous (normal, tas UNSAFE)");
-	tempDest=ComboBox_AddString(hWC, "1: Dual SPU (tas safe, slight glitches [default])");
-	tempDest=ComboBox_AddString(hWC, "2: Synchronous (tas safe, buffering glitches)");
+	tempDest=ComboBox_AddString(hWC, "0: Asynchronous (normal, TAS-unsafe)");
+	tempDest=ComboBox_AddString(hWC, "1: Dual-SPU (TAS-safe, slight glitches [default])"); // Glitches shouldn't be in the emulator! Check all comments and update emulator
+	tempDest=ComboBox_AddString(hWC, "2: Synchronous (TAS-safe, buffering glitches)");
 	tempDest=ComboBox_SetCurSel(hWC,iSoundMode);
 
 	hWC=GetDlgItem(hW,IDC_SYNCHMETHOD);
 	tempDest=ComboBox_AddString(hWC, "Method \"N\" (super cool) [default]");
 	tempDest=ComboBox_AddString(hWC, "Method \"Z\" (super strange)");
-	tempDest=ComboBox_AddString(hWC, "Method \"P\" (super laggy but magical)");
+	tempDest=ComboBox_AddString(hWC, "Method \"P\" (super laggy, but magical)");
 	tempDest=ComboBox_SetCurSel(hWC,iSynchMethod);
 
 	hWC=GetDlgItem(hW,IDC_VOLUME);
 	tempDest=ComboBox_AddString(hWC, "0: mute");
 	tempDest=ComboBox_AddString(hWC, "1: low");
-	tempDest=ComboBox_AddString(hWC, "2: medium");
+	tempDest=ComboBox_AddString(hWC, "2: medium [default]");
 	tempDest=ComboBox_AddString(hWC, "3: loud");
 	tempDest=ComboBox_AddString(hWC, "4: loudest");
 	tempDest=ComboBox_SetCurSel(hWC,5-iVolume);
@@ -112,23 +86,21 @@ BOOL OnInitDSoundDialog(HWND hW)
 
 	hWC=GetDlgItem(hW,IDC_USEREVERB);
 	tempDest=ComboBox_AddString(hWC, "0: Don't Output Reverb (but process it anyway to be safe)");
-	tempDest=ComboBox_AddString(hWC, "1: Output Reverb");
+	tempDest=ComboBox_AddString(hWC, "1: Output Reverb [default]");
 	tempDest=ComboBox_SetCurSel(hWC,iUseReverb);
 
 	hWC=GetDlgItem(hW,IDC_INTERPOL);
 	tempDest=ComboBox_AddString(hWC, "0: None (fastest)");
 	tempDest=ComboBox_AddString(hWC, "1: Linear interpolation (typical)");
-	tempDest=ComboBox_AddString(hWC, "2: Gaussian interpolation (good quality)");
+	tempDest=ComboBox_AddString(hWC, "2: Gaussian interpolation (good quality) [default]");
 	tempDest=ComboBox_AddString(hWC, "3: Cubic interpolation (better treble)");
-	tempDest=ComboBox_AddString(hWC, "4: Cosine interpolation (no comment)");
+	tempDest=ComboBox_AddString(hWC, "4: Cosine interpolation");
 	tempDest=ComboBox_SetCurSel(hWC,iUseInterpolation);
 
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// WIN CFG DLG OK
-////////////////////////////////////////////////////////////////////////
+// Windows configuration dialog OK
 
 void OnDSoundOK(HWND hW)
 {
@@ -161,25 +133,21 @@ void OnDSoundOK(HWND hW)
 		iRecordMode=1;
 	else iRecordMode=0;
 
-	WriteConfig();                                        // write registry
+	WriteConfig();                                        // Write registry
 
 	EndDialog(hW,TRUE);
 
 	SPUReset();
 }
 
-////////////////////////////////////////////////////////////////////////
-// WIN CFG DLG CANCEL
-////////////////////////////////////////////////////////////////////////
+// Windows configuration dialog cancel
 
 void OnDSoundCancel(HWND hW)
 {
 	EndDialog(hW,FALSE);
 }
 
-////////////////////////////////////////////////////////////////////////
-// WIN CFG PROC
-////////////////////////////////////////////////////////////////////////
+// Windows configuration process
 
 BOOL CALLBACK DSoundDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {

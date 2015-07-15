@@ -1,20 +1,3 @@
-/* SPU2-X, a plugin for emulating the Sound Processing Unit of the PlayStation 2
- * Developed and maintained by the PSXjin2 Development Team. < Is that a real emulator/team? I thought there was only PSXjin?
- * 
- * Original portions from SPU2ghz are (c) 2008 by David Quintana [gigaherz]
- *
- * SPU2-X is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Lesser General Public License as published by the Free Software Found-
- * ation, either version 3 of the License, or (at your option) any later version.
- *
- * SPU2-X is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with SPU2-X.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #pragma once
 
 #include <algorithm>
@@ -65,24 +48,27 @@ struct StereoOut32
 // Number of stereo samples per SndOut block.
 // All drivers must work in units of this size when communicating with
 // SndOut.
+
 static const int SndOutPacketSize = 512;
 
 // Overall master volume shift.
 // Converts the mixer's 32 bit value into a 16 bit value.
 //static const int SndOutVolumeShift = 13;
 
-//edit - zeromus 23-oct-2009
-//this is hardcoded differently for metaspu
+// This is hard coded differently for metaspu
+
 static const int SndOutVolumeShift = 0;
 
-// Samplerate of the SPU2. For accurate playback we need to match this
-// exactly.  Trying to scale samplerates and maintain SPU2's Ts timing accuracy
-// is too problematic. :)
-//this is hardcoded differently for metaspu
-//edit - zeromus 23-oct-2009
+// Sample rate of the SPU2. For accurate playback we need to match this
+// exactly.  Trying to scale sample rates and maintain SPU2's time stretcher timing accuracy
+// is too problematic.
+
+// This is hard coded differently for metaspu
+
 ////static const int SampleRate = 48000;
 //static const int SampleRate = 44100;
-//edit - nitsuja: make it use the global sample rate define
+
+// Make it use the global sample rate define
 //#include "..\SPU.h" //desmume
 //static const int SampleRate = DESMUME_SAMPLE_RATE; //desmume
 static const int SampleRate = 44100; //PSXJIN
@@ -394,7 +380,8 @@ struct StereoOutFloat
 //	s32 RightBack;
 //};
 
-// Developer Note: This is a static class only (all static members).
+// Developer note: This is a static class only (all static members)
+
 class SndBuffer
 {
 private:
@@ -445,22 +432,23 @@ public:
 	static s32 Test();
 	static void ClearContents();
 
-	// Note: When using with 32 bit output buffers, the user of this function is responsible
+	// Note: When using with 32-bit output buffers, the user of this function is responsible
 	// for shifting the values to where they need to be manually.  The fixed point depth of
 	// the sample output is determined by the SndOutVolumeShift, which is the number of bits
-	// to shift right to get a 16 bit result.
+	// to shift right to get a 16-bit result.
+	
 	template< typename T >
 	static void ReadSamples( T* bData )
 	{
 		int nSamples = SndOutPacketSize;
 
-		// Problem:
+		//  Problem:
 		//  If the SPU2 gets even the least bit out of sync with the SndOut device,
 		//  the readpos of the circular buffer will overtake the writepos,
-		//  leading to a prolonged period of hopscotching read/write accesses (ie,
+		//  leading to a prolonged period of hopscotching read/write accesses (IE,
 		//  lots of crappy sound for several seconds).
-		//
-		// Fix:
+		
+		//  The fix/workaround:
 		//  If the read position overtakes the write position, abort the
 		//  transfer immediately and force the SndOut driver to wait until
 		//  the read buffer has filled up again before proceeding.
@@ -473,6 +461,7 @@ public:
 			assert( nSamples <= SndOutPacketSize );
 
 			// [Air] [TODO]: This loop is probably a candidate for SSE2 optimization.
+			// Check this for "to do" quality
 
 			const int endPos = m_rpos + nSamples;
 			const int secondCopyLen = endPos - m_size;
@@ -497,6 +486,7 @@ public:
 		// If quietSamples != 0 it means we have an underrun...
 		// Let's just dull out some silence, because that's usually the least
 		// painful way of dealing with underruns:
+		
 		memset( bData, 0, quietSamples * sizeof(T) );
 	}
 };

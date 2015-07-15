@@ -8,7 +8,7 @@
 #include <windowsx.h>
 #include <commctrl.h>
 #include "dinput.h"
-#include "PSXCommon.h"
+#include "psxcommon.h"
 #include "plugins.h"
 #include "resource.h"
 
@@ -19,11 +19,10 @@ struct
 	LPDIRECTINPUT8 pDInput;
 	LPDIRECTINPUTDEVICE8 pDKeyboard;
 	LPDIRECTINPUTDEVICE8 pDDevice[4];
-	LPDIRECTINPUTEFFECT pDEffect[4][2]; /* for Small & Big Motor */
+	LPDIRECTINPUTEFFECT pDEffect[4][2]; // For small and big motor
 	DIJOYSTATE JoyState[4];
 	int devcnt;	
 } dx8;
-
 
 static BOOL CALLBACK EnumAxesCallback (LPCDIDEVICEOBJECTINSTANCE lpddoi, LPVOID pvRef)
 {
@@ -157,14 +156,16 @@ bool InitDirectInput (void)
 		local.eff.rgdwAxes = local.rgdwAxes;
 		local.eff.rglDirection = local.rglDirection;
 
-		/* Small Motor */
+		// Small motor
+		
 		local.eff.cbTypeSpecificParams = sizeof (DIPERIODIC);
 		local.eff.lpvTypeSpecificParams = &local.per;
 		result = pDDevice->CreateEffect (GUID_Square , &local.eff, &dx8.pDEffect[index][0], NULL);
 		if (FAILED (result))
 			dx8.pDEffect[index][0] = NULL;
 
-		/* Big Motor */
+		// Big motor
+		
 		local.eff.cbTypeSpecificParams = sizeof (DICONSTANTFORCE);
 		local.eff.lpvTypeSpecificParams = &local.cf;
 		result = pDDevice->CreateEffect (GUID_ConstantForce , &local.eff, &dx8.pDEffect[index][1], NULL);
@@ -186,8 +187,6 @@ static bool AcquireDevice (LPDIRECTINPUTDEVICE8 lpDirectInputDevice)
 	}
 	return TRUE;
 }
-
-
 
 static bool GetJoyState (const int devno)
 {
@@ -221,7 +220,6 @@ int PadFreeze(EMUFILE *f, int Mode) {
 	gzfreezel(&Config.PadState);
 	return 0;
 }
-
 
 void SavePADConfig (void)
 {
@@ -383,11 +381,7 @@ void UpdateState (const int pad)
 			}
 		}
 	}
-
-	
 }
-	
-
 
 static void set_label (const HWND hWnd, const int pad, const int index)
 {
@@ -421,8 +415,6 @@ static void set_label (const HWND hWnd, const int pad, const int index)
 	Button_SetText (GetDlgItem (hWnd, IDC_ESELECT + index), buff);
 }
 
-
-
 s32 PADopen (HWND hWnd)
 {
 	if (!IsWindow (hWnd) && !IsBadReadPtr ((u32*)hWnd, 4))
@@ -444,12 +436,10 @@ s32 PADopen (HWND hWnd)
 	return 0;
 }
 
-
 u32 CALLBACK PADquery (void)
 {
 	return 3;
 }
-
 
 static const u8 cmd40[8] =
 {
@@ -639,8 +629,6 @@ u8 PADpoll_SSS (u8 value)
 	return buf[Config.PadState.curByte++];
 }
 
-
-
 long PAD1_readPort1(PadDataS* pads)
 {		
 	memset (pads, 0, sizeof (PadDataS));
@@ -692,9 +680,6 @@ keyEvent* CALLBACK PADkeyEvent (void)
 	}
 	return NULL;
 }
-
-
-
 
 LRESULT WINAPI ConfigurePADDlgProc (const HWND hWnd, const UINT msg, const WPARAM wParam, const LPARAM lParam)
 {

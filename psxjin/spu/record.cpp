@@ -1,32 +1,3 @@
-/***************************************************************************
-																												spu.c  -  description
-																													-------------------
-				begin                : Sun Jan 12 2003
-				copyright            : (C) 2003 by Pete Bernert
-				email                : BlackDove@addcom.de
-	***************************************************************************/
-
-/***************************************************************************
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version. See also the license.txt file for *
-	*   additional informations.                                              *
-	*                                                                         *
-	***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2003/03/01 - Pete
-// - added mono mode
-//
-// 2003/01/12 - Pete
-// - added recording funcs (win version only)
-//
-//*************************************************************************//
-
 #include "stdafx.h"
 
 #ifdef _WINDOWS
@@ -38,9 +9,7 @@
 #define _IN_RECORD
 
 #include "record.h"
-#include "PSXCommon.h"
-
-////////////////////////////////////////////////////////////////////////
+#include "psxcommon.h"
 
 int      iDoRecord=0;
 HMMIO    hWaveFile=NULL;
@@ -51,13 +20,13 @@ unsigned long TotBytes;
 int FileCount;
 unsigned long MBYTES = 1024*1024;
 
-////////////////////////////////////////////////////////////////////////
-
 void RecordStart()
 {
 	WAVEFORMATEX pcmwf;
 	TotBytes = 0;
-	// setup header in the same format as our directsound stream
+	
+	// Setup header in the same format as our DirectSound stream
+	
 	memset(&pcmwf,0,sizeof(WAVEFORMATEX));
 	pcmwf.wFormatTag      = WAVE_FORMAT_PCM;
 
@@ -67,12 +36,14 @@ void RecordStart()
 	pcmwf.nAvgBytesPerSec = pcmwf.nSamplesPerSec * pcmwf.nBlockAlign;
 	pcmwf.wBitsPerSample  = 16;
 
-	// create file
+	// Create file
+	
     sprintf(&szRecFileName[0],"%s%s%03d_%s.wav",Movie.AviDrive,Movie.AviDirectory,Movie.AviCount,Movie.AviFnameShort);
 	hWaveFile=mmioOpen(szRecFileName,NULL,MMIO_CREATE|MMIO_WRITE|MMIO_EXCLUSIVE | MMIO_ALLOCBUF);
 	if (!hWaveFile) return;
 
-	// setup WAVE, fmt and data chunks
+	// Setup WAVE, fmt, and data chunks
+	
 	memset(&mmckMain,0,sizeof(MMCKINFO));
 	mmckMain.fccType = mmioFOURCC('W','A','V','E');
 
@@ -90,28 +61,27 @@ void RecordStart()
 	mmioCreateChunk(hWaveFile,&mmckData,0);
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void RecordStop()
 {
-	// first some check, if recording is running
+	// First some checks, if recording is running
+	
 	iDoRecord=0;
 	if (!hWaveFile) return;
 
-	// now finish writing & close the wave file
+	// Now finish writing and close the wave file
+	
 	mmioAscend(hWaveFile,&mmckData,0);
 	mmioAscend(hWaveFile,&mmckMain,0);
 	mmioClose(hWaveFile,0);
 
-	// init var
+	// Initialize variable
 	hWaveFile=NULL;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void RecordBuffer(s16* pSound,long lBytes)
 {
-	// write the samples
+	// Write the samples
+	
 	if (hWaveFile) mmioWrite(hWaveFile,(char*)pSound,lBytes);
 	TotBytes += lBytes;
 	if (TotBytes > 2000*MBYTES)
@@ -121,72 +91,69 @@ void RecordBuffer(s16* pSound,long lBytes)
 		RecordStart();
 	}
 
-
 }
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
 
 BOOL CALLBACK RecordDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (uMsg)
 	{
-		//--------------------------------------------------// init
+	// Initialize
 	case WM_INITDIALOG:
 	{
-		SetDlgItemText(hW,IDC_WAVFILE,"C:\\PEOPS.WAV");   // init filename edit
-		ShowCursor(TRUE);                                 // mmm... who is hiding it? main emu? tsts
+		SetDlgItemText(hW,IDC_WAVFILE,"C:\PEOPS.WAV");   // Initialize filename edit
+		ShowCursor(TRUE);                                 // Who is hiding it? The main emulator? tsts (What is tsts?)
 		return TRUE;
 	}
-	//--------------------------------------------------// destroy
+	// Destroy
 	case WM_DESTROY:
 	{
 		RecordStop();
 	}
 	break;
-	//--------------------------------------------------// command
+	// Command
 	case WM_COMMAND:
 	{
-		if (wParam==IDCANCEL) iRecordMode=2;              // cancel? raise flag for destroying the dialog
+		if (wParam==IDCANCEL) iRecordMode=2;              // Cancel? Raise flag for destroying the dialog
 
-		if (wParam==IDC_RECORD)                           // record start/stop?
+		if (wParam==IDC_RECORD)                           // Record start/stop?
 		{
-			if (IsWindowEnabled(GetDlgItem(hW,IDC_WAVFILE))) // not started yet (edit is not disabled):
+			if (IsWindowEnabled(GetDlgItem(hW,IDC_WAVFILE))) // Not started yet (edit is not disabled):
 			{
-				GetDlgItemText(hW,IDC_WAVFILE,szRecFileName,255);// get filename
+				GetDlgItemText(hW,IDC_WAVFILE,szRecFileName,255); // Get filename
 
-				RecordStart();                                // start recording
+				RecordStart();                                // Start recording
 
-				if (hWaveFile)                                // start was ok?
-				{                                            // -> disable filename edit, change text, raise flag
+				if (hWaveFile)                                // Start was OK?
+				
+				{                                            // Disable filename edit, change text, raise flag
+				
 					EnableWindow(GetDlgItem(hW,IDC_WAVFILE),FALSE);
 					SetDlgItemText(hW,IDC_RECORD,"Stop recording");
 					iDoRecord=1;
 				}
-				else MessageBeep(0xFFFFFFFF);                 // error starting recording? BEEP
+				else MessageBeep(0xFFFFFFFF);                 // Error starting recording? BEEP
 			}
-			else                                            // stop recording?
+			else                                            // Stop recording?
 			{
-				RecordStop();                                 // -> just do it
-				EnableWindow(GetDlgItem(hW,IDC_WAVFILE),TRUE);// -> enable filename edit again
+				RecordStop();                                 // Just do it
+				EnableWindow(GetDlgItem(hW,IDC_WAVFILE),TRUE);// Enable filename edit again
 				SetDlgItemText(hW,IDC_RECORD,"Start recording");
 			}
 			SetFocus(hWMain);
 		}
 	}
 	break;
-	//--------------------------------------------------// size
+	// Size
 	case WM_SIZE:
-		if (wParam==SIZE_MINIMIZED) SetFocus(hWMain);      // if we get minimized, set the foxus to the main window
+		if (wParam==SIZE_MINIMIZED) SetFocus(hWMain);      // If we get minimized, set the focus to the main window
 		break;
-		//--------------------------------------------------// setcursor
+		// Set cursor
 	case WM_SETCURSOR:
 	{
-		SetCursor(LoadCursor(NULL,IDC_ARROW));            // force the arrow
+		SetCursor(LoadCursor(NULL,IDC_ARROW));            // Force the arrow
 		return TRUE;
 	}
-	//--------------------------------------------------//
+
 	}
 	return FALSE;
 }

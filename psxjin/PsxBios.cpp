@@ -5,7 +5,7 @@
 #include <ctype.h>
 
 #include "padwin.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 char *biosA0n[256] = {
 // 0x00
@@ -155,8 +155,6 @@ char *biosC0n[256] = {
 #define Rv0 ((char*)PSXM(v0))
 #define Rsp ((char*)PSXM(sp))
 
-
-
 typedef struct _malloc_chunk {
 	unsigned long stat;
 	unsigned long size;
@@ -228,9 +226,8 @@ typedef struct {
 
 static unsigned long *jmp_int = NULL;
 static int *pad_buf = NULL;
-static char *pad_buf1,*pad_buf2;//shadow add
-static int pad_buf1len,pad_buf2len;//shadow add
-
+static char *pad_buf1,*pad_buf2; // Shadow add
+static int pad_buf1len,pad_buf2len; // Shadow add
 
 static u32 regs[35];
 static EvCB *Event;
@@ -270,14 +267,10 @@ static __inline void DeliverEvent(u32 ev, u32 spec) {
 	} else Event[ev][spec].status = EvStALREADY;
 }
 
-/*                                           *
-//                                           *
-//                                           *
-//               System calls A0             */
-
+// System calls A0
 
 void psxBios_abs() { // 0x0e
-	v0 = abs((long)a0); //zero 20-mar-2013 - cast from unsigned long to long to satisfy vs2010. i think this is ok.. the cast coerces a sign back on and then abs can run normally
+	v0 = abs((long)a0); // zero 20-mar-2013 - cast from unsigned long to long to satisfy vs2010. I think this is OK. The cast coerces a sign back on and then abs can run normally. Hack? May remove
 	pc0 = ra;
 }
 
@@ -661,7 +654,7 @@ void psxBios_GPU_dw() { // 0x46
 	GPUwriteData((a1<<16)|(a0&0xffff));
 	GPUwriteData((a3<<16)|(a2&0xffff));
 	size = (a2*a3+1)/2;
-	ptr = (long*)PSXM(Rsp[4]);  //that is correct?
+	ptr = (long*)PSXM(Rsp[4]);  // This is correct?
 	do {
 		GPUwriteData(*ptr++);
 	} while(--size);
@@ -679,7 +672,7 @@ void psxBios_mem2vram() { // 0x47
 	GPUwriteStatus(0x04000002);
 	psxHwWrite32(0x1f8010f4,0);
 	psxHwWrite32(0x1f8010f0,psxHwRead32(0x1f8010f0)|0x800);
-	psxHwWrite32(0x1f8010a0,Rsp[4]);//might have a buggy...
+	psxHwWrite32(0x1f8010a0,Rsp[4]); // Might be buggy
 	psxHwWrite32(0x1f8010a4,((size/16)<<16)|16);
 	psxHwWrite32(0x1f8010a8,0x01000201);
 
@@ -812,11 +805,11 @@ void psxBios_SetRCnt() { // 02
 		unsigned long mode=0;
 
 		psxRcntWtarget(a0, a1);
-		if (a2&0x1000) mode|= 0x050; // Interrupt Mode
+		if (a2&0x1000) mode|= 0x050; // Interrupt mode
 		if (a2&0x0100) mode|= 0x008; // Count to 0xffff
 		if (a2&0x0010) mode|= 0x001; // Timer stop mode
-		if (a0 == 2) { if (a2&0x0001) mode|= 0x200; } // System Clock mode
-		else         { if (a2&0x0001) mode|= 0x100; } // System Clock mode
+		if (a0 == 2) { if (a2&0x0001) mode|= 0x200; } // System clock mode
+		else         { if (a2&0x0001) mode|= 0x100; } // System clock mode
 
 		psxRcntWmode(a0, mode);
 	}
@@ -871,14 +864,15 @@ void psxBios_ResetRCnt() { // 06
 }
 
 
-/* gets ev for use with Event */
+// Get ev for use with Event
 #define GetEv() \
 	ev = (a0 >> 24) & 0xf; \
 	if (ev == 0xf) ev = 0x5; \
 	ev*= 32; \
 	ev+= a0&0x1f;
 
-/* gets spec for use with Event */
+// Get spec for use with Event
+
 #define GetSpec() \
 	spec = 0; \
 	switch (a1) { \
@@ -1596,7 +1590,7 @@ void psxBios_ChangeClearPad() { // 5b
 	pc0 = ra;
 }
 
-/* System calls C0 */
+// System calls C0
 
 /*
  * int SysEnqIntRP(int index , long *queue);
@@ -1999,7 +1993,7 @@ void psxBiosInit() {
 
 	memset(SysIntRP, 0, sizeof(SysIntRP));
 	memset(Thread, 0, sizeof(Thread));
-	Thread[0].status = 2; // main thread
+	Thread[0].status = 2; // Main thread
 
 	psxMu32ref(0x0150) = SWAPu32(0x160);
 	psxMu32ref(0x0154) = SWAPu32(0x320);
@@ -2011,7 +2005,7 @@ void psxBiosInit() {
 	psxMu32ref(0x09e0) = SWAPu32(0x43d0);
 	psxMu32ref(0x4d98) = SWAPu32(0x946f000a);
 */
-	// opcode HLE
+	// Opcode HLE
 	psxRu32ref(0x0000) = SWAPu32((0x3b << 26) | 4);
 	psxMu32ref(0x0000) = SWAPu32((0x3b << 26) | 0);
 	psxMu32ref(0x00a0) = SWAPu32((0x3b << 26) | 1);
@@ -2169,9 +2163,9 @@ void psxBiosException() {
 //			PSXCPU_LOG("syscall exp %x\n", a0);
 #endif
 			switch (a0) {
-				case 1: // EnterCritical - disable irq's
+				case 1: // EnterCritical - disable IRQ's
 					psxRegs.CP0.n.Status&=~0x404; break;
-				case 2: // ExitCritical - enable irq's
+				case 2: // ExitCritical - enable IRQ's
 					psxRegs.CP0.n.Status|= 0x404; break;
 			}
 			pc0 = psxRegs.CP0.n.EPC + 4;

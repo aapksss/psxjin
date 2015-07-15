@@ -374,8 +374,6 @@ CP2_FUNCNC(NCCT);
 /*	x86SetJ8(j8Ptr[2]);*/ \
 }
 
-
-
 #define gte_C11 gteLR1
 #define gte_C12 gteLR2
 #define gte_C13 gteLR3
@@ -385,7 +383,6 @@ CP2_FUNCNC(NCCT);
 #define gte_C31 gteLB1
 #define gte_C32 gteLB2
 #define gte_C33 gteLB3
-
 
 #define _MVMVA_FUNC(vn, mx) { \
 	MOVSX32M16toR(EAX, (u32)&mx##vn##1); \
@@ -446,6 +443,7 @@ static void recMVMVA() {
 	PUSH32R(EDI);
 	PUSH32R(EBX);
 */
+
 	XOR32RtoR(EAX, EAX); /* gteFLAG = 0 */
 	MOV32RtoM((u32)&gteFLAG, EAX);
 

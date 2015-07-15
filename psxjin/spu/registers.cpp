@@ -1,42 +1,3 @@
-/***************************************************************************
-                         registers.c  -  description
-                             -------------------
-    begin                : Wed May 15 2002
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2004/09/18 - LDChen
-// - pre-calculated ADSRX values
-//
-// 2003/02/09 - kode54
-// - removed &0x3fff from reverb volume registers, fixes a few games,
-//   hopefully won't be breaking anything
-//
-// 2003/01/19 - Pete
-// - added Neill's reverb
-//
-// 2003/01/06 - Pete
-// - added Neill's ADSR timings
-//
-// 2002/05/15 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
 #include "stdafx.h"
 
 #define _IN_REGISTERS
@@ -57,7 +18,7 @@
 #define RELEASE_MS    446L
 */
 
-// we have a timebase of 1.020408f ms, not 1 ms... so adjust adsr defines
+// We have a timebase of 1.020408f ms, not 1ms, so adjust adsr defines
 #define ATTACK_MS      494L
 #define DECAYHALF_MS   286L
 #define DECAY_MS       572L
@@ -65,15 +26,16 @@
 #define RELEASE_MS     437L
 
 
-//handles the SoundOn command--each bit can keyon a channel
+// Handles the SoundOn command--each bit can keyon a channel
+
 void SoundOn(SPU_struct *spu, int start,int end,unsigned short val)
 {
 	for (int ch=start;ch<end;ch++,val>>=1)
 	{
 		if(val&1) spu->channels[ch].keyon();
 
-		//? dont understand this.. was it a sanity check?
-		//if ((val&1) && s_chan[ch].pStart)                   // mmm... start has to be set before key on !?!
+		// Don't understand this, was it a sanity check?
+		//if ((val&1) && s_chan[ch].pStart)                   // Start has to be set before key on?
 		
 		//{
 		//	s_chan[ch].bIgnoreLoop=0;
@@ -83,45 +45,48 @@ void SoundOn(SPU_struct *spu, int start,int end,unsigned short val)
 	}
 }
 
-//same as above
+// Same as above
+
 void SoundOff(SPU_struct *spu, int start,int end,unsigned short val) 
 {
 	for (int ch=start;ch<end;ch++,val>>=1)
 	{
 		if (val&1) spu->channels[ch].keyoff();              
-			 // && s_chan[i].bOn)  mmm...
+			 // && s_chan[i].bOn)
 			//s_chan[ch].bStop=1;
 	}
 }
 
-
-// please note: sweep and phase invert are wrong... but I've never seen
+// Note: sweep and phase invert are wrong, but I've never seen
 // them used
-void SetVolume(SPU_struct* spu, bool left, unsigned char ch,short vol)            // LEFT VOLUME
+// Doesn't matter, we should still try to emulate it for homebrew or for accuracy
+
+void SetVolume(SPU_struct* spu, bool left, unsigned char ch,short vol)            // Left volume
 {
 	if (vol&0x4000) printf("SPU: PHASE INVERT (setting vol to %04X)\n",vol);
 
-	if (vol&0x8000)                                       // sweep?
+	if (vol&0x8000)                                       // Sweep?
 	{
 		printf("SPU: VOL SWEEP\n");
-		short sInc=1;                                       // -> sweep up?
-		if (vol&0x2000) sInc=-1;                            // -> or down?
-		if (vol&0x1000) vol^=0xffff;                        // -> mmm... phase inverted? have to investigate this
-		vol=((vol&0x7f)+1)/2;                               // -> sweep: 0..127 -> 0..64
-		vol+=vol/(2*sInc);                                  // -> HACK: we don't sweep right now, so we just raise/lower the volume by the half!
+		short sInc=1;                                       // Sweep up?
+		if (vol&0x2000) sInc=-1;                            // Or down?
+		if (vol&0x1000) vol^=0xffff;                        // Phase inverted? Investigate this.
+		vol=((vol&0x7f)+1)/2;                               // Sweep: 0..127 -> 0..64
+		vol+=vol/(2*sInc);                                  // HACK: we don't sweep right now, so we just raise/lower the volume by the half (Remove this hack eventually)
 		vol*=128;
 	}
 	else 
-	{ //no sweep:
+	{ // No sweep:
 
-		//phase invert: just make a negative volume
+		// Phase invert: just make a negative volume
+		
 		if (vol&0x4000) 
 			//vol=0x3fff-(vol&0x3fff);
 			vol=-(vol&0x3fff);
 		else vol = vol&0x3fff;
 	}
 
-	// store volume
+	// Store volume
 	//printf("set volume %s to %04X\n",left?"left":"right",vol);
 	if(left) spu->channels[ch].iLeftVolume=vol;
 	else spu->channels[ch].iRightVolume = vol;
@@ -129,8 +94,9 @@ void SetVolume(SPU_struct* spu, bool left, unsigned char ch,short vol)          
 
 void SetPitch(SPU_struct* spu, int ch,unsigned short val)
 {
-	//should we clamp the pitch??
-	//need a verification case
+	// Should we clamp the pitch?
+	// Need a verification case
+	
 	if(val>0x3fff) {
 		printf("[%02d] SPU: OUT OF RANGE PITCH: %08X\n",ch,val);
 		val &= 0x3fff;
@@ -145,32 +111,31 @@ static void SetStart(SPU_struct* spu, int ch, u16 val)
 	spu->channels[ch].rawStartAddr = val;
 }
 
-
 void FModOn(SPU_struct* spu, int start,int end,unsigned short val)
 {
 	for (int ch=start;ch<end;ch++,val>>=1) 
 	{
-		if (val&1)                                          // -> fmod on/off
+		if (val&1)                                          // FMOD on/off
 		{
 			if (ch>0)
 			{
-				printf("[%02d] fmod on\n",ch);
+				printf("[%02d] FMOD on\n",ch);
 				spu->channels[ch].bFMod = TRUE;
-				//s_chan[ch].bFMod=1;                             // --> sound channel
-				//s_chan[ch-1].bFMod=2;                           // --> freq channel
+				//s_chan[ch].bFMod=1;                             // Sound channel
+				//s_chan[ch-1].bFMod=2;                           // Frequency channel
 			}
 		}
 		else
 		{
-			//s_chan[ch].bFMod=0;                               // --> turn off fmod
+			//s_chan[ch].bFMod=0;                               // Turn off FMOD
 			spu->channels[ch].bFMod = FALSE;
 		}
 	}
 }
 
-void ReverbOn(SPU_struct* spu, int start,int end,unsigned short val)    // REVERB ON PSX COMMAND
+void ReverbOn(SPU_struct* spu, int start,int end,unsigned short val)    // Reverb on PS1 command
 {
-	for (int ch=start;ch<end;ch++,val>>=1)                    // loop channels
+	for (int ch=start;ch<end;ch++,val>>=1)                    // Loop channels
 	{
 		if (val&1)
 			spu->channels[ch].bReverb=TRUE;
@@ -178,7 +143,6 @@ void ReverbOn(SPU_struct* spu, int start,int end,unsigned short val)    // REVER
 			spu->channels[ch].bReverb=FALSE;
 	}
 }
-
 
 void NoiseOn(SPU_struct* spu, int start,int end,unsigned short val)
 {
@@ -193,33 +157,42 @@ void NoiseOn(SPU_struct* spu, int start,int end,unsigned short val)
 
 void SPU_struct::writeRegister(u32 r, u16 val)
 {
-	//channel parameters range:
+	// Channel parameters range:
 	if (r>=0x0c00 && r<0x0d80)
 	{
-		// calc channel
+		// Calculate channel
+		
 		int ch=(r>>4)-0xc0;
 		switch (r&0x0f)
 		{
 		case 0x0:
-			//left volume
+		
+			// Left volume
+			
 			SetVolume(this, true, ch,val);
 			break;
 		case 0x2:
-			//right volume
+		
+			// Right volume
+			
 			SetVolume(this, false, ch,val);
 			break;
 		case 0x4:
-			// pitch
+		
+			// Pitch
+			
 			SetPitch(this, ch, val);
 			break;
 		case 0x6:
-			// start
+		
+			// Start
+			
 			SetStart(this, ch, val);
 			break;
 			
 		case 0x8:
 		{
-			//level with pre-calcs
+			// Level with pre-calcs
 			channels[ch].ADSR.AttackModeExp = (val&0x8000)?1:0;
 			channels[ch].ADSR.AttackRate = ((val>>8) & 0x007f)^0x7f;
 			channels[ch].ADSR.DecayRate = 4*(((val>>4) & 0x000f)^0x1f);
@@ -228,7 +201,7 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 		break;
 		case 0x0A:
 		{
-			//adsr times with pre-calcs
+			// adsr times with pre-calcs
 			channels[ch].ADSR.SustainModeExp = (val&0x8000)?1:0;
 			channels[ch].ADSR.SustainIncrease= (val&0x4000)?0:1;
 			channels[ch].ADSR.SustainRate = ((val>>6) & 0x007f)^0x7f;
@@ -238,11 +211,12 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 		break;
 		
 		case 0x0C:
-			// READS BACK current adsr volume... not sure what writing here does
-			printf("SPU: WROTE TO ADSR READBACK (unknown behaviour)\n");
+			// Reads back current adsr volume...not sure what writing here does
+			printf("SPU: wrote to adsr readback (unknown behavior)\n");
 			break;
-		case 0x0E: 
-			//this can be tested nicely in the ff7 intro credits screen where the harp won't work unless this gets set
+		case 0x0E:
+		
+			// This can be tested nicely in the FInal Fantasy VII intro credits screen where the harp won't work unless this is set
 			channels[ch].loopStartAddr = val<<3;
 			//if(val!=0) printf("[%02d] Loopstart set to %d\n",ch,val<<3);
 			break;
@@ -313,7 +287,6 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 	case H_SPUrvolR:
 		rvb.VolRight=val;
 		break;
-		//-------------------------------------------------//
 
 		/*
 		    case H_ExtLeft:
@@ -327,7 +300,7 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 		    case H_SPUmvolL:
 		     //auxprintf("ML %d\n",val);
 		      break;
-		    //-------------------------------------------------//
+		    //-------------------------------------------------//                 // Check all of these to see why they are commented out
 		    case H_SPUmvolR:
 		     //auxprintf("MR %d\n",val);
 		      break;
@@ -350,7 +323,6 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 		iRightXAVol=val & 0x7fff;
 		if (cddavCallback) cddavCallback(1,val);
 		break;
-
 
 	case H_Reverb+0:
 		rvb.FB_SRC_A=val;
@@ -451,15 +423,18 @@ void SPU_struct::writeRegister(u32 r, u16 val)
 	}
 }
 
-//WRITE REGISTERS: called by main emu
+//Write registers: called by main emulator
+
 void SPUwriteRegister(u32 reg, u16 val)
 {
 	const u32 r=reg&0xfff;
 
 	//printf("write reg %08x %04x\n",r,val);
 
-	//cache a copy of the register for reading back.
-	//we have no reason yet to doubt that this will work.
+	// Cache a copy of the register for reading back
+	// We have no reason yet to doubt that this will work
+	// Test this
+	
 	regArea[(r-0xc00)>>1] = val;
 
 	SPU_core->writeRegister(r,val);
@@ -467,9 +442,7 @@ void SPUwriteRegister(u32 reg, u16 val)
 		SPU_user->writeRegister(r,val);
 }
 
-////////////////////////////////////////////////////////////////////////
-// READ REGISTER: called by main emu
-////////////////////////////////////////////////////////////////////////
+// Read register: called by main emulator
 
 u16 SPUreadRegister(u32 reg)
 {
@@ -479,36 +452,41 @@ u16 SPUreadRegister(u32 reg)
 
 	//printf("SPUreadRegister: %04X\n",r);
 
-	//handle individual channel registers
+	// Handle individual channel registers
+	
 	if(r>=0x0c00 && r<0x0d80) {
 		const int ch=(r>>4)-0xc0;
 		switch(r&0x0f) {
 			case 0x0C: {
-				//get adsr vol
+				// Get ADSR volume
 
 				SPU_chan& chan = SPU_core->channels[ch];
 
 				//printf("returning adsr vol %08X while status=%d\n",chan.ADSR.EnvelopeVol,chan.status);
 				
-				//test case: without this, various sound effects in SOTN will not get a chance to retrigger as their voices get stuck
-				//(in other words, the game polls this to see whether to retrigger instead of discovering whether the channel is stopped)
+				// Test case: without this, various sound effects in Symphony Of The Night will not get a chance to re-trigger as their voices get stuck
+				// In other words, the game polls this to see whether to re-trigger instead of discovering whether the channel is stopped
+				
 				if(chan.status == CHANSTATUS_STOPPED)
 					return 0;
 
-				//test case: without this, beyond the beyond flute in isla village (first town) will get cut off
-				//since the game will choose to cut out the flute lead sound to play other instruments.
-				//with this here, the game knows that the sound isnt dead yet.
+				// Test case: without this, beyond the beyond flute in Isla village (first town) will get cut off
+				// since the game will choose to cut out the flute lead sound to play other instruments.
+				// With this here, the game knows that the sound isn't dead yet
+				
 				u16 ret = (u16)(((u32)chan.ADSR.EnvelopeVol)>>16);
 				return ret;
 			}
 
 			case 0x0E: {
-				//get loop address
+				
+				// Get loop address
+				
 				printf("SPUreadRegister: reading ch %02d loop address\n");
 				return SPU_core->channels[ch].loopStartAddr;
 			}
 		}
-	} //end individual channel regs
+	} // End individual channel registers
 
 	switch(r) {
 		case H_SPUctrl:
@@ -526,6 +504,7 @@ u16 SPUreadRegister(u32 reg)
 			if(SPU_core->spuAddr>0x7ffff) SPU_core->spuAddr=0;
 			
 			//SPU_user needs to be notified of this so that subsequent writes will be in the right place
+			
 			if(SPU_user) SPU_user->spuAddr = SPU_core->spuAddr;
 			return s;
 		}
@@ -534,12 +513,12 @@ u16 SPUreadRegister(u32 reg)
 			return SPU_core->spuIrq>>3;
 
 		case H_SPUon1:
-			printf("NOTIMPLEMENTED! Reading H_SPUon1\n");
+			printf("Not implemented. Reading H_SPUon1\n");
 			//return IsSoundOn(0,16);
 			break;
 
 		case H_SPUon2:
-			printf("NOTIMPLEMENTED! Reading H_SPUon2\n");
+			printf("Not implemented. Reading H_SPUon2\n");
 			//return IsSoundOn(16,24);
 			break;
 	}

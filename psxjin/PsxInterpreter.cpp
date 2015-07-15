@@ -1,5 +1,5 @@
 #include <stdlib.h>
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 #ifdef _MSC_VER_
 #pragma warning(disable:4018)
@@ -34,7 +34,7 @@ void VsyncThings()
 {
 	SysUpdate();
 
-	// start capture?
+	// Start capture?
 	if ( (Movie.startAvi) || (Movie.startWav) )
 	{
 		if (Movie.startAvi)
@@ -46,7 +46,7 @@ void VsyncThings()
 		Movie.capture = 1;
 	}
 
-	// stop capture?
+	// Stop capture?
 	if ( (Movie.stopCapture != 0) && (Movie.stopCapture == Movie.currentFrame) )
 	{
 		GPUstopAvi();
@@ -124,12 +124,7 @@ inline void execI()
 			iSaveStateTo = 0;
 		}
 	}
-
-
-
 }
-
-
 
 static void delayRead(int reg, u32 bpc) {
 	u32 rold, rnew;
@@ -137,7 +132,7 @@ static void delayRead(int reg, u32 bpc) {
 //	SysPrintf("delayRead at %x!\n", psxRegs.pc);
 
 	rold = psxRegs.GPR.r[reg];
-	psxBSC[psxRegs.code >> 26](); // branch delay load
+	psxBSC[psxRegs.code >> 26](); // Branch delay load
 	rnew = psxRegs.GPR.r[reg];
 
 	psxRegs.pc = bpc;
@@ -145,7 +140,7 @@ static void delayRead(int reg, u32 bpc) {
 	psxBranchTest();
 
 	psxRegs.GPR.r[reg] = rold;
-	execI(); // first branch opcode
+	execI(); // First branch opcode
 	psxRegs.GPR.r[reg] = rnew;
 
 	branch = 0;
@@ -158,7 +153,7 @@ static void delayWrite(int reg, u32 bpc) {
 	SysPrintf("%s\n", disR3000AF(psxRegs.code, psxRegs.pc-4));
 	SysPrintf("%s\n", disR3000AF(PSXMu32(bpc), bpc));*/
 
-	// no changes from normal behavior
+	// No changes from normal behavior
 
 	psxBSC[psxRegs.code >> 26]();
 
@@ -172,7 +167,7 @@ static void delayReadWrite(int reg, u32 bpc) {
 
 //	SysPrintf("delayReadWrite at %x!\n", psxRegs.pc);
 
-	// the branch delay load is skipped
+	// The branch delay load is skipped
 
 	branch = 0;
 	psxRegs.pc = bpc;
@@ -180,7 +175,7 @@ static void delayReadWrite(int reg, u32 bpc) {
 	psxBranchTest();
 }
 
-// this defines shall be used with the tmp 
+// This defines what shall be used with the tmp
 // of the next func (instead of _Funct_...)
 #define _tFunct_  ((tmp      ) & 0x3F)  // The funct part of the instruction register 
 #define _tRd_     ((tmp >> 11) & 0x1F)  // The rd part of the instruction register 
@@ -230,8 +225,8 @@ void psxDelayTest(int reg, u32 bpc) {
 
 				case 0x20: case 0x21: case 0x22: case 0x23:
 				case 0x24: case 0x25: case 0x26: case 0x27: 
-				case 0x2a: case 0x2b: // ADD/ADDU...
-				case 0x04: case 0x06: case 0x07: // SLLV...
+				case 0x2a: case 0x2b: // ADD/ADDU
+				case 0x04: case 0x06: case 0x07: // SLLV
 					if (_tRd_ == reg && (_tRt_ == reg || _tRs_ == reg)) {
 						delayReadWrite(reg, bpc); return;
 					} else if (_tRt_ == reg || _tRs_ == reg) {
@@ -253,7 +248,7 @@ void psxDelayTest(int reg, u32 bpc) {
 					break;
 
 				case 0x18: case 0x19:
-				case 0x1a: case 0x1b: // MULT/DIV...
+				case 0x1a: case 0x1b: // MULT/DIV
 					if (_tRt_ == reg || _tRs_ == reg) {
 						delayRead(reg, bpc); return;
 					}
@@ -264,7 +259,7 @@ void psxDelayTest(int reg, u32 bpc) {
 		case 0x01: // REGIMM
 			switch (_tRt_) {
 				case 0x00: case 0x02:
-				case 0x10: case 0x12: // BLTZ/BGEZ...
+				case 0x10: case 0x12: // BLTZ/BGEZ
 					if (_tRs_ == reg) {
 						delayRead(reg, bpc); return;
 					}
@@ -292,7 +287,7 @@ void psxDelayTest(int reg, u32 bpc) {
 			break;
 
 		case 0x08: case 0x09: case 0x0a: case 0x0b:
-		case 0x0c: case 0x0d: case 0x0e: // ADDI/ADDIU...
+		case 0x0c: case 0x0d: case 0x0e: // ADDI/ADDIU
 			if (_tRt_ == reg && _tRs_ == reg) {
 				delayReadWrite(reg, bpc); return;
 			} else if (_tRs_ == reg) {
@@ -402,7 +397,7 @@ __inline void doBranch(u32 tar) {
 
 	psxRegs.pc+= 4; psxRegs.cycle++;
 
-	// check for load delay
+	// Check for load delay
 	tmp = psxRegs.code >> 26;
 	switch (tmp) {
 		case 0x10: // COP0
@@ -448,31 +443,31 @@ __inline void doBranch(u32 tar) {
 * Arithmetic with immediate operand                      *
 * Format:  OP rt, rs, immediate                          *
 *********************************************************/
-void psxADDI() 	{ if (!_Rt_) return; _rRt_ = _u32(_rRs_) + _Imm_ ; }		// Rt = Rs + Im 	(Exception on Integer Overflow)
+void psxADDI() 	{ if (!_Rt_) return; _rRt_ = _u32(_rRs_) + _Imm_ ; }		// Rt = Rs + Im 	(exception on integer overflow)
 void psxADDIU() { if (!_Rt_) return; _rRt_ = _u32(_rRs_) + _Imm_ ; }		// Rt = Rs + Im
 void psxANDI() 	{ if (!_Rt_) return; _rRt_ = _u32(_rRs_) & _ImmU_; }		// Rt = Rs And Im
 void psxORI() 	{ if (!_Rt_) return; _rRt_ = _u32(_rRs_) | _ImmU_; }		// Rt = Rs Or  Im
 void psxXORI() 	{ if (!_Rt_) return; _rRt_ = _u32(_rRs_) ^ _ImmU_; }		// Rt = Rs Xor Im
-void psxSLTI() 	{ if (!_Rt_) return; _rRt_ = _i32(_rRs_) < _Imm_ ; }		// Rt = Rs < Im		(Signed)
-void psxSLTIU() { if (!_Rt_) return; _rRt_ = _u32(_rRs_) < ((u32)_Imm_); }		// Rt = Rs < Im		(Unsigned)
+void psxSLTI() 	{ if (!_Rt_) return; _rRt_ = _i32(_rRs_) < _Imm_ ; }		// Rt = Rs < Im		(signed)
+void psxSLTIU() { if (!_Rt_) return; _rRt_ = _u32(_rRs_) < ((u32)_Imm_); }		// Rt = Rs < Im		(unsigned)
 
 /*********************************************************
 * Register arithmetic                                    *
 * Format:  OP rd, rs, rt                                 *
 *********************************************************/
-void psxADD()	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) + _u32(_rRt_); }	// Rd = Rs + Rt		(Exception on Integer Overflow)
+void psxADD()	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) + _u32(_rRt_); }	// Rd = Rs + Rt		(exception on integer overflow)
 void psxADDU() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) + _u32(_rRt_); }	// Rd = Rs + Rt
-void psxSUB() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) - _u32(_rRt_); }	// Rd = Rs - Rt		(Exception on Integer Overflow)
+void psxSUB() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) - _u32(_rRt_); }	// Rd = Rs - Rt		(exception on integer overflow)
 void psxSUBU() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) - _u32(_rRt_); }	// Rd = Rs - Rt
 void psxAND() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) & _u32(_rRt_); }	// Rd = Rs And Rt
 void psxOR() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) | _u32(_rRt_); }	// Rd = Rs Or  Rt
 void psxXOR() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) ^ _u32(_rRt_); }	// Rd = Rs Xor Rt
 void psxNOR() 	{ if (!_Rd_) return; _rRd_ =~(_u32(_rRs_) | _u32(_rRt_)); }// Rd = Rs Nor Rt
-void psxSLT() 	{ if (!_Rd_) return; _rRd_ = _i32(_rRs_) < _i32(_rRt_); }	// Rd = Rs < Rt		(Signed)
-void psxSLTU() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) < _u32(_rRt_); }	// Rd = Rs < Rt		(Unsigned)
+void psxSLT() 	{ if (!_Rd_) return; _rRd_ = _i32(_rRs_) < _i32(_rRt_); }	// Rd = Rs < Rt		(signed)
+void psxSLTU() 	{ if (!_Rd_) return; _rRd_ = _u32(_rRs_) < _u32(_rRt_); }	// Rd = Rs < Rt		(unsigned)
 
 /*********************************************************
-* Register mult/div & Register trap logic                *
+* Register mult/div & register trap logic                *
 * Format:  OP rs, rt                                     *
 *********************************************************/
 void psxDIV() {
@@ -547,7 +542,7 @@ void psxMFHI() { if (!_Rd_) return; _rRd_ = _rHi_; } // Rd = Hi
 void psxMFLO() { if (!_Rd_) return; _rRd_ = _rLo_; } // Rd = Lo
 
 /*********************************************************
-* Move to GPR to HI/LO & Register jump                   *
+* Move to GPR to HI/LO & register jump                   *
 * Format:  OP rs                                         *
 *********************************************************/
 void psxMTHI() { _rHi_ = _rRs_; } // Hi = Rs
@@ -558,7 +553,7 @@ void psxMTLO() { _rLo_ = _rRs_; } // Lo = Rs
 * Format:  OP                                            *
 *********************************************************/
 void psxBREAK() {
-	// Break exception - psx rom doens't handles this
+	// Break exception - PS1 BIOS doesn't handle this
 }
 
 void psxSYSCALL() {
@@ -749,8 +744,8 @@ void psxMFC0() { if (!_Rt_) return; _rRt_ = (int)_rFs_; }
 void psxCFC0() { if (!_Rt_) return; _rRt_ = (int)_rFs_; }
 
 void psxTestSWInts() {
-	// the next code is untested, if u know please
-	// tell me if it works ok or not (linuzappz)
+	// The next code is untested, if you know please
+	// contact a PSXjin developer
 	if (psxRegs.CP0.n.Cause & psxRegs.CP0.n.Status & 0x0300 &&
 		psxRegs.CP0.n.Status & 0x1) {
 		psxException(psxRegs.CP0.n.Cause, branch);
@@ -780,7 +775,7 @@ void psxMTC0() { MTC0(_Rd_, _u32(_rRt_)); }
 void psxCTC0() { MTC0(_Rd_, _u32(_rRt_)); }
 
 /*********************************************************
-* Unknow instruction (would generate an exception)       *
+* Unknown instruction (would generate an exception)       *
 * Format:  ?                                             *
 *********************************************************/
 void psxNULL() { 
@@ -868,9 +863,6 @@ void (*psxCP2BSC[32])() = {
 	psxNULL, psxNULL, psxNULL, psxNULL, psxNULL, psxNULL, psxNULL, psxNULL,
 	psxNULL, psxNULL, psxNULL, psxNULL, psxNULL, psxNULL, psxNULL, psxNULL
 };
-
-
-///////////////////////////////////////////
 
 static int intInit() {
 	return 0;

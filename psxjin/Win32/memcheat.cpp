@@ -1,4 +1,4 @@
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "resource.h"
 #include "../cheat.h"
 #include "../movie.h"
@@ -16,7 +16,7 @@ static void LoadCheatFile(char nameo[2048])
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=gApp.hInstance;
-	ofn.lpstrTitle="Load Cheat List...";
+	ofn.lpstrTitle="Load cheat list...";
 	ofn.lpstrFilter=filter;
 	nameo[0]=0;
 	ofn.lpstrFile=nameo;
@@ -35,7 +35,7 @@ static void SaveCheatFile(char nameo[2048])
 	memset(&ofn,0,sizeof(ofn));
 	ofn.lStructSize=sizeof(ofn);
 	ofn.hInstance=gApp.hInstance;
-	ofn.lpstrTitle="Save Cheat List...";
+	ofn.lpstrTitle="Save cheat list...";
 	ofn.lpstrFilter=filter;
 	nameo[0]=0;
 	ofn.lpstrFile=nameo;
@@ -46,7 +46,8 @@ static void SaveCheatFile(char nameo[2048])
 	{
 		int i;
 
-		//quick get length of nameo
+		// Quick get length of nameo
+		
 		for(i=0;i<2048;i++)
 		{
 			if(nameo[i] == 0)
@@ -55,7 +56,8 @@ static void SaveCheatFile(char nameo[2048])
 			}
 		}
 
-		//add .cht if nameo doesn't have it
+		// Add .cht if nameo doesn't have it
+		
 		if((i < 4 || nameo[i-4] != '.') && i < 2040)
 		{
 			nameo[i] = '.';
@@ -219,7 +221,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				EnableWindow(GetDlgItem(hwndDlg, IDC_DELETE_CHEAT), 1);
 				if(!has_sel||sel_idx!=ListView_GetSelectionMark(GetDlgItem(hwndDlg, IDC_CHEAT_LIST)))
 				{
-					//change
+					// Change
 					char buf[25];
 					LV_ITEM lvi;
 					char temp[4];
@@ -445,7 +447,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 					}
 					buffer2[k]='\0';
 
-					// hack to prevent people from using 80xxxxxx addresses
+					// Hack to prevent people from using 80xxxxxx addresses (Remove if we can, if not try to adjust it so it applies in the least amount of scenarios as possible)
 					if (strlen(buffer2)>7) {
 						for(j=0; j<strlen(buffer2)-2;j++)
 						{
@@ -602,7 +604,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 				}
 				if (!cheatsEnabled) {
 					cheatsEnabled = 1;
-					GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
+					GPUdisplayText(_("*PSXjin*: cheats enabled"));
 				}
 				PSXjinApplyCheats();
 				break;
@@ -868,7 +870,7 @@ static BOOL CALLBACK ChtEdtrCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
 
 				if (!cheatsEnabled) {
 					cheatsEnabled = 1;
-					GPUdisplayText(_("*PSXjin*: Cheats Enabled"));
+					GPUdisplayText(_("*PSXjin*: cheats enabled"));
 				}
 				PSXjinApplyCheats();
 			}

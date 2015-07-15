@@ -1,4 +1,4 @@
-#include "Debug.h"
+#include "debug.h"
 
 char ostr[256];
 
@@ -16,7 +16,7 @@ char *disRNameCP0[] = {
 	"*RES*"     , "*RES* "    , "PErr"    , "CacheErr", "TagLo"   , "TagHi"     , "ErrorEPC"  , "*RES*"     };
 
 
-// Type deffinition of our functions
+// Type definition of our functions
 
 typedef char* (*TdisR3000AF)(u32 code, u32 pc);
 
@@ -233,7 +233,7 @@ MakeDisF(disCFC0,		dName("CFC0"); dGPR(_Rt_); dCP0(_Rd_);)
 MakeDisF(disCTC0,		dName("CTC0"); dCP0(_Rd_); dGPR(_Rt_);)
 
 /*********************************************************
-* Unknow instruction (would generate an exception)       *
+* Unknown instruction (would generate an exception)       *
 * Format:  ?                                             *
 *********************************************************/
 MakeDisF(disNULL,		dName("*** Bad OP ***");)

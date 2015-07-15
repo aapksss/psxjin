@@ -21,9 +21,9 @@ extern int curr_ram_size;
 extern bool noMisalign;
 
 void ResetResults();
-void CloseRamWindows(); //Close the Ram Search & Watch windows when rom closes
-void ReopenRamWindows(); //Reopen them when a new Rom is loaded
-void Update_RAM_Search(); //keeps RAM values up to date in the search and watch windows
+void CloseRamWindows(); // Close the RAM search and watch windows when game closes
+void ReopenRamWindows(); // Re-open them when a new game is loaded
+void Update_RAM_Search(); // Keeps RAM values up to date in the search and watch windows
 
 extern HWND RamSearchHWnd;
 extern LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam);

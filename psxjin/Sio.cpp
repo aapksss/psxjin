@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#if defined(__DREAMCAST__)
+#if defined(__DREAMCAST__) // Again with the Dreamcast references. What, why, and how?
 #define st_size size
 //struct stat {
 //	uint32 st_size;
@@ -17,12 +17,12 @@
 #pragma warning(disable:4244)
 #endif
 
-// *** FOR WORKS ON PADS AND MEMORY CARDS *****
+// For work on controllers and memory cards
 
 static unsigned char buf[256];
 unsigned char cardh[4] = { 0x00, 0x00, 0x5a, 0x5d };
 
-//static unsigned short StatReg = 0x002b;
+// Static unsigned short StatReg = 0x002b;
 // Transfer Ready and the Buffer is Empty
 unsigned short StatReg = TX_RDY | TX_EMPTY;
 unsigned short ModeReg;
@@ -39,7 +39,7 @@ PadDataS pad;
 
 char Mcd1Data[MCD_SIZE], Mcd2Data[MCD_SIZE];
 
-// clk cycle byte
+// CLK cycle byte
 // 4us * 8bits = ((PSXCLK / 1000000) * 32) / BIAS; (linuzappz)
 #define SIO_INT() { \
 	if (!Config.Sio) { \
@@ -56,7 +56,7 @@ unsigned char sioRead8() {
 //		StatReg &= ~RX_OVERRUN;
 		ret = buf[parp];
 		if (parp == bufcount) {
-			StatReg &= ~RX_RDY;		// Receive is not Ready now
+			StatReg &= ~RX_RDY;		// Receive is not ready now
 			if (mcdst == 5) {
 				mcdst = 0;
 				if (rdwr == 2) {
@@ -158,7 +158,7 @@ void sioWrite8(unsigned char value) {
 				default: mcdst = 0;
 			}
 			return;
-		case 2: // address H
+		case 2: // Address H
 			SIO_INT();
 			adrH = value;
 			*buf = 0;
@@ -166,7 +166,7 @@ void sioWrite8(unsigned char value) {
 			bufcount = 1;
 			mcdst = 3;
 			return;
-		case 3: // address L
+		case 3: // Address L
 			SIO_INT();
 			adrL = value;
 			*buf = adrH;
@@ -178,7 +178,7 @@ void sioWrite8(unsigned char value) {
 			SIO_INT();
 			parp = 0;
 			switch (rdwr) {
-				case 1: // read
+				case 1: // Read
 					buf[0] = 0x5c;
 					buf[1] = 0x5d;
 					buf[2] = adrH;
@@ -201,7 +201,7 @@ void sioWrite8(unsigned char value) {
 					buf[133] = 0x47;
 					bufcount = 133;
 					break;
-				case 2: // write
+				case 2: // Write
 					buf[0] = adrL;
 					buf[1] = value;
 					buf[129] = 0x5c;
@@ -222,8 +222,8 @@ void sioWrite8(unsigned char value) {
 	}
 
 	switch (value) {
-		case 0x01: // start pad
-			StatReg |= RX_RDY;		// Transfer is Ready
+		case 0x01: // Start controller
+			StatReg |= RX_RDY;		// Transfer is ready
 			
 				switch (CtrlReg&0x2002) {
 					case 0x0002: buf[0] = PAD1_startPoll(1); break;
@@ -236,7 +236,7 @@ void sioWrite8(unsigned char value) {
 			padst = 1;
 			SIO_INT();
 			return;
-		case 0x81: // start memcard
+		case 0x81: // Start memory card
 			StatReg |= RX_RDY;
 			memcpy(buf, cardh, 4);
 			parp = 0;
@@ -274,7 +274,6 @@ char* MakeMemCardPath(const char* filename)
 	return str;
 }
 
-
 void LoadMcd(int mcd, char *str) {
 	FILE *f;
 	char *data = NULL;
@@ -302,7 +301,7 @@ void LoadMcd(int mcd, char *str) {
 			fread(data, 1, MCD_SIZE, f);
 			fclose(f);
 		}
-		//else SysMessage(_("Failed loading MemCard %s\n"), str);
+		// else SysMessage(_("Failed loading MemCard %s\n"), str);
 	}
 	else {
 		struct stat buf;
@@ -344,7 +343,7 @@ void SaveMcd(char *mcd, char *data, unsigned long adr, int size) {
 		return;
 	}
 
-	// try to create it again if we can't open it
+	// Try to create it again if we can't open it
 	/*f = fopen(mcd, "wb");
 	if (f != NULL) {
 		fwrite(data, 1, MCD_SIZE, f);
@@ -544,7 +543,7 @@ void GetMcdBlockInfo(int mcd, int block, McdBlock *Info) {
 	}
 	str[i] = 0;
 
-	ptr = data + block * 8192 + 0x60; // icon palete data
+	ptr = data + block * 8192 + 0x60; // Icon palette data
 
 	for (i=0; i<16; i++) {
 		clut[i] = *((unsigned short*)ptr);
@@ -554,7 +553,7 @@ void GetMcdBlockInfo(int mcd, int block, McdBlock *Info) {
 	for (i=0; i<Info->IconCount; i++) {
 		short *icon = &Info->Icon[i*16*16];
 
-		ptr = data + block * 8192 + 128 + 128 * i; // icon data
+		ptr = data + block * 8192 + 128 + 128 * i; // Icon data
 
 		for (x=0; x<16*16; x++) {
 			icon[x++] = clut[*ptr & 0xf];
@@ -617,7 +616,7 @@ static unsigned long SaveMemoryCardEmbed(char *file,char *newfile,char *moviefil
 	char *buffer;
 	unsigned long numbytes;
 
-	//read old mcd file
+	// Read old mcd file
 	infile = fopen(file, "rb");
 	if(infile == NULL)
 		return 0;
@@ -630,17 +629,17 @@ static unsigned long SaveMemoryCardEmbed(char *file,char *newfile,char *moviefil
 	fread(buffer, sizeof(char), numbytes, infile);
 	fclose(infile);
 
-	//write new mcd temp file
+	// Write new mcd temp file
 	infile = fopen(newfile, "wb");
 	fwrite(buffer,sizeof(char),numbytes,infile);
 	fclose(infile);
 
-	//write uncompressed mcd size to movie file
+	// Write uncompressed mcd size to movie file
 	infile = fopen(moviefile, "ab");
 	fwrite(&numbytes, 1, 4, infile);
 	fclose(infile);
 
-	//write compressed embed mcd to movie file
+	// Write compressed embed mcd to movie file
 	f = gzopen(moviefile, "ab");
 	if (f == NULL)
 		return 0;
@@ -674,20 +673,20 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 
 	embMcdTmp = (uint8*)malloc(blockSize);
 
-	//read embedded mcd size and full compressed mcd file
+	// Read embedded mcd size and full compressed mcd file
 	fp = fopen(moviefile,"rb");
 	fseek(fp, fileOffsetBegin, SEEK_SET);
 	fread(&embMcdSize, 1, 4, fp);
 	fread(embMcdTmp, 1, blockSize-4, fp);
 	fclose(fp);
 
-	//write compressed mcd file to temp destination
+	// Write compressed mcd file to temp destination
 	fp2 = fopen("movie_mcd.tmp","wb");
 	fwrite(embMcdTmp, 1, blockSize-4, fp2);
 	fclose(fp2);
 	free(embMcdTmp);
 
-	//open temp compressed mcd file and uncompress it
+	// Open temp compressed mcd file and uncompress it
 	fs = gzopen("movie_mcd.tmp", "rb");
 	if (!fs)
 		return 1;
@@ -697,7 +696,7 @@ static int LoadMemoryCardEmbed(char *moviefile,char *newmcdfile,
 	gzclose(fs);
 	remove("movie_mcd.tmp");
 
-	//write uncompressed mcd to new movie temp destination
+	// Write uncompressed mcd to new movie temp destination
 	fp2 = fopen(newmcdfile,"wb");
 	fwrite(data, 1, embMcdSize, fp2);
 	fclose(fp2);

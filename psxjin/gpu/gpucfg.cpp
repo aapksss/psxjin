@@ -1,21 +1,3 @@
-/***************************************************************************
-                          cfg.c  -  description
-                             -------------------
-    begin                : Sun Oct 28 2001
-    copyright            : (C) 2001 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
 #include "stdafx.h"
 
 #define _IN_CFG
@@ -29,18 +11,16 @@
 #include "gpucfg.h"
 #include "gpu.h"
 
-/////////////////////////////////////////////////////////////////////////////
 // CONFIG FILE helpers
-/////////////////////////////////////////////////////////////////////////////
 
-static int tempDest; //this is for the co,mpiler to not throw in a million of warnings
+static int tempDest; // This is for the compiler to not throw in a million of warnings (we should check if this is needed)
 char pConfigFile[MAX_PATH*2] = ".\\psxjin.ini";
 
 #ifndef _FPSE
 
 #include <sys/stat.h>
 
-// some helper macros:
+// Some helper macros:
 
 #define GetValue(name, var) \
  p = strstr(pB, name); \
@@ -88,24 +68,16 @@ char pConfigFile[MAX_PATH*2] = ".\\psxjin.ini";
   size+=sprintf(pB+size, "%s = %.1f\n", name, (double)var); \
  }
 
-/////////////////////////////////////////////////////////////////////////////
-
 #endif
-
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////////////
 
 #ifdef _WINDOWS
 
-/////////////////////////////////////////////////////////////////////////////
-// globals
+// Globals
 
 char szKeyDefaults[11]={0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00};
 char szDevName[128];
 
-////////////////////////////////////////////////////////////////////////
-// prototypes
+// Prototypes
 
 BOOL OnInitCfgDialog(HWND hW);
 void OnCfgOK(HWND hW);
@@ -116,18 +88,17 @@ void OnCfgDef1(HWND hW);
 void OnCfgDef2(HWND hW);
 void OnBugFixes(HWND hW);
 
-//void OnRecording(HWND hW);
+// void OnRecording(HWND hW);
 
 void SelectDev(HWND hW);
 BOOL bTestModes(void);
-//void OnKeyConfig(HWND hW);
+// void OnKeyConfig(HWND hW);
 void GetSettings(HWND hW);
 void OnClipboard(HWND hW);
 void DoDevEnum(HWND hW);
 char * pGetConfigInfos(int iCfg);
 
-////////////////////////////////////////////////////////////////////////
-// funcs
+// Functions
 
 BOOL CALLBACK SoftDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -177,9 +148,7 @@ BOOL CALLBACK SoftDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// init dlg
-////////////////////////////////////////////////////////////////////////
+// Initialize dialog
 
 void ComboBoxAddRes(HWND hWC,char * cs)
 {
@@ -242,7 +211,7 @@ BOOL OnInitSoftDialog(HWND hW)
 	hWC=GetDlgItem(hW,IDC_COLDEPTH);
 	tempDest = ComboBox_AddString(hWC,"16 Bit");
 	tempDest = ComboBox_AddString(hWC,"32 Bit");
-	wsprintf(cs,"%d Bit",iColDepth);                      // resolution
+	wsprintf(cs,"%d Bit",iColDepth);                      // Resolution
 	i=ComboBox_FindString(hWC,-1,cs);
 	if (i==CB_ERR) i=0;
 	tempDest = ComboBox_SetCurSel(hWC,i);
@@ -250,10 +219,10 @@ BOOL OnInitSoftDialog(HWND hW)
 	hWC=GetDlgItem(hW,IDC_SCANLINES);
 	tempDest = ComboBox_AddString(hWC,"Scanlines disabled");
 	tempDest = ComboBox_AddString(hWC,"Scanlines enabled (standard)");
-	tempDest = ComboBox_AddString(hWC,"Scanlines enabled (double blitting - nVidia fix)");
+	tempDest = ComboBox_AddString(hWC,"Scanlines enabled (double blitting - Nvidia fix)");
 	tempDest = ComboBox_SetCurSel(hWC,iUseScanLines);
 
-	SetDlgItemInt(hW,IDC_WINX,iResX,FALSE);    // window size
+	SetDlgItemInt(hW,IDC_WINX,iResX,FALSE);    // Window size
 	SetDlgItemInt(hW,IDC_WINY,iResY,FALSE);
 
 	if (UseFrameLimit)    CheckDlgButton(hW,IDC_USELIMIT,TRUE);
@@ -273,41 +242,39 @@ BOOL OnInitSoftDialog(HWND hW)
 	tempDest = ComboBox_AddString(hWC,"Stretch to full window size");
 	tempDest = ComboBox_AddString(hWC,"1:1 (faster with some cards)");
 	tempDest = ComboBox_AddString(hWC,"Scale to window size, keep aspect ratio");
-	tempDest = ComboBox_AddString(hWC,"2xSaI stretching (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"2xSaI unstretched (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"Super2xSaI stretching (needs a very fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"Super2xSaI unstretched (needs a very fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"SuperEagle stretching (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"SuperEagle unstretched (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"Scale2x stretching (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"Scale2x unstretched (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"HQ2X unstretched (Fast CPU+mmx)");
-	tempDest = ComboBox_AddString(hWC,"HQ2X stretched (Fast CPU+mmx)");
-	tempDest = ComboBox_AddString(hWC,"Scale3x stretching (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"Scale3x unstretched (needs a fast cpu)");
-	tempDest = ComboBox_AddString(hWC,"HQ3X unstretched (Fast CPU+mmx)");
-	tempDest = ComboBox_AddString(hWC,"HQ3X stretching (Fast CPU+mmx)");
+	tempDest = ComboBox_AddString(hWC,"2xSaI stretching (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"2xSaI unstretched (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"Super2xSaI stretching (needs a very fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"Super2xSaI unstretched (needs a very fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"SuperEagle stretching (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"SuperEagle unstretched (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"Scale2x stretching (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"Scale2x unstretched (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"HQ2X unstretched (Fast CPU+MMX)");
+	tempDest = ComboBox_AddString(hWC,"HQ2X stretched (Fast CPU+MMX)");
+	tempDest = ComboBox_AddString(hWC,"Scale3x stretching (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"Scale3x unstretched (needs a fast CPU)");
+	tempDest = ComboBox_AddString(hWC,"HQ3X unstretched (Fast CPU+MMX)");
+	tempDest = ComboBox_AddString(hWC,"HQ3X stretching (Fast CPU+MMX)");
 	tempDest = ComboBox_SetCurSel(hWC,iUseNoStretchBlt);
 
-	hWC=GetDlgItem(hW,IDC_DITHER);                        // dithering
+	hWC=GetDlgItem(hW,IDC_DITHER);                        // Dithering
 	tempDest = ComboBox_AddString(hWC,"No dithering (fastest)");
-	tempDest = ComboBox_AddString(hWC,"Game dependend dithering (slow)");
+	tempDest = ComboBox_AddString(hWC,"Game dependent dithering (slow)");
 	tempDest = ComboBox_AddString(hWC,"Always dither g-shaded polygons (slowest)");
 	tempDest = ComboBox_SetCurSel(hWC,iUseDither);
 
-	if (iFrameLimit==2)                                   // frame limit wrapper
+	if (iFrameLimit==2)                                   // Frame limit wrapper
 		CheckDlgButton(hW,IDC_FRAMEAUTO,TRUE);
 	else CheckDlgButton(hW,IDC_FRAMEMANUELL,TRUE);
 
 	sprintf(cs,"%.2f",fFrameRate);
-	SetDlgItemText(hW,IDC_FRAMELIM,cs);                   // set frame rate
+	SetDlgItemText(hW,IDC_FRAMELIM,cs);                   // Set frame rate
 
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// on ok: take vals
-////////////////////////////////////////////////////////////////////////
+// On OK: take values
 
 void GetSettings(HWND hW)
 {
@@ -316,25 +283,25 @@ void GetSettings(HWND hW)
 	int i,j;
 	char * p;
 
-	hWC=GetDlgItem(hW,IDC_RESOLUTION);                    // get resolution
+	hWC=GetDlgItem(hW,IDC_RESOLUTION);                    // Get resolution
 	i=ComboBox_GetCurSel(hWC);
 	tempDest = ComboBox_GetLBText(hWC,i,cs);
 	iResX=atol(cs);
 	p=strchr(cs,'x');
 	iResY=atol(p+1);
-	p=strchr(cs,',');									   // added by syo
-	if (p) iRefreshRate=atol(p+1);						  // get refreshrate
+	p=strchr(cs,',');									   // Added by "syo"
+	if (p) iRefreshRate=atol(p+1);						  // Get refresh rate
 	else  iRefreshRate=0;
 
-	hWC=GetDlgItem(hW,IDC_COLDEPTH);                      // get color depth
+	hWC=GetDlgItem(hW,IDC_COLDEPTH);                      // Get color depth
 	i=ComboBox_GetCurSel(hWC);
 	tempDest = ComboBox_GetLBText(hWC,i,cs);
 	iColDepth=atol(cs);
 
-	hWC=GetDlgItem(hW,IDC_SCANLINES);                     // scanlines
+	hWC=GetDlgItem(hW,IDC_SCANLINES);                     // Scanlines
 	iUseScanLines=ComboBox_GetCurSel(hWC);
 
-	i=GetDlgItemInt(hW,IDC_WINX,NULL,FALSE);              // get win size
+	i=GetDlgItemInt(hW,IDC_WINX,NULL,FALSE);              // Get window size
 	if (i<50) i=50;
 	if (i>20000) i=20000;
 	j=GetDlgItemInt(hW,IDC_WINY,NULL,FALSE);
@@ -343,43 +310,43 @@ void GetSettings(HWND hW)
 	iResX = i;
 	iResY = j;
 
-	if (IsDlgButtonChecked(hW,IDC_DISPMODE2))             // win mode
+	if (IsDlgButtonChecked(hW,IDC_DISPMODE2))             // Window mode
 		iWindowMode=1;
 	else iWindowMode=0;
 
-	if (IsDlgButtonChecked(hW,IDC_USELIMIT))              // fps limit
+	if (IsDlgButtonChecked(hW,IDC_USELIMIT))              // FPS limit
 		UseFrameLimit=1;
 	else UseFrameLimit=0;
 
-	if (IsDlgButtonChecked(hW,IDC_USESKIPPING))           // fps skip
+	if (IsDlgButtonChecked(hW,IDC_USESKIPPING))           // FPS skip
 		UseFrameSkip=1;
 	else UseFrameSkip=0;
 
-	if (IsDlgButtonChecked(hW,IDC_GAMEFIX))               // game fix
+	if (IsDlgButtonChecked(hW,IDC_GAMEFIX))               // Game fix (also known as a hack)
 		iUseFixes=1;
 	else iUseFixes=0;
 
-	if (IsDlgButtonChecked(hW,IDC_SYSMEMORY))             // use system memory
+	if (IsDlgButtonChecked(hW,IDC_SYSMEMORY))             // Use system memory
 		iSysMemory=1;
 	else iSysMemory=0;
 
-	if (IsDlgButtonChecked(hW,IDC_STOPSAVER))             // stop screen saver
+	if (IsDlgButtonChecked(hW,IDC_STOPSAVER))             // Stop screen saver
 		iStopSaver=1;
 	else iStopSaver=0;
 
-	if (IsDlgButtonChecked(hW,IDC_VSYNC))                 // wait VSYNC
+	if (IsDlgButtonChecked(hW,IDC_VSYNC))                 // Wait for Vsync
 		bVsync=bVsync_Key=TRUE;
 	else bVsync=bVsync_Key=FALSE;
 
-	if (IsDlgButtonChecked(hW,IDC_TRANSPARENT))           // transparent menu
+	if (IsDlgButtonChecked(hW,IDC_TRANSPARENT))           // Transparent menu
 		bTransparent=TRUE;
 	else bTransparent=FALSE;
 
-	if (IsDlgButtonChecked(hW,IDC_SSSPSXLIMIT))           // SSSPSX fps limit mode
+	if (IsDlgButtonChecked(hW,IDC_SSSPSXLIMIT))           // SSSPSX FPS limit mode
 		bSSSPSXLimit=TRUE;
 	else bSSSPSXLimit=FALSE;
 
-	if (IsDlgButtonChecked(hW,IDC_DEBUGMODE))             // debug mode
+	if (IsDlgButtonChecked(hW,IDC_DEBUGMODE))             // Debug mode
 		iDebugMode=1;
 	else iDebugMode=0;
 
@@ -393,7 +360,7 @@ void GetSettings(HWND hW)
 	hWC=GetDlgItem(hW,IDC_DITHER);
 	iUseDither=ComboBox_GetCurSel(hWC);
 
-	if (IsDlgButtonChecked(hW,IDC_FRAMEAUTO))             // frame rate
+	if (IsDlgButtonChecked(hW,IDC_FRAMEAUTO))             // Frame rate
 		iFrameLimit=2;
 	else iFrameLimit=1;
 
@@ -408,7 +375,7 @@ void OnSoftOK(HWND hW)
 {
 	GetSettings(hW);
 
-	if (!iWindowMode && !bTestModes())                    // check fullscreen sets
+	if (!iWindowMode && !bTestModes())                    // Check fullscreen sets
 	{
 		MessageBox(hW,"Resolution/color depth not supported!","Error",MB_ICONERROR|MB_OK);
 		return;
@@ -419,9 +386,7 @@ void OnSoftOK(HWND hW)
 	EndDialog(hW,TRUE);
 }
 
-////////////////////////////////////////////////////////////////////////
-// on clipboard button
-////////////////////////////////////////////////////////////////////////
+// On clipboard button
 
 void OnClipboard(HWND hW)
 {
@@ -436,22 +401,18 @@ void OnClipboard(HWND hW)
 		SendMessage(hWE,EM_SETSEL,0,-1);
 		SendMessage(hWE,WM_COPY,0,0);
 		free(pB);
-		MessageBox(hW,"Configuration info successfully copied to the clipboard\nJust use the PASTE function in another program to retrieve the data!","Copy Info",MB_ICONINFORMATION|MB_OK);
+		MessageBox(hW,"Configuration info successfully copied to the clipboard\nJust use the paste function in another program to retrieve the data!","Copy Info",MB_ICONINFORMATION|MB_OK);
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
 // Cancel
-////////////////////////////////////////////////////////////////////////
 
 void OnCfgCancel(HWND hW)
 {
 	EndDialog(hW,FALSE);
 }
 
-////////////////////////////////////////////////////////////////////////
 // Bug fixes
-////////////////////////////////////////////////////////////////////////
 
 BOOL CALLBACK BugFixesDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -500,9 +461,7 @@ void OnBugFixes(HWND hW)
 	          hW,(DLGPROC)BugFixesDlgProc);
 }
 
-////////////////////////////////////////////////////////////////////////
 // Recording options
-////////////////////////////////////////////////////////////////////////
 
 bool HACK_CODEC_CHOOSE(HWND hW)
 {
@@ -523,13 +482,11 @@ bool HACK_CODEC_CHOOSE(HWND hW)
 		}
 		RECORD_COMPRESSION2.lpState = RECORD_COMPRESSION_STATE2;
 	}
-	//RefreshCodec(hW);
+	// RefreshCodec(hW);
 	return true;
 }
 
-////////////////////////////////////////////////////////////////////////
-// default 1: fast
-////////////////////////////////////////////////////////////////////////
+// Default 1: Fast
 
 void OnCfgDef1(HWND hW)
 {
@@ -560,9 +517,7 @@ void OnCfgDef1(HWND hW)
 	CheckDlgButton(hW,IDC_KKAPTURE,FALSE);
 }
 
-////////////////////////////////////////////////////////////////////////
-// default 2: nice
-////////////////////////////////////////////////////////////////////////
+// Default 2: Nice
 
 void OnCfgDef2(HWND hW)
 {
@@ -594,9 +549,7 @@ void OnCfgDef2(HWND hW)
 	SetDlgItemInt(hW,IDC_WINY,480,FALSE);
 }
 
-////////////////////////////////////////////////////////////////////////
-// read config
-////////////////////////////////////////////////////////////////////////
+// Read configuration
 
 void gpu_ReadConfig(void)
 {
@@ -605,7 +558,7 @@ void gpu_ReadConfig(void)
 	memset(szDevName,0,128);
 	memset(&guiDev,0,sizeof(GUID));
 
-	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
+	strcpy(Conf_File, ".\\psxjin.ini");	// To do: make a global for other files (we should)
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
 	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);
@@ -641,7 +594,8 @@ void gpu_ReadConfig(void)
 	
 	GetPrivateProfileString("GPU", "DeviceName", 0, &szDevName[0], 128, Conf_File);	
 
-	//Recording options
+	// Recording options
+	
 	RECORD_RECORDING_MODE = GetPrivateProfileInt("GPU", "RECORD_RECORDING_MODE", 0, Conf_File);
 	RECORD_VIDEO_SIZE = GetPrivateProfileInt("GPU", "RECORD_VIDEO_SIZE", 0, Conf_File);
 	RECORD_RECORDING_WIDTH = GetPrivateProfileInt("GPU", "RECORD_RECORDING_WIDTH", 0, Conf_File);
@@ -674,25 +628,21 @@ void gpu_ReadConfig(void)
 	if (iUseGammaVal<0 || iUseGammaVal>1536) iUseGammaVal=2048;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void ReadWinSizeConfig(void)
 {
 	char Conf_File[256];
 
-	strcpy(Conf_File, ".\\psxjin.ini");	//TODO: make a global for other files
+	strcpy(Conf_File, ".\\psxjin.ini");	// To do: make a global for other files (we should)
 	
 	iResX = GetPrivateProfileInt("GPU", "iResX", 320, Conf_File);
 	iResY = GetPrivateProfileInt("GPU", "iResY", 240, Conf_File);	
 }
 
-////////////////////////////////////////////////////////////////////////
-// write config
-////////////////////////////////////////////////////////////////////////
+// Write configuration
 
 void gpu_WriteConfig(void)
 {
-	char Conf_File[1024] = ".\\psxjin.ini";	//TODO: make a global for other files
+	char Conf_File[1024] = ".\\psxjin.ini";	// To do: make a global for other files (we should)
 	char Str_Tmp[1024];
 
 	sprintf(Str_Tmp, "%d", iResX);
@@ -741,9 +691,8 @@ void gpu_WriteConfig(void)
 	WritePrivateProfileString("GPU", "bKkaptureMode", Str_Tmp, Conf_File);
 	
 	WritePrivateProfileString("GPU", "DeviceName", szDevName, Conf_File);
-//*****
+
 //		WritePrivateProfileString("GPU", "guiDev", &guiDev, Conf_File);
-	
 
 	if (RECORD_COMPRESSION2.cbState>sizeof(RECORD_COMPRESSION_STATE2) || RECORD_COMPRESSION2.lpState!=RECORD_COMPRESSION_STATE2)
 	{
@@ -779,9 +728,6 @@ void gpu_WriteConfig(void)
 
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 HWND gHWND;
 
 static HRESULT WINAPI Enum3DDevicesCallback( GUID* pGUID, LPSTR strDesc,
@@ -790,7 +736,7 @@ static HRESULT WINAPI Enum3DDevicesCallback( GUID* pGUID, LPSTR strDesc,
 {
 	BOOL IsHardware;
 
-// Check params
+// Check parameters
 	if ( NULL==pGUID || NULL==pHALDesc || NULL==pHELDesc)
 		return D3DENUMRET_CANCEL;
 
@@ -811,7 +757,7 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
     HMONITOR hMonitor )
 {
 // Use the GUID to create the DirectDraw object, so that information
-// can be extracted from it.
+// can be extracted from it
 
 	LPDIRECTDRAW pDD;
 	LPDIRECTDRAW4 g_pDD;
@@ -822,7 +768,8 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
 		return D3DENUMRET_OK;
 	}
 
-// Query the DirectDraw driver for access to Direct3D.
+// Query the DirectDraw driver for access to Direct3D
+
 	if ( FAILED(IDirectDraw_QueryInterface(pDD, IID_IDirectDraw4, (VOID**)&g_pDD)))
 	{
 		IDirectDraw_Release(pDD);
@@ -830,7 +777,7 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
 	}
 	IDirectDraw_Release(pDD);
 
-// Query the DirectDraw driver for access to Direct3D.
+// Query the DirectDraw driver for access to Direct3D
 
 	if ( FAILED( IDirectDraw4_QueryInterface(g_pDD,IID_IDirect3D3, (VOID**)&pD3D)))
 	{
@@ -841,6 +788,7 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
 	bDeviceOK=FALSE;
 
 // Now, enumerate all the 3D devices
+
 	IDirect3D3_EnumDevices(pD3D,Enum3DDevicesCallback,NULL);
 
 	if (bDeviceOK)
@@ -858,15 +806,11 @@ static BOOL WINAPI DirectDrawEnumCallbackEx( GUID FAR* pGUID, LPSTR strDesc,
 	return DDENUMRET_OK;
 }
 
-//-----------------------------------------------------------------------------
-
 static BOOL WINAPI DirectDrawEnumCallback( GUID FAR* pGUID, LPSTR strDesc,
     LPSTR strName, VOID* pV)
 {
 	return DirectDrawEnumCallbackEx( pGUID, strDesc, strName, NULL, NULL );
 }
-
-//-----------------------------------------------------------------------------
 
 void DoDevEnum(HWND hW)
 {
@@ -889,8 +833,6 @@ void DoDevEnum(HWND hW)
 		DirectDrawEnumerate( DirectDrawEnumCallback, NULL );
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void FreeGui(HWND hW)
 {
 	int i,iCnt;
@@ -901,8 +843,6 @@ void FreeGui(HWND hW)
 		free((GUID *)ComboBox_GetItemData(hWC,i));
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 BOOL CALLBACK DeviceDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -991,8 +931,6 @@ BOOL CALLBACK DeviceDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lParam)
 	return FALSE;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void SelectDev(HWND hW)
 {
 	if (DialogBox(hInst,MAKEINTRESOURCE(IDD_DEVICE),
@@ -1001,9 +939,6 @@ void SelectDev(HWND hW)
 		SetDlgItemText(hW,IDC_DEVICETXT,szDevName);
 	}
 }
-
-
-////////////////////////////////////////////////////////////////////////
 
 static HRESULT WINAPI EnumDisplayModesCallback( DDSURFACEDESC2* pddsd,
     VOID* pvContext )
@@ -1020,8 +955,6 @@ static HRESULT WINAPI EnumDisplayModesCallback( DDSURFACEDESC2* pddsd,
 
 	return DDENUMRET_OK;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 BOOL bTestModes(void)
 {
@@ -1059,8 +992,6 @@ BOOL bTestModes(void)
 	return bDeviceOK;
 }
 
-////////////////////////////////////////////////////////////////////////
-// define key dialog
-////////////////////////////////////////////////////////////////////////
+// Define key dialog
 
 #endif

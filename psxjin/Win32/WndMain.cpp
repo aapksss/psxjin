@@ -10,21 +10,21 @@
 #include <fcntl.h>
 #include <io.h>
 #include "resource.h"
-#include "AboutDlg.h"
+#include "aboutdlg.h"
 #include "gpu/gpurecord.h"
 #include "../version.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "plugin.h"
-#include "Debug.h"
-#include "Win32.h"
+#include "debug.h"
+#include "win32.h"
 #include "../cheat.h"
 #include "../movie.h"
 #include "moviewin.h"
 #include "ramsearch.h"
 #include "ramwatch.h"
-#include "CWindow.h"
-#include "memView.h"
-#include "../spu/spu.h"	//For iVolume
+#include "cwindow.h"
+#include "memview.h"
+#include "../spu/spu.h"	// For iVolume
 #include "recentmenu.h"
 #include "plugins.h"
 #include "analog.h"
@@ -37,14 +37,17 @@ const int RECENTLUA_START = 65040;
 
 extern HWND LuaConsoleHWnd;
 extern INT_PTR CALLBACK DlgLuaScriptDialog(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam);
-extern void ReadConfig();	//SPU save/load
+extern void ReadConfig();	// SPU save/load
 extern void WriteConfig();
 
-//Prototypes
+// Prototypes
+
 void RunCD(HWND hWnd);
 void SaveIni();
 void UpdateMenuHotkeys();
-// global variables
+
+// Global variables
+
 AppData gApp;
 HANDLE hConsole;
 long LoadCdBios;
@@ -53,7 +56,9 @@ int Continue=0;
 char PSXjinDir[256];
 bool AVIisCapturing = false;
 
-//TODO: remove me and use the gpu ones!
+// To do: remove me and use the GPU ones
+// We will!
+
 int dispInput = 0;
 int dispAnalog = 0;
 int dispFrameCounter = 0;
@@ -61,12 +66,13 @@ int dispAllText = 0;
 
 int MainWindow_wndx = 0;
 int MainWindow_wndy = 0;
-int MainWindow_width = 320;		//adelikat Setting width/height to values here is moot since it will set a default value when reading from the config, but hey, why not
+int MainWindow_width = 320;		// Setting width/height to values here is moot since it will set a default value when reading from the configuration file
 int MainWindow_height = 240;
 int MainWindow_menubar = 48;
 //const int MENUSIZE = 48;
 
-// Recent Menus
+// Recent menus
+
 RecentMenu RecentCDs;
 RecentMenu RecentMovies;
 RecentMenu RecentLua;
@@ -84,7 +90,6 @@ uint32 mousex,mousey;
 HWND memPokeHWND = NULL;
 char bufPokeAddress[7];
 char bufPokeNewval[7];
-
 
 #include "maphkeys.h"
 int iTurboMode;
@@ -110,7 +115,6 @@ int GetMenuSize()
 	MainWindow_menubar = Point.y-Rect.top;
 	return MainWindow_menubar +  GetSystemMetrics(SM_CXDLGFRAME);
 }
-
 
 void strcatz(char *dst, char *src) {
 	int len = strlen(dst) + 1;
@@ -266,7 +270,7 @@ int main(int argc, char **argv) {
 			PSXjin_LoadLuaCode(argv[i]);
 		}
 		else if (!strcmp(argv[i], "-luaargs")) {
-			// swallows all remaining arguments!
+			// Swallows all remaining arguments!
 			++i;
 			while (i < argc)
 				PSXjin_LuaAddArgument(argv[i++]);
@@ -300,12 +304,13 @@ int main(int argc, char **argv) {
 	sprintf(Config.MovieDir, "%smovies\\", szCurrentPath);
 	sprintf(Config.MemCardsDir, "%smemcards\\", szCurrentPath);
 	sprintf(Config.Conf_File, "%s\\psxjin.ini", szCurrentPath);
-	LoadConfig();	//Attempt to load ini, or set default settings
+	LoadConfig();	// Attempt to load ini file, or set default settings
 	Config.enable_extern_analog = false;
 	Config.WriteAnalog = false;
 	strcpy (pConfigFile, Config.Conf_File);
 
-	//If directories don't already exist, create them
+	// If directories don't already exist, create them
+	
 	CreateDirectory(Config.SstatesDir, 0);	
 	CreateDirectory(Config.SnapDir, 0);
 	CreateDirectory(Config.BiosDir, 0);
@@ -324,11 +329,10 @@ int main(int argc, char **argv) {
 
 	char Str[MAX_PATH];
 	
-	if (!luaLoaded && RecentLua.GetAutoLoad()) //If lua wasn't loaded from command line (commandline should override autoload parameters)
+	if (!luaLoaded && RecentLua.GetAutoLoad()) // If Lua wasn't loaded from command line (command line should override auto load parameters)
 			PSXjin_LoadLuaCode(RecentLua.GetRecentItem(0).c_str());
 
-	//adelikat
-	//Set IsoFile, then load movie, then Run Iso, seems messy but it is the easiest way to deal with how these functions are implemented
+	// Set IsoFile, then load movie, then run ISO. Seems messy, but it is the easiest way to deal with how these functions are implemented (We should check anyway)
 
 	if(!runexe)
 	{
@@ -348,7 +352,8 @@ int main(int argc, char **argv) {
 		WIN32_StartMovieReplay(Str);
 	}
 
-	//process some command line options
+	// Process some command line options
+	
 	if (runcd == 1 || runcd == 2)
 	{
 		strcpy(IsoFile, CDR_iso_fileToOpen.c_str());
@@ -392,14 +397,14 @@ void RunMessageLoop() {
 		{
 			if (RamWatchHWnd && IsDialogMessage(RamWatchHWnd, &msg))
 			{
-				if(msg.message == WM_KEYDOWN) // send keydown messages to the dialog (for accelerators, and also needed for the Alt key to work)
+				if(msg.message == WM_KEYDOWN) // Send keydown messages to the dialog (for accelerators, and also needed for the Alt key to work)
 					SendMessage(RamWatchHWnd, msg.message, msg.wParam, msg.lParam);
 				continue;
 			}
 			if (RamSearchHWnd && IsDialogMessage(RamSearchHWnd, &msg))
 				continue;
 
-			//if(!TranslateAccelerator(gApp.hWnd,hAccel,&msg)) //adelikat: TODO: get this hooked back up so Ram Watch can use accel keys
+			//if(!TranslateAccelerator(gApp.hWnd,hAccel,&msg)) // To do: get this hooked back up so RAM watch can use acceleration keys (We should do this!)
 			{
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
@@ -435,7 +440,7 @@ void RestoreWindow() {
 
 void UpdateToolWindows()
 {
-	Update_RAM_Search();	//Update_RAM_Watch() is also called; hotkey.cpp - HK_StateLoadSlot & State_Load also call these functions
+	Update_RAM_Search();	// Update_RAM_Watch() is also called; hotkey.cpp - HK_StateLoadSlot & State_Load also call these functions
 	RefreshAllToolWindows();
 	if (Config.WriteAnalog && AnalogControlHWnd)
 		UpdatePositionText(AnalogControlHWnd);
@@ -464,7 +469,6 @@ void UpdateMenuSlots() {
 	}
 }
 
-
 void CloseConsole() {
 	FreeConsole(); hConsole = NULL;
 }
@@ -480,8 +484,8 @@ void States_Load(int num) {
 	sprintf (Text, "sstates\\%10.10s.%3.3d", CdromLabel, num);
 	ret = LoadState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PSXjin*: Loaded State %d"), num);
-	else sprintf(Text, _("*PSXjin*: Error Loading State %d"), num);
+		 sprintf(Text, _("*PSXjin*: Loaded state %d"), num);
+	else sprintf(Text, _("*PSXjin*: Error loading state %d"), num);
 	GPUdisplayText(Text);
 
 	Running = 1;
@@ -503,8 +507,8 @@ void States_Save(int num) {
 	GPUfreeze(2, (GPUFreeze_t *)&num);
 	ret = SaveState(Text);
 	if (ret == 0)
-		 sprintf(Text, _("*PSXjin*: Saved State %d"), num);
-	else sprintf(Text, _("*PSXjin*: Error Saving State %d"), num);
+		 sprintf(Text, _("*PSXjin*: saved state %d"), num);
+	else sprintf(Text, _("*PSXjin*: error saving state %d"), num);
 	GPUdisplayText(Text);
 
 	Running = 1;
@@ -550,8 +554,8 @@ void OnStates_LoadOther() {
 
 		ret = LoadState(szFileName);
 		if (ret == 0)
-			 sprintf(Text, _("*PSXjin*: Loaded State %s"), szFileName);
-		else sprintf(Text, _("*PSXjin*: Error Loading State %s"), szFileName);
+			 sprintf(Text, _("*PSXjin*: loaded state %s"), szFileName);
+		else sprintf(Text, _("*PSXjin*: error loading state %s"), szFileName);
 		GPUdisplayText(Text);
 
 		Running = 1;
@@ -599,8 +603,8 @@ void OnStates_SaveOther() {
 
 		ret = SaveState(szFileName);
 		if (ret == 0)
-			 sprintf(Text, _("*PSXjin*: Saved State %s"), szFileName);
-		else sprintf(Text, _("*PSXjin*: Error Saving State %s"), szFileName);
+			 sprintf(Text, _("*PSXjin*: saved state %s"), szFileName);
+		else sprintf(Text, _("*PSXjin*: error saving state %s"), szFileName);
 		GPUdisplayText(Text);
 
 		Running = 1;
@@ -611,7 +615,7 @@ void OnStates_SaveOther() {
 
 void ExitPSXjin()
 {
-	if (AskSave())	//RamWatch ask's to save changes if needed, if the user cancels, don't close
+	if (AskSave())	// RamWatch will ask to save changes if needed, if the user cancels, don't close
 	{
 		if (!AccBreak) 
 		{
@@ -623,8 +627,8 @@ void ExitPSXjin()
 				ClosePlugins();
 			SysClose();
 			exit(0);
-			SaveConfig();	//Various settings	//TODO: A single save config file function!
-			SaveIni();		//Main Window settings
+			SaveConfig();	// Various settings	// To do: A single save configuration file function (We should do that)
+			SaveIni();		// Main window settings
 		}
 		else
 			AccBreak = 0;
@@ -632,7 +636,7 @@ void ExitPSXjin()
 	}
 }
 
-bool BIOSExists()	//Attempts to open the BIOS, if successful, it returns true
+bool BIOSExists()	// Attempts to open the BIOS, if successful, it returns true
 {
 	FILE *f = NULL;
 	char Bios[256];
@@ -668,7 +672,7 @@ void RunCD(HWND hWnd)
 			if (LoadCdrom() == -1) {
 				ClosePlugins();
 				RestoreWindow();
-				SysMessage(_("Could not load Cdrom"));
+				SysMessage(_("Could not load CD-ROM"));
 				IsoFile[0] = 0;
 				return;
 			}			
@@ -685,7 +689,7 @@ void RunCD(HWND hWnd)
 			psxCpu->Execute();
 		}
 		else
-			SysMessage("Failure to open BIOS.  Please reconfigure your BIOS settings");
+			SysMessage("Failed to open BIOS. Please check your BIOS settings or try another BIOS");
 	}
 }
 
@@ -713,9 +717,6 @@ void SetWindowSize(int dX, int dY)
 	MoveWindow(gApp.hWnd, MainWindow_wndx, MainWindow_wndy, MainWindow_width, MainWindow_height, true);
 }
 
-
-
-
 void WriteWindowSizeToConfig()
 {
 	char Str_Tmp[1024];
@@ -732,19 +733,19 @@ void ResetGame()
 	if (Movie.mode == MOVIEMODE_RECORD) {
 			MovieControl.reset ^= 1;
 			if (MovieControl.reset)
-				GPUdisplayText("*PSXjin*: CPU Will Reset On Next Frame");
+				GPUdisplayText("*PSXjin*: CPU will reset on next frame");
 			else
-				GPUdisplayText("*PSXjin*: CPU Won't Reset On Next Frame");
+				GPUdisplayText("*PSXjin*: CPU won't reset on next frame");
 		}
 		else {
-			GPUdisplayText("*PSXjin*: CPU Reset");
+			GPUdisplayText("*PSXjin*: CPU reset");
 			LoadCdBios = 0;
 			SysReset();
 			NeedReset = 0;
 			Movie.currentFrame = 0;
 			CheckCdrom();
 			if (LoadCdrom() == -1)
-				SysMessage(_("Could not load Cdrom"));
+				SysMessage(_("Could not load CD-ROM"));
 			Running = 1;
 			psxCpu->Execute();
 	}
@@ -770,13 +771,13 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			len=DragQueryFile((HDROP)wParam,0,0,0)+1; 
 			if((ftmp=(char*)malloc(len))) 
 			{
-				//adelikat:  Drag and Drop only checks file extension, the internal functions are responsible for file error checking
+				// Drag and drop only checks file extension, the internal functions are responsible for file error checking
+				
 				DragQueryFile((HDROP)wParam,0,ftmp,len); 
 				std::string fileDropped = ftmp;
 				
-				//-------------------------------------------------------
-				//Check if Ram Watch file
-				//-------------------------------------------------------
+				// Check if RAM watch file
+
 				if (IsFileExtension(fileDropped, ".img") || IsFileExtension(fileDropped, ".bin") || IsFileExtension(fileDropped, ".iso"))
 				{
 					strcpy(IsoFile, fileDropped.c_str());
@@ -797,7 +798,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					}
 					else
 					{
-						CfgOpenFile();	//If no game selected, ask the user to select one
+						CfgOpenFile();	// If no game selected, ask the user to select one
 						WIN32_StartMovieReplay(ftmp);
 						RunCD(hWnd);
 						
@@ -805,7 +806,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				}
 				else if (IsFileExtension(fileDropped, ".pxm"))
 				{
-					SysMessage("PSXjin-rr movies are not supported in PSXjin");
+					SysMessage("PSXjin-rr movies are not supported in PSXjin"); // PSXjin-rr? I'm not sure that is a thing...
 				}
 				else if (IsFileExtension(fileDropped, ".lua"))
 				{
@@ -828,7 +829,7 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			UpdateMenuHotkeys();
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_RESET,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));   
 			EnableMenuItem(gApp.hMenu,ID_FILE_CLOSE_CD,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
-			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); //Always grayed until mutiple lua script support
+			EnableMenuItem(gApp.hMenu,ID_LUA_CLOSE_ALL,MF_GRAYED); // Always grayed until we add support for multiple Lua scripts
 			EnableMenuItem(gApp.hMenu,ID_FILE_RECORD_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_REPLAY_MOVIE,MF_BYCOMMAND | ( IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_FILE_STOP_MOVIE,MF_BYCOMMAND   | (!IsMovieLoaded() ? MF_ENABLED:MF_GRAYED));
@@ -868,7 +869,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 			EnableMenuItem(gApp.hMenu,ID_FILE_STATES_SAVE_OTHER,MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_CDCLOSE,		MF_BYCOMMAND | (IsoFile[0] ? MF_ENABLED:MF_GRAYED));
 
-			//Disable these when a game is running.  TODO: Find a way to resize the drawing area without having to restart the game
+			// Disable these when a game is running.  To do: Find a way to resize the drawing area without having to restart the game
+			// Do that, and also check resize stability
+			
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_1X,MF_BYCOMMAND   | (!AVIisCapturing ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_2X,MF_BYCOMMAND   | (!AVIisCapturing ? MF_ENABLED:MF_GRAYED));
 			EnableMenuItem(gApp.hMenu,ID_EMULATOR_3X,MF_BYCOMMAND   | (!AVIisCapturing ? MF_ENABLED:MF_GRAYED));
@@ -894,7 +897,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 		}
 		break;
 		case WM_COMMAND:
-			//Recent CDs
+		
+			// Recent CDs
+			
 			if(wParam >= RECENTCD_START && wParam <= RECENTCD_START + RecentCDs.MAX_RECENT_ITEMS - 1)
 			{
 				strcpy(IsoFile, RecentCDs.GetRecentItem(wParam - RECENTCD_START).c_str());
@@ -912,7 +917,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				RecentCDs.FlipAutoLoad();
 				return TRUE;
 			}
-			//Recent Movies
+			
+			// Recent movies
+			
 			if(wParam >= RECENTMOVIE_START && wParam <= RECENTMOVIE_START + RecentMovies.MAX_RECENT_ITEMS - 1)
 			{
 				strcpy(Str_Tmp, RecentMovies.GetRecentItem(wParam - RECENTMOVIE_START).c_str());
@@ -930,7 +937,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				RecentMovies.FlipAutoLoad();
 				return TRUE;
 			}
-			//Recent Lua
+			
+			// Recent Lua scripts
+			
 			if(wParam >= RECENTLUA_START && wParam <= RECENTLUA_START + RecentLua.MAX_RECENT_ITEMS - 1)
 			{
 				PSXjin_LoadLuaCode(RecentLua.GetRecentItem(wParam - RECENTLUA_START).c_str());
@@ -991,9 +1000,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 				case ID_MOVIE_CONVERT:
 					MOV_Convert();
 					if (Movie.isText)
-						MessageBox(hWnd, "Movie converted to Text", "Convert Movie", MB_OK);
+						MessageBox(hWnd, "Movie converted to text", "Convert Movie", MB_OK);
 					else
-						MessageBox(hWnd, "Movie converted to Binary", "Convert Movie", MB_OK);
+						MessageBox(hWnd, "Movie converted to binary", "Convert Movie", MB_OK);
 					return TRUE;
 				case ID_LUA_OPEN:
 					if(!LuaConsoleHWnd)
@@ -1018,9 +1027,9 @@ LRESULT WINAPI MainWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 					break;
 
 				case ID_FILE_RUN_CD:
-					LoadCdBios = 0;	//adelikat: In PSXjin we shall not allow CD BIOS files, until someone proves to me otherwise
+					LoadCdBios = 0;	// In PSXjin we don't allow CD BIOS files (I'm not sure such a thing exists, but we should investigate)
 
-					CfgOpenFile();	//Open the Open CD dialog, which will set IsoFile if the user chooses one
+					CfgOpenFile();	// Open the Open CD dialog, which will set IsoFile if the user chooses one
 					RunCD(hWnd);
 					return true;
 				case ID_FILE_CLOSE_CD:
@@ -1507,7 +1516,7 @@ void McdListGetDispInfo(int mcd, int idc, LPNMHDR pnmh) {
 					lpdi->item.pszText = _("mid link block");
 					break;
 				case 3:
-					lpdi->item.pszText = _("terminiting link block");
+					lpdi->item.pszText = _("terminating link block");
 					break;
 			}
 			break;
@@ -1577,7 +1586,7 @@ void UpdateMcdIcon(int mcd, int idc) {
                 (*count)++;
                 aIover[mcd-1]=0;
  
-                if(ani[mcd-1] <= (Info->IconCount-1))  // last frame and below...
+                if(ani[mcd-1] <= (Info->IconCount-1))  // Last frame and below
                     hICON[mcd-1][ani[mcd-1]][i] = GetIcon(&Info->Icon[(*count)*16*16]);
             } else {
                 aIover[mcd-1]=1;
@@ -1612,16 +1621,16 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 		case WM_INITDIALOG:
 			mcdDlg = hW;
 
-			SetWindowText(hW, _("Memcard Manager"));
+			SetWindowText(hW, _("Memory card manager"));
 
 			Button_SetText(GetDlgItem(hW, IDOK),        _("OK"));
 			Button_SetText(GetDlgItem(hW, IDCANCEL),    _("Cancel"));
-			Button_SetText(GetDlgItem(hW, IDC_MCDSEL1), _("Select Mcd"));
-			Button_SetText(GetDlgItem(hW, IDC_FORMAT1), _("Format Mcd"));
-			Button_SetText(GetDlgItem(hW, IDC_RELOAD1), _("Reload Mcd"));
-			Button_SetText(GetDlgItem(hW, IDC_MCDSEL2), _("Select Mcd"));
-			Button_SetText(GetDlgItem(hW, IDC_FORMAT2), _("Format Mcd"));
-			Button_SetText(GetDlgItem(hW, IDC_RELOAD2), _("Reload Mcd"));
+			Button_SetText(GetDlgItem(hW, IDC_MCDSEL1), _("Select memory card"));
+			Button_SetText(GetDlgItem(hW, IDC_FORMAT1), _("Format memory card"));
+			Button_SetText(GetDlgItem(hW, IDC_RELOAD1), _("Reload memory card"));
+			Button_SetText(GetDlgItem(hW, IDC_MCDSEL2), _("Select memory card"));
+			Button_SetText(GetDlgItem(hW, IDC_FORMAT2), _("Format memory card"));
+			Button_SetText(GetDlgItem(hW, IDC_RELOAD2), _("Reload memory card"));
 			Button_SetText(GetDlgItem(hW, IDC_COPYTO2), _("-> Copy ->"));
 			Button_SetText(GetDlgItem(hW, IDC_COPYTO1), _("<- Copy <-"));
 			Button_SetText(GetDlgItem(hW, IDC_PASTE),   _("Paste"));
@@ -1690,7 +1699,8 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 						Edit_GetText(GetDlgItem(hW,IDC_MCD1), str, 256);
 						i = ListView_GetSelectionMark(GetDlgItem(mcdDlg, IDC_LIST1));
 
-						// save dir data + save data
+						// Save directory data + save data
+						
 						memcpy(Mcd1Data + (i+1) * 128, Mcd2Data + (copy+1) * 128, 128);
 						SaveMcd(str, Mcd1Data, (i+1) * 128, 128);
 						memcpy(Mcd1Data + (i+1) * 1024 * 8, Mcd2Data + (copy+1) * 1024 * 8, 1024 * 8);
@@ -1699,7 +1709,8 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 						Edit_GetText(GetDlgItem(hW,IDC_MCD2), str, 256);
 						i = ListView_GetSelectionMark(GetDlgItem(mcdDlg, IDC_LIST2));
 
-						// save dir data + save data
+						// Save directory data + save data
+						
 						memcpy(Mcd2Data + (i+1) * 128, Mcd1Data + (copy+1) * 128, 128);
 						SaveMcd(str, Mcd2Data, (i+1) * 128, 128);
 						memcpy(Mcd2Data + (i+1) * 1024 * 8, Mcd1Data + (copy+1) * 1024 * 8, 1024 * 8);
@@ -1728,10 +1739,10 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 					if ((Info->Flags & 0xF0) == 0xA0) {
 						if ((Info->Flags & 0xF) >= 1 &&
-							(Info->Flags & 0xF) <= 3) { // deleted
+							(Info->Flags & 0xF) <= 3) { // Deleted
 							*ptr = 0x50 | (Info->Flags & 0xF);
 						} else return TRUE;
-					} else if ((Info->Flags & 0xF0) == 0x50) { // used
+					} else if ((Info->Flags & 0xF0) == 0x50) { // Used
 						*ptr = 0xA0 | (Info->Flags & 0xF);
 					} else { return TRUE; }
 
@@ -1762,10 +1773,10 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 
 					if ((Info->Flags & 0xF0) == 0xA0) {
 						if ((Info->Flags & 0xF) >= 1 &&
-							(Info->Flags & 0xF) <= 3) { // deleted
+							(Info->Flags & 0xF) <= 3) { // Deleted
 							*ptr = 0x50 | (Info->Flags & 0xF);
 						} else return TRUE;
-					} else if ((Info->Flags & 0xF0) == 0x50) { // used
+					} else if ((Info->Flags & 0xF0) == 0x50) { // Used
 						*ptr = 0xA0 | (Info->Flags & 0xF);
 					} else { return TRUE; }
 
@@ -1795,14 +1806,14 @@ BOOL CALLBACK ConfigureMcdsDlgProc(HWND hW, UINT uMsg, WPARAM wParam, LPARAM lPa
 					UpdateMcdDlg();
 					return TRUE;
 				case IDC_FORMAT1:
-					if (MessageBox(hW, _("Are you sure you want to format this Memory Card?"), _("Confirmation"), MB_YESNO) == IDNO) return TRUE;
+					if (MessageBox(hW, _("Are you sure you want to format this memory card?"), _("Confirmation"), MB_YESNO) == IDNO) return TRUE;
 					Edit_GetText(GetDlgItem(hW,IDC_MCD1), str, 256);
 					CreateMcd(str);
 					LoadMcd(1, str);
 					UpdateMcdDlg();
 					return TRUE;
 				case IDC_FORMAT2:
-					if (MessageBox(hW, _("Are you sure you want to format this Memory Card?"), _("Confirmation"), MB_YESNO) == IDNO) return TRUE;
+					if (MessageBox(hW, _("Are you sure you want to format this memory card?"), _("Confirmation"), MB_YESNO) == IDNO) return TRUE;
 					Edit_GetText(GetDlgItem(hW,IDC_MCD2), str, 256);
 					CreateMcd(str);
 					LoadMcd(2, str);
@@ -1920,32 +1931,32 @@ void Open_Mcd_Proc(HWND hW, int mcd) {
 	memset(&szFileTitle, 0, sizeof(szFileTitle));
 	memset(&szFilter,    0, sizeof(szFilter));
 
-	strcpy(szFilter, _("Psx Mcd Format (*.mcr;*.mc;*.mem;*.vgs;*.mcd;*.gme;*.ddf)"));
+	strcpy(szFilter, _("PS1 memory card format (*.mcr;*.mc;*.mem;*.vgs;*.mcd;*.gme;*.ddf)"));
 	str = szFilter + strlen(szFilter) + 1; 
 	strcpy(str, "*.mcr;*.mcd;*.mem;*.gme;*.mc;*.ddf");
 
 	str+= strlen(str) + 1;
-	strcpy(str, _("Psx Memory Card (*.mcr;*.mc)"));
+	strcpy(str, _("PS1 memory card (*.mcr;*.mc)"));
 	str+= strlen(str) + 1;
 	strcpy(str, "*.mcr;0*.mc");
 
 	str+= strlen(str) + 1;
-	strcpy(str, _("CVGS Memory Card (*.mem;*.vgs)"));
+	strcpy(str, _("CVGS memory card (*.mem;*.vgs)"));
 	str+= strlen(str) + 1;
 	strcpy(str, "*.mem;*.vgs");
 
 	str+= strlen(str) + 1;
-	strcpy(str, _("Bleem Memory Card (*.mcd)"));
+	strcpy(str, _("Bleem memory card (*.mcd)"));
 	str+= strlen(str) + 1;
 	strcpy(str, "*.mcd");
 
 	str+= strlen(str) + 1;
-	strcpy(str, _("DexDrive Memory Card (*.gme)"));
+	strcpy(str, _("DexDrive memory card (*.gme)"));
 	str+= strlen(str) + 1;
 	strcpy(str, "*.gme");
 
 	str+= strlen(str) + 1;
-	strcpy(str, _("DataDeck Memory Card (*.ddf)"));
+	strcpy(str, _("DataDeck memory card (*.ddf)"));
 	str+= strlen(str) + 1;
 	strcpy(str, "*.ddf");
 
@@ -1988,7 +1999,7 @@ int Open_File_Proc(char *file) {
     ofn.lStructSize			= sizeof(OPENFILENAME);
     ofn.hwndOwner			= gApp.hWnd;
 
-	strcpy(szFilter, _("Psx Exe Format"));
+	strcpy(szFilter, _("PS1 EXE format"));
 	strcatz(szFilter, "*.*;*.*");
 
     ofn.lpstrFilter			= szFilter;
@@ -2038,7 +2049,6 @@ int Open_File_Proc(char *file) {
 	sprintf(buf, string); \
 	InsertMenuItem(submenu[menun], 0, TRUE, &item);
 
-
 #define ADDMENUITEMC(menun, string, id) \
 	item.fType = MFT_STRING; \
 	item.fMask = MIIM_STATE | MIIM_TYPE | MIIM_ID; \
@@ -2066,87 +2076,87 @@ void CreateMainMenu() {
 	ADDSUBMENU(0, _("&File"));
 	ADDMENUITEM(0, _("E&xit"), ID_FILE_EXIT);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("Stop AVI"), ID_END_CAPTURE);
-	ADDMENUITEM(0, _("Record &AVI"), ID_START_CAPTURE);
+	ADDMENUITEM(0, _("Stop AVI recording"), ID_END_CAPTURE);
+	ADDMENUITEM(0, _("Start recording &AVI"), ID_START_CAPTURE);
 	ADDSEPARATOR(0);
 	
-	ADDMENUITEM(0, _("Screenshot"), ID_FILE_SCREENSHOT);
+	ADDMENUITEM(0, _("Take screenshot"), ID_FILE_SCREENSHOT);
 
-	ADDSUBMENUS(0, 3, _("Loadstate"));
-	ADDMENUITEM(3, _("Loadstate From..."), ID_FILE_STATES_LOAD_OTHER);
+	ADDSUBMENUS(0, 3, _("Load state"));
+	ADDMENUITEM(3, _("Load state from..."), ID_FILE_STATES_LOAD_OTHER);
 	ADDSEPARATOR(3);
-	ADDMENUITEM(3, _("Loadstate Slot 0"), ID_FILE_STATES_LOAD_SLOT0);
-	ADDMENUITEM(3, _("Loadstate Slot 9"), ID_FILE_STATES_LOAD_SLOT9);
-	ADDMENUITEM(3, _("Loadstate Slot 8"), ID_FILE_STATES_LOAD_SLOT8);
-	ADDMENUITEM(3, _("Loadstate Slot 7"), ID_FILE_STATES_LOAD_SLOT7);
-	ADDMENUITEM(3, _("Loadstate Slot 6"), ID_FILE_STATES_LOAD_SLOT6);
-	ADDMENUITEM(3, _("Loadstate Slot 5"), ID_FILE_STATES_LOAD_SLOT5);
-	ADDMENUITEM(3, _("Loadstate Slot 4"), ID_FILE_STATES_LOAD_SLOT4);
-	ADDMENUITEM(3, _("Loadstate Slot 3"), ID_FILE_STATES_LOAD_SLOT3);
-	ADDMENUITEM(3, _("Loadstate Slot 2"), ID_FILE_STATES_LOAD_SLOT2);
-	ADDMENUITEM(3, _("Loadstate Slot 1"), ID_FILE_STATES_LOAD_SLOT1);
+	ADDMENUITEM(3, _("Load state Slot 0"), ID_FILE_STATES_LOAD_SLOT0);
+	ADDMENUITEM(3, _("Load state Slot 9"), ID_FILE_STATES_LOAD_SLOT9);
+	ADDMENUITEM(3, _("Load state Slot 8"), ID_FILE_STATES_LOAD_SLOT8);
+	ADDMENUITEM(3, _("Load state Slot 7"), ID_FILE_STATES_LOAD_SLOT7);
+	ADDMENUITEM(3, _("Load state Slot 6"), ID_FILE_STATES_LOAD_SLOT6);
+	ADDMENUITEM(3, _("Load state Slot 5"), ID_FILE_STATES_LOAD_SLOT5);
+	ADDMENUITEM(3, _("Load state Slot 4"), ID_FILE_STATES_LOAD_SLOT4);
+	ADDMENUITEM(3, _("Load state Slot 3"), ID_FILE_STATES_LOAD_SLOT3);
+	ADDMENUITEM(3, _("Load state Slot 2"), ID_FILE_STATES_LOAD_SLOT2);
+	ADDMENUITEM(3, _("Load state Slot 1"), ID_FILE_STATES_LOAD_SLOT1);
 	
-	ADDSUBMENUS(0, 4, _("Savestate"));
-	ADDMENUITEM(4, _("Savestate As..."), ID_FILE_STATES_SAVE_OTHER);
+	ADDSUBMENUS(0, 4, _("Save state"));
+	ADDMENUITEM(4, _("Save state as..."), ID_FILE_STATES_SAVE_OTHER);
 	ADDSEPARATOR(4);
-	ADDMENUITEM(4, _("Savestate Slot 0"), ID_FILE_STATES_SAVE_SLOT0);
-	ADDMENUITEM(4, _("Savestate Slot 9"), ID_FILE_STATES_SAVE_SLOT9);
-	ADDMENUITEM(4, _("Savestate Slot 8"), ID_FILE_STATES_SAVE_SLOT8);
-	ADDMENUITEM(4, _("Savestate Slot 7"), ID_FILE_STATES_SAVE_SLOT7);
-	ADDMENUITEM(4, _("Savestate Slot 6"), ID_FILE_STATES_SAVE_SLOT6);
-	ADDMENUITEM(4, _("Savestate Slot 5"), ID_FILE_STATES_SAVE_SLOT5);
-	ADDMENUITEM(4, _("Savestate Slot 4"), ID_FILE_STATES_SAVE_SLOT4);
-	ADDMENUITEM(4, _("Savestate Slot 3"), ID_FILE_STATES_SAVE_SLOT3);
-	ADDMENUITEM(4, _("Savestate Slot 2"), ID_FILE_STATES_SAVE_SLOT2);
-	ADDMENUITEM(4, _("Savestate Slot 1"), ID_FILE_STATES_SAVE_SLOT1);
+	ADDMENUITEM(4, _("Save state Slot 0"), ID_FILE_STATES_SAVE_SLOT0);
+	ADDMENUITEM(4, _("Save state Slot 9"), ID_FILE_STATES_SAVE_SLOT9);
+	ADDMENUITEM(4, _("Save state Slot 8"), ID_FILE_STATES_SAVE_SLOT8);
+	ADDMENUITEM(4, _("Save state Slot 7"), ID_FILE_STATES_SAVE_SLOT7);
+	ADDMENUITEM(4, _("Save state Slot 6"), ID_FILE_STATES_SAVE_SLOT6);
+	ADDMENUITEM(4, _("Save state Slot 5"), ID_FILE_STATES_SAVE_SLOT5);
+	ADDMENUITEM(4, _("Save state Slot 4"), ID_FILE_STATES_SAVE_SLOT4);
+	ADDMENUITEM(4, _("Save state Slot 3"), ID_FILE_STATES_SAVE_SLOT3);
+	ADDMENUITEM(4, _("Save state Slot 2"), ID_FILE_STATES_SAVE_SLOT2);
+	ADDMENUITEM(4, _("Save state Slot 1"), ID_FILE_STATES_SAVE_SLOT1);
 
-	ADDSUBMENUS(0, 2, _("&Lua Scripting"));
-	ADDMENUITEM(2, _("&Close All Script Windows"), ID_LUA_CLOSE_ALL);
-	ADDMENUITEM(2, _("&New Lua Script Window..."), ID_LUA_OPEN);
+	ADDSUBMENUS(0, 2, _("&Lua scripting"));
+	ADDMENUITEM(2, _("&Close all script windows"), ID_LUA_CLOSE_ALL);
+	ADDMENUITEM(2, _("&New Lua script window..."), ID_LUA_OPEN);
 	ADDMENUITEM(2, _("Recent"), ID_FILE_RECENT_LUA);
 	ADDSUBMENUS(0, 1, _("&Movie"));
-	ADDMENUITEM(1, _("Convert Movie"), ID_MOVIE_CONVERT);
-	ADDMENUITEM(1, _("Edit Rerecords"), ID_FILE_EDITRERECORD);
-	ADDMENUITEM(1, _("Edit Author"), ID_FILE_EDITAUTHOR);
+	ADDMENUITEM(1, _("Convert movie"), ID_MOVIE_CONVERT);
+	ADDMENUITEM(1, _("Edit recordings"), ID_FILE_EDITRERECORD);
+	ADDMENUITEM(1, _("Edit author"), ID_FILE_EDITAUTHOR);
 	ADDMENUITEM(1, _("Read-only"), ID_FILE_READONLY);
-	ADDMENUITEM(1, _("Play from &Beginning"), ID_FILE_PLAYBEGINNING);
-	ADDMENUITEM(1, _("S&top Movie"), ID_FILE_STOP_MOVIE);
-	ADDMENUITEM(1, _("Start &Playback..."), ID_FILE_REPLAY_MOVIE);
-	ADDMENUITEM(1, _("Start &Recording..."), ID_FILE_RECORD_MOVIE);
+	ADDMENUITEM(1, _("Play from &beginning"), ID_FILE_PLAYBEGINNING);
+	ADDMENUITEM(1, _("S&top movie"), ID_FILE_STOP_MOVIE);
+	ADDMENUITEM(1, _("Start &playback..."), ID_FILE_REPLAY_MOVIE);
+	ADDMENUITEM(1, _("Start &recording..."), ID_FILE_RECORD_MOVIE);
 	ADDMENUITEM(1, _("Recent"), ID_FILE_RECENT_MOVIE);
 	ADDSEPARATOR(0);
-	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE); //adelikat: For running SDK made games, disabling in favor of a commandline argument instead
+	//ADDMENUITEM(0, _("Run &EXE"), ID_FILE_RUN_EXE); // For running SDK-made games, disabling in favor of a command line argument instead (Maybe we should add this back in for Net Yaroze and such? Investigation should tell us more.)
 	ADDMENUITEM(0, _("Close CD"), ID_FILE_CLOSE_CD);
 	ADDMENUITEM(0, _("Recent"), ID_FILE_RECENT_CD);
 	ADDMENUITEM(0, _("Open &CD"), ID_FILE_RUN_CD);
 
 	ADDSUBMENU(0, _("&Emulator"));
-	ADDMENUITEM(0, _("Display Analog"), ID_EMULATOR_DISPANALOG);
-	ADDMENUITEM(0, _("Display Input"), ID_EMULATOR_DISPINPUT);
-	ADDMENUITEM(0, _("Display Frame counter"), ID_EMULATOR_DISPFRAMECOUNTER);
-	ADDMENUITEM(0, _("Display All Text"), ID_EMULATOR_DISPALL);
+	ADDMENUITEM(0, _("Display analog"), ID_EMULATOR_DISPANALOG);
+	ADDMENUITEM(0, _("Display input"), ID_EMULATOR_DISPINPUT);
+	ADDMENUITEM(0, _("Display frame counter"), ID_EMULATOR_DISPFRAMECOUNTER);
+	ADDMENUITEM(0, _("Display all text"), ID_EMULATOR_DISPALL);
 	ADDSEPARATOR(0);
 	ADDMENUITEM(0, _("4x"), ID_EMULATOR_4X);
 	ADDMENUITEM(0, _("3x"), ID_EMULATOR_3X);
 	ADDMENUITEM(0, _("2x"), ID_EMULATOR_2X);
 	ADDMENUITEM(0, _("1x"), ID_EMULATOR_1X);
 	ADDSEPARATOR(0);	
-	ADDMENUITEM(0, _("Open Analog Control"), ID_EMULATOR_ANALOG);
-	ADDMENUITEM(0, _("Mute Sound"), ID_EMULATOR_MUTE);
-	ADDMENUITEM(0, _("&CD Case Open/Close"), ID_EMULATOR_CDCLOSE);
+	ADDMENUITEM(0, _("Open analog control"), ID_EMULATOR_ANALOG);
+	ADDMENUITEM(0, _("Mute sound"), ID_EMULATOR_MUTE);
+	ADDMENUITEM(0, _("&CD tray open/close"), ID_EMULATOR_CDCLOSE);
 	ADDMENUITEM(0, _("&Reset"), ID_EMULATOR_RESET);
 
 	ADDSUBMENU(0, _("&Configuration"));
-	ADDMENUITEM(0, _("&Dual Shock Emulation"), ID_ANALOG_HACK);
+	ADDMENUITEM(0, _("&DualShock emulation"), ID_ANALOG_HACK);
 	ADDMENUITEM(0, _("&Options"), ID_CONFIGURATION_CPU);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("Map &Hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
-	ADDMENUITEM(0, _("&Memory Cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
+	ADDMENUITEM(0, _("Map &hotkeys"), ID_CONFIGURATION_MAPHOTKEYS);
+	ADDMENUITEM(0, _("&Memory cards"), ID_CONFIGURATION_MEMORYCARDMANAGER);
 	ADDMENUITEM(0, _("&Controllers"), ID_CONFIGURATION_CONTROLLERS);
 	ADDMENUITEM(0, _("&Sound"), ID_CONFIGURATION_SOUND);
 	ADDMENUITEM(0, _("&Graphics"), ID_CONFIGURATION_GRAPHICS);
 	ADDSEPARATOR(0);
-	ADDMENUITEM(0, _("&Bios"), ID_CONFIGURATION);
+	ADDMENUITEM(0, _("&BIOS"), ID_CONFIGURATION);
 
 
 	ADDSUBMENU(0, _("&Tools"));
@@ -2277,7 +2287,7 @@ void SaveIni()
 	RecentMovies.SaveRecentItemsToIni(Config.Conf_File, "General");
 	RecentLua.SaveRecentItemsToIni(Config.Conf_File, "General");
 	
-	WriteConfig();	//Save SPU Settings
+	WriteConfig();	// Save SPU settings
 }
 
 void LoadIni()
@@ -2294,8 +2304,8 @@ void LoadIni()
 	dispAnalog = GetPrivateProfileInt("General", "AnalogDisplay", 0, Config.Conf_File);
 	Config.UsingAnalogHack = GetPrivateProfileInt("General", "AnalogHack", 0, Config.Conf_File);
 
-	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things
-	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	//Just in case, sometimes windows likes to save -32000 and other odd things
+	if (MainWindow_wndx < -320) MainWindow_wndx = 0;	// Just in case, sometimes windows likes to save -32000 and other odd things
+	if (MainWindow_wndy < -240) MainWindow_wndy = 0;	// Just in case, sometimes windows likes to save -32000 and other odd things
 
 	for(int i = 0; i < MAX_RECENT_WATCHES; i++)
 	{
@@ -2304,7 +2314,7 @@ void LoadIni()
 		GetPrivateProfileString("Watches", str, "", &rw_recent_files[i][0], 1024, Config.Conf_File);
 	}
 
-	ReadConfig();	//Load SPU settings
+	ReadConfig();	// Load SPU settings
 }
 
 int SysInit() {
@@ -2335,12 +2345,14 @@ int SysInit() {
 
 void SysReset() 
 {
-	//Let's do a BIOS check here, if the code gets any further without it, it will be disaster.  This code won't prevent that, but at least it will inform the user!
-	//This should have been already checked before the game is even loaded, so in theory this will never appear for the user.
+	// Let's do a BIOS check here, if the code gets any further without it, it will be disaster. This code won't prevent that, but at least it will inform the user!
+	// This should have been already checked before the game is even loaded, so in theory this will never appear for the user
+	// If we have it set to check before we, in theory, don't need this. We should investigate this.
+	
 	if (!BIOSExists()) 
 	{
-		SysMessage ("Could not open bios. This program will likely crash after this box disappears, if it doesn't close immediately then configure your BIOS settings\n");
-		return;	//Put the responsiblity of this on the calling function
+		SysMessage ("Could not open BIOS. This program will likely crash after this box disappears, if it doesn't close immediately then configure your BIOS settings\n");
+		return;	// Put the responsibility of this on the calling function
 	}
 	psxReset();
 }
@@ -2386,7 +2398,7 @@ void SysMessage(char *fmt, ...) {
 	MessageBox(0, tmp, _("PSXJIN Message"), 0);
 }
 
-static char *err = N_("Error Loading Symbol");
+static char *err = N_("Error loading symbol");
 static int errval;
 
 void *SysLoadLibrary(char *lib) {
@@ -2420,11 +2432,10 @@ void SysRunGui() {
 	SPUunMute();
 }
 
-
 void WIN32_StartMovieReplay(char* szFilename)
 {
 	int nRet=1;
-	CheckCdrom(); //get CdromId
+	CheckCdrom(); // Get CdromId
 	if (szFilename != '\0') {
 		if (! MOV_ReadMovieFile(szFilename,&Movie) ) {
 			char errorMessage[300];
@@ -2438,17 +2449,17 @@ void WIN32_StartMovieReplay(char* szFilename)
 	else
 		nRet = MOV_W32_StartReplayDialog();
 	if (nRet) {
-		if (IsoFile[0] == 0) CfgOpenFile();	//If no game loaded, ask the user for a game
+		if (IsoFile[0] == 0) CfgOpenFile();	// If no game loaded, ask the user for a game
 		
-		//If still no ISO file selected (because the user cancelled), don't attempt to run the movie
-		if (!IsoFile[0] == 0) //adelikat:  Having CfgOpenFile() be value returning is more elegant but this gets the job done
+		// If still no ISO file selected (because the user canceled), don't attempt to run the movie
+		if (!IsoFile[0] == 0) // Having CfgOpenFile() be value returning is more elegant but this gets the job done
 		{
 			LoadCdBios = 0;
 			if (AutoRWLoad)
 			{
 				OpenRWRecentFile(0);
 				RamWatchHWnd = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAMWATCH), NULL, (DLGPROC) RamWatchProc);
-			}	//adelikat: Need to do this for Movie autoload
+			}	// Need to do this for movie auto load
 			OpenPlugins(gApp.hWnd);
 			SysReset();
 			NeedReset = 0;
@@ -2456,7 +2467,7 @@ void WIN32_StartMovieReplay(char* szFilename)
 			if (LoadCdrom() == -1) {
 				ClosePlugins();
 				RestoreWindow();
-				SysMessage(_("Could not load Cdrom"));
+				SysMessage(_("Could not load CD-ROM"));
 				return;
 			}
 			Running = 1;
@@ -2470,18 +2481,18 @@ void WIN32_StartMovieReplay(char* szFilename)
 void WIN32_StartMovieRecord()
 {
 	int nRet;
-	CheckCdrom(); //get CdromId
+	CheckCdrom(); // Get CdromId
 	nRet = MOV_W32_StartRecordDialog();
 	if (nRet) 
 	{
-		if (IsoFile[0] == 0) CfgOpenFile();	//If no game loaded, ask the user for a game
+		if (IsoFile[0] == 0) CfgOpenFile();	// If no game loaded, ask the user for a game
 
-		//If still no ISO file selected (because the user cancelled), don't attempt to run the movie
-		if (!IsoFile[0] == 0) //adelikat:  Having CfgOpenFile() be value returning is more elegant but this gets the job done
+		// If still no ISO file selected (because the user canceled), don't attempt to run the movie
+		if (!IsoFile[0] == 0) // Having CfgOpenFile() be value returning is more elegant but this gets the job done
 		{
 			if (Movie.saveStateIncluded)
 			{
-//				OpenPlugins(gApp.hWnd); //This shouldnt be call here, its not call when loading a state, r726 fix for broken movies with states.
+//				OpenPlugins(gApp.hWnd); // This shouldn't be called here, if it's not called when loading a state, r726 fix for broken movies with states
 				Running = 1;
 				MOV_StartMovie(MOVIEMODE_RECORD);
 				psxCpu->Execute();
@@ -2496,7 +2507,7 @@ void WIN32_StartMovieRecord()
 			{
 				ClosePlugins();
 				RestoreWindow();
-				SysMessage(_("Could not load Cdrom"));
+				SysMessage(_("Could not load CD-ROM"));
 				return;
 			}
 			Running = 1;
@@ -2534,7 +2545,8 @@ void WIN32_StartAviRecord()
 		int i;
 		i = strlen(nameo);
 
-		//add .avi if nameo doesn't have it
+		// Add .avi if nameo doesn't have it
+		
 		if((i < 4 || nameo[i-4] != '.') && (i < (256-8))) {
 			nameo[i] = '.';
 			nameo[i+1] = 'a';
@@ -2597,7 +2609,6 @@ void WIN32_StopAviRecord()
 	AVIisCapturing = false;
 }
 
-
 INT_PTR CALLBACK DlgMemPoke(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch(msg) {
@@ -2646,11 +2657,11 @@ INT_PTR CALLBACK DlgMemPoke(HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
 
 void CreateMemPoke()
 {
-	if(!memPokeHWND) { // create and show non-modal cheat search window
+	if(!memPokeHWND) { // Create and show non-modal cheat search window
 		memPokeHWND = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_RAM_POKE), NULL, DlgMemPoke);
 		ShowWindow(memPokeHWND, SW_SHOW);
 	}
-	else // already open so just reactivate the window
+	else // Already open so just re-activate the window
 		SetActiveWindow(memPokeHWND);
 }
 
@@ -2692,56 +2703,56 @@ void MakeMenuName(int i, std::string menuname, int menuid)
 
 void UpdateMenuHotkeys()
 {
-	//Update all menu items that can be called from a hotkey to include the current hotkey assignment
+	// Update all menu items that can be called from a hotkey to include the current hotkey assignment
 	
-	//File-------------------------------------------------------
+	// File
 	MakeMenuName(EMUCMD_OPENCD, "Open &CD", ID_FILE_RUN_CD);
-	MakeMenuName(EMUCMD_SCREENSHOT, "Screenshot", ID_FILE_SCREENSHOT);
+	MakeMenuName(EMUCMD_SCREENSHOT, "Take screenshot", ID_FILE_SCREENSHOT);
 	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
 	MakeMenuName(EMUCMD_STOPMOVIE, "S&top Movie", ID_FILE_STOP_MOVIE);
-	MakeMenuName(EMUCMD_PLAYFROMBEGINNING, "Play from &Beginning", ID_FILE_PLAYBEGINNING);
+	MakeMenuName(EMUCMD_PLAYFROMBEGINNING, "Play from &beginning", ID_FILE_PLAYBEGINNING);
 	MakeMenuName(EMUCMD_RWTOGGLE, "Read-only", ID_FILE_READONLY);
-	MakeMenuName(EMUCMD_LOADSTATE10, "Loadstate Slot 0", ID_FILE_STATES_LOAD_SLOT0);
-	MakeMenuName(EMUCMD_LOADSTATE1, "Loadstate Slot 1", ID_FILE_STATES_LOAD_SLOT1);
-	MakeMenuName(EMUCMD_LOADSTATE2, "Loadstate Slot 2", ID_FILE_STATES_LOAD_SLOT2);
-	MakeMenuName(EMUCMD_LOADSTATE3, "Loadstate Slot 3", ID_FILE_STATES_LOAD_SLOT3);
-	MakeMenuName(EMUCMD_LOADSTATE4, "Loadstate Slot 4", ID_FILE_STATES_LOAD_SLOT4);
-	MakeMenuName(EMUCMD_LOADSTATE5, "Loadstate Slot 5", ID_FILE_STATES_LOAD_SLOT5);
-	MakeMenuName(EMUCMD_LOADSTATE6, "Loadstate Slot 6", ID_FILE_STATES_LOAD_SLOT6);
-	MakeMenuName(EMUCMD_LOADSTATE7, "Loadstate Slot 7", ID_FILE_STATES_LOAD_SLOT7);
-	MakeMenuName(EMUCMD_LOADSTATE8, "Loadstate Slot 8", ID_FILE_STATES_LOAD_SLOT8);
-	MakeMenuName(EMUCMD_LOADSTATE9, "Loadstate Slot 9", ID_FILE_STATES_LOAD_SLOT9);
-	MakeMenuName(EMUCMD_SAVESTATE10, "Savestate Slot 0", ID_FILE_STATES_SAVE_SLOT0);
-	MakeMenuName(EMUCMD_SAVESTATE1, "Savestate Slot 1", ID_FILE_STATES_SAVE_SLOT1);
-	MakeMenuName(EMUCMD_SAVESTATE2, "Savestate Slot 2", ID_FILE_STATES_SAVE_SLOT2);
-	MakeMenuName(EMUCMD_SAVESTATE3, "Savestate Slot 3", ID_FILE_STATES_SAVE_SLOT3);
-	MakeMenuName(EMUCMD_SAVESTATE4, "Savestate Slot 4", ID_FILE_STATES_SAVE_SLOT4);
-	MakeMenuName(EMUCMD_SAVESTATE5, "Savestate Slot 5", ID_FILE_STATES_SAVE_SLOT5);
-	MakeMenuName(EMUCMD_SAVESTATE6, "Savestate Slot 6", ID_FILE_STATES_SAVE_SLOT6);
-	MakeMenuName(EMUCMD_SAVESTATE7, "Savestate Slot 7", ID_FILE_STATES_SAVE_SLOT7);
-	MakeMenuName(EMUCMD_SAVESTATE8, "Savestate Slot 8", ID_FILE_STATES_SAVE_SLOT8);
-	MakeMenuName(EMUCMD_SAVESTATE9, "Savestate Slot 9", ID_FILE_STATES_SAVE_SLOT9);
+	MakeMenuName(EMUCMD_LOADSTATE10, "Load state Slot 0", ID_FILE_STATES_LOAD_SLOT0);
+	MakeMenuName(EMUCMD_LOADSTATE1, "Load state Slot 1", ID_FILE_STATES_LOAD_SLOT1);
+	MakeMenuName(EMUCMD_LOADSTATE2, "Load state Slot 2", ID_FILE_STATES_LOAD_SLOT2);
+	MakeMenuName(EMUCMD_LOADSTATE3, "Load state Slot 3", ID_FILE_STATES_LOAD_SLOT3);
+	MakeMenuName(EMUCMD_LOADSTATE4, "Load state Slot 4", ID_FILE_STATES_LOAD_SLOT4);
+	MakeMenuName(EMUCMD_LOADSTATE5, "Load state Slot 5", ID_FILE_STATES_LOAD_SLOT5);
+	MakeMenuName(EMUCMD_LOADSTATE6, "Load state Slot 6", ID_FILE_STATES_LOAD_SLOT6);
+	MakeMenuName(EMUCMD_LOADSTATE7, "Load state Slot 7", ID_FILE_STATES_LOAD_SLOT7);
+	MakeMenuName(EMUCMD_LOADSTATE8, "Load state Slot 8", ID_FILE_STATES_LOAD_SLOT8);
+	MakeMenuName(EMUCMD_LOADSTATE9, "Load state Slot 9", ID_FILE_STATES_LOAD_SLOT9);
+	MakeMenuName(EMUCMD_SAVESTATE10, "Save state Slot 0", ID_FILE_STATES_SAVE_SLOT0);
+	MakeMenuName(EMUCMD_SAVESTATE1, "Save state Slot 1", ID_FILE_STATES_SAVE_SLOT1);
+	MakeMenuName(EMUCMD_SAVESTATE2, "Save state Slot 2", ID_FILE_STATES_SAVE_SLOT2);
+	MakeMenuName(EMUCMD_SAVESTATE3, "Save state Slot 3", ID_FILE_STATES_SAVE_SLOT3);
+	MakeMenuName(EMUCMD_SAVESTATE4, "Save state Slot 4", ID_FILE_STATES_SAVE_SLOT4);
+	MakeMenuName(EMUCMD_SAVESTATE5, "Save state Slot 5", ID_FILE_STATES_SAVE_SLOT5);
+	MakeMenuName(EMUCMD_SAVESTATE6, "Save state Slot 6", ID_FILE_STATES_SAVE_SLOT6);
+	MakeMenuName(EMUCMD_SAVESTATE7, "Save state Slot 7", ID_FILE_STATES_SAVE_SLOT7);
+	MakeMenuName(EMUCMD_SAVESTATE8, "Save state Slot 8", ID_FILE_STATES_SAVE_SLOT8);
+	MakeMenuName(EMUCMD_SAVESTATE9, "Save state Slot 9", ID_FILE_STATES_SAVE_SLOT9);
 
-	MakeMenuName(EMUCMD_STARTPLAYBACK, "Start &Playback...", ID_FILE_REPLAY_MOVIE);
-	MakeMenuName(EMUCMD_STARTRECORDING, "Start &Recording...", ID_FILE_RECORD_MOVIE);
-	MakeMenuName(EMUCMD_STARTAVI, "Record &AVI", ID_START_CAPTURE);
-	MakeMenuName(EMUCMD_STOPAVI, "Stop AVI", ID_END_CAPTURE);
-	MakeMenuName(EMUCMD_LUA_OPEN, "&New Lua Script Window...", ID_LUA_OPEN);
+	MakeMenuName(EMUCMD_STARTPLAYBACK, "Start &playback...", ID_FILE_REPLAY_MOVIE);
+	MakeMenuName(EMUCMD_STARTRECORDING, "Start &recording...", ID_FILE_RECORD_MOVIE);
+	MakeMenuName(EMUCMD_STARTAVI, "Start recording &AVI", ID_START_CAPTURE);
+	MakeMenuName(EMUCMD_STOPAVI, "Stop AVI recording", ID_END_CAPTURE);
+	MakeMenuName(EMUCMD_LUA_OPEN, "&New Lua script window...", ID_LUA_OPEN);
 
-	//Emulator---------------------------------------------------
+	// Emulator
 	MakeMenuName(EMUCMD_RESET, "&Reset", ID_EMULATOR_RESET);
-	MakeMenuName(EMUCMD_FRAMECOUNTER, "Display Frame counter", ID_EMULATOR_DISPFRAMECOUNTER);
-	MakeMenuName(EMUCMD_INPUTDISPLAY, "Display Input", ID_EMULATOR_DISPINPUT);
+	MakeMenuName(EMUCMD_FRAMECOUNTER, "Display frame counter", ID_EMULATOR_DISPFRAMECOUNTER);
+	MakeMenuName(EMUCMD_INPUTDISPLAY, "Display input", ID_EMULATOR_DISPINPUT);
 	
-	//Configuration----------------------------------------------
+	// Configuration
 	MakeMenuName(EMUCMD_CONFGPU, "&Graphics", ID_CONFIGURATION_GRAPHICS);
 	MakeMenuName(EMUCMD_CONFSPU, "&Sound", ID_CONFIGURATION_SOUND);
 	MakeMenuName(EMUCMD_CONFPAD, "&Controllers", ID_CONFIGURATION_CONTROLLERS);
-	MakeMenuName(EMUCMD_MEMORYCARDS, "&Memory Cards", ID_CONFIGURATION_MEMORYCARDMANAGER);
-	MakeMenuName(EMUCMD_HOTKEYS, "Map &Hotkeys",ID_CONFIGURATION_MAPHOTKEYS);
+	MakeMenuName(EMUCMD_MEMORYCARDS, "&Memory cards", ID_CONFIGURATION_MEMORYCARDMANAGER);
+	MakeMenuName(EMUCMD_HOTKEYS, "Map &hotkeys",ID_CONFIGURATION_MAPHOTKEYS);
 	MakeMenuName(EMUCMD_CONFCPU, "&Options", ID_CONFIGURATION_CPU);
 
-	//Tools------------------------------------------------------
+	// Tools
 	MakeMenuName(EMUCMD_RAMSEARCH, "RAM &Search", ID_RAM_SEARCH);
 	MakeMenuName(EMUCMD_RAMWATCH, "RAM &Watch", ID_RAM_WATCH);
 	MakeMenuName(EMUCMD_RAMPOKE, "RAM &Poke", ID_CONFIGURATION_MEMPOKE);

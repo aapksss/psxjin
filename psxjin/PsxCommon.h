@@ -20,14 +20,13 @@ typedef uint32_t uint32;
 #define END_EXTERN_C
 #endif
 
-#include "System.h"
+#include "system.h"
 #include <zlib.h>
 #ifndef DIRECTINPUT_VERSION
 #define DIRECTINPUT_VERSION 0x0800
 #endif
+
 #include "dinput.h"
-
-
 #include <windows.h>
 
 typedef struct {
@@ -38,9 +37,6 @@ typedef struct {
 
 extern AppData gApp;
 
-
-
-
 typedef __int8  s8;
 typedef __int16 s16;
 typedef __int32 s32;
@@ -50,7 +46,6 @@ typedef unsigned __int8  u8;
 typedef unsigned __int16 u16;
 typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
-
 
 #include "emufile.h"
 
@@ -67,7 +62,6 @@ typedef struct
 
 
 #define INLINE __inline
-
 
 #define _(msgid) msgid
 #define N_(msgid) msgid
@@ -128,7 +122,7 @@ typedef struct {
 	long Sio;
 	long Mdec;
 	long PsxAuto;
-	long PsxType; // ntsc - 0 | pal - 1
+	long PsxType; // NTSC - 0 | PAL - 1
 	long QKeys;
 	long Cdda;
 	long HLE;
@@ -172,77 +166,77 @@ extern int NetOpened;
 
 typedef struct
 {
-	unsigned char controllerType;                           //controler type
+	unsigned char controllerType;                           // Controller type
 	unsigned char padding;
-	unsigned short buttonStatus;                            //normal buttons, all types use it
-	// next values are in range 0-255 where 128 is center
-	unsigned char rightJoyX, rightJoyY, leftJoyX, leftJoyY; //for analog
-	unsigned char moveX, moveY;                             //for mouse
+	unsigned short buttonStatus;                            // Normal buttons, all types use it
+	// Next values are in range 0-255 where 128 is center
+	unsigned char rightJoyX, rightJoyY, leftJoyX, leftJoyY; // For analog
+	unsigned char moveX, moveY;                             // For mouse
 } PadDataS;
 
 #define MOVIE_MAX_METADATA 512
 #define MOVIE_MAX_CDROM_IDS 252
 
 struct MovieType {	
-	int isText;							 //set if Movie type is Text, other wise it is binary
-	bool CDSwap;						//Set if swap is going to occur
+	int isText;							 // Set if movie type is text, other wise it is binary
+	bool CDSwap;						// Set if swap is going to occur
 	PadDataS lastPads1[4];
 	PadDataS lastPads2[4];
-	char control;                        //frame control (reset, enable cheats, disable hacks, etc.)
-	int16 movieFlags;                     //movie flags byte used in header
-	unsigned char padType1;              //joypad1 type
-	unsigned char padType2;              //joypad2 type
-	unsigned long totalFrames;           //total movie frames
-	unsigned long currentFrame;          //current frame in movie
-	unsigned long MaxRecFrames;			 //Maximum frame hit for recording
-	unsigned long lagCounter;            //current lag count
-	unsigned char mode;                  //movie is | 1: recording | 2: playing | 0: not active
-	unsigned char readOnly;              //movie is | 1: read-only | 0: read+write
-	unsigned long rerecordCount;         //total movie rerecords
-	unsigned char saveStateIncluded;     //0: no save state | 1: includes save state
-	unsigned char memoryCardIncluded;    //0: no memory cards | 1: includes memory cards
-	unsigned char cheatListIncluded;     //0: no cheat list | 1: includes cheat list
-	unsigned char irqHacksIncluded;      //0: no irq hacks used | 1: uses irq hacks
-	unsigned long saveStateOffset;       //savestate chunk location in file
-	unsigned long memoryCard1Offset;     //memcard1 chunk location in file
-	unsigned long memoryCard2Offset;     //memcard2 chunk location in file
-	unsigned long cheatListOffset;       //cheat list chunk location in file
-	unsigned long cdIdsOffset;           //cdIds chunk location in file
-	unsigned long inputOffset;           //input chunk location in file
-	unsigned long memoryCard1Size;       //memcard1 file size
-	unsigned long memoryCard2Size;       //memcard2 file size
-	unsigned long authorInfoOffset;		 //Offset to author info
-	char authorInfo[MOVIE_MAX_METADATA]; //author info
-	unsigned long formatVersion;         //movie file format version number
-	unsigned long emuVersion;            //emulator version used in recording
-	char movieFilenameMini[256];         //short movie filename (ex: "movie") used for savestates
-	char movieFilename[256];             //full path file name (ex:"c:/pcsx/movies/movie.pjm")
-	char bytesPerFrame;                  //size of each frame in bytes
-	char palTiming;                      //PAL mode (50 FPS instead of 60)
-	char currentCdrom;                   //in which CD number are we at now?
-	char CdromCount;                     //how many different cds are used in the movie
-	char CdromIds[MOVIE_MAX_CDROM_IDS];  //every CD ID used in the movie
-	char capture;                        //0: not capturing an AVI | 1: capturing
-	char aviFilename[256];               //filename used in AVI capture
-	char wavFilename[256];               //filename used in WAV capture
-	char startAvi;                       //start AVI capture at first emulated frame?
-	char startWav;                       //start WAV capture at first emulated frame?
-	unsigned long stopCapture;           //stop AVI/WAV capture at what emulated frame?
-	uint8* inputBuffer;                  //full movie input buffer
-	uint32 inputBufferSize;              //movie input buffer size
-	uint8* inputBufferPtr;               //pointer to the full movie input buffer
-	int AviCount;						 //Number of AVIs created
-	char AviDrive[256];					 //Drive where avi will be stored - for splitting
-	char AviDirectory[256];				 //Directory where avi will be stored - for splitting
-	char AviFnameShort[256];			 //Filename where avi will be stored - for splitting
-	int MultiTrack;						//Enable Disable Multitrack
-	int RecordPlayer;					//Which Player are we currently Recording?
-	int Port1_Mtap;						//Is player 1 a Multitap?
-	int Port2_Mtap;						//Is player 2 a Multitap?
-	int NumPlayers;						//Number of players in the movie
-	int P2_Start;						//Where does pad2 start? 
-	bool UsingAnalogHack;				//Stupid Analog Hack for Final Fantasy 8. Yes, I added a hack just for me.
-	int UsingRCntFix;					//Parasite Eve Fix
+	char control;                        // Frame control (reset, enable cheats, disable hacks, etc.)
+	int16 movieFlags;                     // Movie flags byte used in header
+	unsigned char padType1;              // joypad1 type
+	unsigned char padType2;              // joypad2 type
+	unsigned long totalFrames;           // Total movie frames
+	unsigned long currentFrame;          // Current frame in movie
+	unsigned long MaxRecFrames;			 // Maximum frame hit for recording
+	unsigned long lagCounter;            // Current lag count
+	unsigned char mode;                  // Movie is | 1: recording | 2: playing | 0: not active
+	unsigned char readOnly;              // Movie is | 1: read-only | 0: read+write
+	unsigned long rerecordCount;         // Total movie rerecords
+	unsigned char saveStateIncluded;     // 0: no save state | 1: includes save state
+	unsigned char memoryCardIncluded;    // 0: no memory cards | 1: includes memory cards
+	unsigned char cheatListIncluded;     // 0: no cheat list | 1: includes cheat list
+	unsigned char irqHacksIncluded;      // 0: no IRQ hacks used | 1: uses IRQ hacks
+	unsigned long saveStateOffset;       // Savestate chunk location in file
+	unsigned long memoryCard1Offset;     // memcard1 chunk location in file
+	unsigned long memoryCard2Offset;     // memcard2 chunk location in file
+	unsigned long cheatListOffset;       // Cheat list chunk location in file
+	unsigned long cdIdsOffset;           // cdIds chunk location in file
+	unsigned long inputOffset;           // Input chunk location in file
+	unsigned long memoryCard1Size;       // memcard1 file size
+	unsigned long memoryCard2Size;       // memcard2 file size
+	unsigned long authorInfoOffset;		 // Offset to author info
+	char authorInfo[MOVIE_MAX_METADATA]; // Author info
+	unsigned long formatVersion;         // Movie file format version number
+	unsigned long emuVersion;            // Emulator version used in recording
+	char movieFilenameMini[256];         // Short movie filename (ex: "movie") used for savestates
+	char movieFilename[256];             // Full path file name ("c:/pcsx/movies/movie.pjm")
+	char bytesPerFrame;                  // Size of each frame in bytes
+	char palTiming;                      // PAL mode (50FPS instead of 60FPS)
+	char currentCdrom;                   // Which CD number are we on?
+	char CdromCount;                     // How many different CDs are used in the movie
+	char CdromIds[MOVIE_MAX_CDROM_IDS];  // Every CD ID used in the movie
+	char capture;                        // 0: not capturing an AVI | 1: capturing
+	char aviFilename[256];               // Filename used in AVI capture
+	char wavFilename[256];               // Filename used in WAV capture
+	char startAvi;                       // Start AVI capture at first emulated frame?
+	char startWav;                       // Start WAV capture at first emulated frame?
+	unsigned long stopCapture;           // Stop AVI/WAV capture at what emulated frame?
+	uint8* inputBuffer;                  // Full movie input buffer
+	uint32 inputBufferSize;              // Movie input buffer size
+	uint8* inputBufferPtr;               // Pointer to the full movie input buffer
+	int AviCount;						 // Number of AVIs created
+	char AviDrive[256];					 // Drive where AVI will be stored - for splitting
+	char AviDirectory[256];				 // Directory where AVI will be stored - for splitting
+	char AviFnameShort[256];			 // Filename where AVI will be stored - for splitting
+	int MultiTrack;						// Enable/disable multi-track
+	int RecordPlayer;					// Which player are we currently recording?
+	int Port1_Mtap;						// Is player 1 a multitap?
+	int Port2_Mtap;						// Is player 2 a multitap?
+	int NumPlayers;						// Number of players in the movie
+	int P2_Start;						// Where does pad2 start? 
+	bool UsingAnalogHack;				// Analog hack for Final Fantasy 8. Is this hack able to be removed?
+	int UsingRCntFix;					// Parasite Eve hack. Is this hack able to be removed?
 
 };
 
@@ -308,28 +302,29 @@ template<typename T> void _gzfreezel(int Mode, EMUFILE* f, T* ptr) { gzfreeze(pt
 char *GetSavestateFilename(int newState);
 
 //#define BIAS	4
-#define BIAS	2
-#define PSXCLK	33868800	/* 33.8688 Mhz */
 
-#include "R3000A.h"
-#include "PsxMem.h"
-#include "PsxHw.h"
-#include "PsxBios.h"
-#include "PsxDma.h"
-#include "PsxCounters.h"
-#include "PsxHLE.h"
-#include "Mdec.h"
-//#include "CdRom.h"
-#include "Sio.h"
-#include "spu/Spu.h"
+#define BIAS	2
+#define PSXCLK	33868800	// 33.8688MHz (Can we overclock the PS1 with this? Maybe worth trying...)
+
+#include "r3000a.h"
+#include "psxmem.h"
+#include "psxhw.h"
+#include "psxbios.h"
+#include "psxdma.h"
+#include "psxcounters.h"
+#include "psxhle.h"
+#include "mdec.h"
+//#include "cdrom.h"
+#include "sio.h"
+#include "spu/spu.h"
 #include "plugins.h"
-//#include "DecodeXA.h"
-#include "Misc.h"
-#include "Debug.h"
-#include "Gte.h"
-#include "Movie.h"
-#include "Cheat.h"
-#include "LuaEngine.h"
+//#include "decodexa.h"
+#include "misc.h"
+#include "debug.h"
+#include "gte.h"
+#include "movie.h"
+#include "cheat.h"
+#include "luaengine.h"
 
 
 inline u64 double_to_u64(double d) {
@@ -367,8 +362,6 @@ inline float u32_to_float(u32 u) {
 	fuxor.a = u;
 	return fuxor.b;
 }
-
-
 
 #ifndef CTASSERT
 #define	CTASSERT(x)		typedef char __assert ## y[(x) ? 1 : -1]

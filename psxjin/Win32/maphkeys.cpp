@@ -1,9 +1,9 @@
 #include "resource.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "maphkeys.h"
 
 #ifdef WIN32
-#include "Win32.h"
+#include "win32.h"
 #endif
 
 extern AppData gApp;
@@ -14,92 +14,90 @@ struct EMUCMDTABLE EmuCommandTable[]=
 {
 	{ 'O',			   VK_CONTROL,	"Open CD", },
 	{ VK_PAUSE,        0,           "Pause", },
-	{ VK_TAB,          0,           "Fast Forward", },
-	{ VK_SPACE,        0,           "Frame Advance", },
-	{ '8',             VK_SHIFT,    "Read-Only Toggle", },
-	{ VK_OEM_MINUS,    0,           "Decrease Speed", },
-	{ VK_OEM_PLUS,     0,           "Increase Speed", },
-	{ VK_NUMPAD0,      0,           "Normal Speed", },
-	{ 0,               0,           "Turbo Speed", },
-	{ VK_DECIMAL,      0,           "Maximum Speed", },
-	{ VK_OEM_PERIOD,   0,           "Frame Counter", },
-	{ VK_OEM_COMMA,	   0,			"Input Display", },
-	{ 0,               0,           "Lag Counter Reset", },
-	{ VK_F12,          0,           "Take Screenshot", },
-	{ VK_F1,           0,           "Load State 1", },
-	{ VK_F2,           0,           "Load State 2", },
-	{ VK_F3,           0,           "Load State 3", },
-	{ VK_F4,           0,           "Load State 4", },
-	{ VK_F5,           0,           "Load State 5", },
-	{ VK_F6,           0,           "Load State 6", },
-	{ VK_F7,           0,           "Load State 7", },
-	{ VK_F8,           0,           "Load State 8", },
-	{ VK_F9,           0,           "Load State 9", },
-	{ VK_F10,		   0,			"Load State 10",},
-	{ VK_F1,           VK_SHIFT,    "Save State 1", },
-	{ VK_F2,           VK_SHIFT,    "Save State 2", },
-	{ VK_F3,           VK_SHIFT,    "Save State 3", },
-	{ VK_F4,           VK_SHIFT,    "Save State 4", },
-	{ VK_F5,           VK_SHIFT,    "Save State 5", },
-	{ VK_F6,           VK_SHIFT,    "Save State 6", },
-	{ VK_F7,           VK_SHIFT,    "Save State 7", },
-	{ VK_F8,           VK_SHIFT,    "Save State 8", },
-	{ VK_F9,           VK_SHIFT,    "Save State 9", },
-	{ VK_F10,		   VK_SHIFT,	"Save State 0",},
-	{ '1',             0,           "Select State 1", },
-	{ '2',             0,           "Select State 2", },
-	{ '3',             0,           "Select State 3", },
-	{ '4',             0,           "Select State 4", },
-	{ '5',             0,           "Select State 5", },
-	{ '6',             0,           "Select State 6", },
-	{ '7',             0,           "Select State 7", },
-	{ '8',             0,           "Select State 8", },
-	{ '9',             0,           "Select State 9", },
-	{ '0',			   0,			"Select State 0",},
-	{ 0,			   0,			"Previous State",},
-	{ 0,			   0,			"Next State",},
-	{ 'P',             VK_CONTROL,  "Load Current State", },
-	{ 'I',             VK_CONTROL,  "Save Current State", },
-	{ 'N',             VK_CONTROL,  "Start Recording", },
-	{ 'R',             VK_CONTROL,  "Start Playback", },
-	{ 'R',             VK_SHIFT,    "Play Movie From Beginning", },
-	{ 'T',             VK_CONTROL,  "Stop Movie", },
-	{ 0,               0,           "Start AVI Capture", },
-	{ 0,               0,           "Stop AVI Capture", },
-	{ 0,               0,           "Memory Cards", },
-	{ 'C',             VK_CONTROL,  "Cheat Editor", },
-	{ 'F',             VK_CONTROL,  "RAM Search", },
-	{ 'K',             VK_CONTROL,  "RAM Poke", },
-	{ 'W',             VK_CONTROL,  "RAM Watch", },
-	{ 0,               0,           "Configure Graphics", },
-	{ 0,               0,           "Configure Sound", },
-	{ 0,               0,           "Map Hotkeys", },
-	{ 0,               0,           "Configure Controllers", },
-	{ 0,               0,           "Configure Options", },
-	{ 'C',             VK_SHIFT,    "Cheats Enable/Disable", },
-	{ 'S',             VK_CONTROL,	"CD Swap (Open/Close)", },
-	{ 0,               0,           "SIO IRQ Enable/Disable", },
-	{ 0,               0,           "Parasite Eve 2 Fix E/D", },		//RCntFix
-	{ 0,               0,           "Resident Evil 2/3 Fix E/D", },		//VSYNCWA
+	{ VK_TAB,          0,           "Fast forward", },
+	{ VK_SPACE,        0,           "Frame advance", },
+	{ '8',             VK_SHIFT,    "Read-only toggle", },
+	{ VK_OEM_MINUS,    0,           "Decrease speed", },
+	{ VK_OEM_PLUS,     0,           "Increase speed", },
+	{ VK_NUMPAD0,      0,           "Normal speed", },
+	{ 0,               0,           "Turbo speed", },
+	{ VK_DECIMAL,      0,           "Maximum speed", },
+	{ VK_OEM_PERIOD,   0,           "Frame counter", },
+	{ VK_OEM_COMMA,	   0,			"Input display", },
+	{ 0,               0,           "Lag counter reset", },
+	{ VK_F12,          0,           "Take screenshot", },
+	{ VK_F1,           0,           "Load state 1", },
+	{ VK_F2,           0,           "Load state 2", },
+	{ VK_F3,           0,           "Load state 3", },
+	{ VK_F4,           0,           "Load state 4", },
+	{ VK_F5,           0,           "Load state 5", },
+	{ VK_F6,           0,           "Load state 6", },
+	{ VK_F7,           0,           "Load state 7", },
+	{ VK_F8,           0,           "Load state 8", },
+	{ VK_F9,           0,           "Load state 9", },
+	{ VK_F10,		   0,			"Load state 10",},
+	{ VK_F1,           VK_SHIFT,    "Save state 1", },
+	{ VK_F2,           VK_SHIFT,    "Save state 2", },
+	{ VK_F3,           VK_SHIFT,    "Save state 3", },
+	{ VK_F4,           VK_SHIFT,    "Save state 4", },
+	{ VK_F5,           VK_SHIFT,    "Save state 5", },
+	{ VK_F6,           VK_SHIFT,    "Save state 6", },
+	{ VK_F7,           VK_SHIFT,    "Save state 7", },
+	{ VK_F8,           VK_SHIFT,    "Save state 8", },
+	{ VK_F9,           VK_SHIFT,    "Save state 9", },
+	{ VK_F10,		   VK_SHIFT,	"Save state 0",},
+	{ '1',             0,           "Select state 1", },
+	{ '2',             0,           "Select state 2", },
+	{ '3',             0,           "Select state 3", },
+	{ '4',             0,           "Select state 4", },
+	{ '5',             0,           "Select state 5", },
+	{ '6',             0,           "Select state 6", },
+	{ '7',             0,           "Select state 7", },
+	{ '8',             0,           "Select state 8", },
+	{ '9',             0,           "Select state 9", },
+	{ '0',			   0,			"Select state 0",},
+	{ 0,			   0,			"Previous state",},
+	{ 0,			   0,			"Next state",},
+	{ 'P',             VK_CONTROL,  "Load current state", },
+	{ 'I',             VK_CONTROL,  "Save current state", },
+	{ 'N',             VK_CONTROL,  "Start recording", },
+	{ 'R',             VK_CONTROL,  "Start playback", },
+	{ 'R',             VK_SHIFT,    "Play movie from beginning", },
+	{ 'T',             VK_CONTROL,  "Stop movie", },
+	{ 0,               0,           "Start AVI capture", },
+	{ 0,               0,           "Stop AVI capture", },
+	{ 0,               0,           "Memory cards", },
+	{ 'C',             VK_CONTROL,  "Cheat editor", },
+	{ 'F',             VK_CONTROL,  "RAM search", },
+	{ 'K',             VK_CONTROL,  "RAM poke", },
+	{ 'W',             VK_CONTROL,  "RAM watch", },
+	{ 0,               0,           "Configure graphics", },
+	{ 0,               0,           "Configure sound", },
+	{ 0,               0,           "Map hotkeys", },
+	{ 0,               0,           "Configure controllers", },
+	{ 0,               0,           "Configure options", },
+	{ 'C',             VK_SHIFT,    "Cheats enable/disable", },
+	{ 'S',             VK_CONTROL,	"CD swap (open/close)", },
+	{ 0,               0,           "SIO IRQ enable/disable", },
+	{ 0,               0,           "Parasite Eve 2 hack enable/disable", },		//RCntFix
+	{ 0,               0,           "Resident Evil 2/3 hack enable/disable", },		//VSYNCWA
 	{ VK_F3,           VK_CONTROL,  "Reset", },
-	{ 0,               0,           "Analog Display", },
-	{ 'L',             VK_CONTROL,  "New Lua Script Window", },
-	{ 0,               0,           "Stop Lua Script", },
-	{ 'L',             VK_SHIFT,    "Reload Lua Script", },
-	{ 0,               0,           "Volume Up", },
-	{ 0,               0,           "Volume Down", },
-	{ 0,               0,           "Analog Control", },
-	{ 0,			   0,			"Toggle MultiTrack",},
-	{ 0,			   0,			"MTrack: Increment Player",},
-	{ 0,			   0,			"MTrack: Decrement Player",},
-	{ 0,			   0,			"MTrack: Select All",},
-	{ 0,			   0,			"MTrack: Select None",},
+	{ 0,               0,           "Analog display", },
+	{ 'L',             VK_CONTROL,  "New Lua script window", },
+	{ 0,               0,           "Stop Lua script", },
+	{ 'L',             VK_SHIFT,    "Reload Lua script", },
+	{ 0,               0,           "Volume up", },
+	{ 0,               0,           "Volume down", },
+	{ 0,               0,           "Analog control", },
+	{ 0,			   0,			"Toggle multi-track",},
+	{ 0,			   0,			"Multi-track: increment player",},
+	{ 0,			   0,			"Multi-track: decrement player",},
+	{ 0,			   0,			"Multi-track: select all",},
+	{ 0,			   0,			"Multi-track: select none",},
 	{ 0,			   0,			"Auto-hold",},
 	{ 0,			   0,			"Auto-hold clear",},
 	{ 0,			   0,			"Auto-fire",},
-	{ 0,               0,           "SPU IRQ Enable/Disable", },			//dirty fix, this key is missing from maphkeys.h, putting it on botom of the list prevent keys to be offset and seem to remove it from hotkeys map list
-
-	
+	{ 0,               0,           "SPU IRQ enable/disable", },	// Dirty fix, this key is missing from maphkeys.h, putting it on the bottom of the list prevent keys to be offset and seems to remove it from hotkeys map list (Although, we should fix this ASAP to prevent strange occurrences in the future)
 
 };
 
@@ -200,6 +198,7 @@ char* RealKeyName(int c)
 }
 
 // Update which command is using which key
+
 static int MHkeysUseUpdate()
 {
 	char tempTxt[256];
@@ -210,6 +209,7 @@ static int MHkeysUseUpdate()
 	}
 
 	// Update the values of all the inputs
+	
 	for (i = 0; i < EMUCMDMAX; i++) {
 		LVITEM LvItem;
 		tempTxt[0] = '\0';
@@ -244,7 +244,8 @@ static int MHkeysListBegin()
 		return 1;
 	}
 
-	// Full row select style:
+	// Full row select style
+	
 	SendMessage(hMHkeysList, LVM_SETEXTENDEDLISTVIEWSTYLE, 0, LVS_EX_FULLROWSELECT);
 
 	// Make column headers
@@ -263,6 +264,7 @@ static int MHkeysListBegin()
 }
 
 // Make a list view of the game inputs
+
 int MHkeysListMake(int bBuild)
 {
 	unsigned int i;
@@ -277,6 +279,7 @@ int MHkeysListMake(int bBuild)
 	}
 
 	// Add all the input names to the list
+	
 	for (i = 0; i < EMUCMDMAX; i++) {
 		LVITEM LvItem;
 
@@ -301,7 +304,8 @@ static int MHkeysInit()
 
 	hMHkeysList = GetDlgItem(hMHkeysDlg, IDC_MHKEYS_LIST);
 
-	// Allocate a last val array for the last input values
+	// Allocate a last value array for the last input values
+	
 	nMemLen = EMUCMDMAX * sizeof(char);
 	LastVal = (unsigned char*)malloc(nMemLen);
 	if (LastVal == NULL) {
@@ -357,6 +361,7 @@ static LRESULT CALLBACK KeyMappingHook(int code, WPARAM wParam, LPARAM lParam) {
 }
 
 // List item(s) deleted; find out which one(s)
+
 static int ListItemDelete()
 {
 	int nStart = -1;
@@ -367,6 +372,7 @@ static int ListItemDelete()
 		nStart = nRet;
 
 		// Get the corresponding input
+		
 		LvItem.mask = LVIF_PARAM;
 		LvItem.iItem = nRet;
 		LvItem.iSubItem = 0;
@@ -382,6 +388,7 @@ static int ListItemDelete()
 }
 
 // List item activated; find out which one
+
 static int ListItemActivate()
 {
 	char str [256];
@@ -458,7 +465,7 @@ static BOOL CALLBACK DialogProc(HWND hDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 int MHkeysCreate()
 {
-	DestroyWindow(hMHkeysDlg); // Make sure exitted
+	DestroyWindow(hMHkeysDlg); // Make sure exited
 
 //	hMHkeysDlg = CreateDialog(gApp.hInstance, MAKEINTRESOURCE(IDD_MHKEYS), gApp.hWnd, DialogProc);
 	/*hMHkeysDlg =*/ DialogBox(gApp.hInstance,MAKEINTRESOURCE(IDD_MHKEYS),gApp.hWnd,(DLGPROC)DialogProc);

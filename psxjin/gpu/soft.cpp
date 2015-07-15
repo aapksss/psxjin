@@ -1,77 +1,4 @@
-/***************************************************************************
-                          soft.c  -  description
-                             -------------------
-    begin                : Sun Oct 28 2001
-    copyright            : (C) 2001 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2005/06/11 - Pete
-// - added y sprite mirror
-//
-// 2005/04/15 - Pete
-// - gamefix 0x200 controls g-shaded quads now
-//
-// 2005/04/12 - Pete
-// - 25% blending mode 3
-//
-// 2004/02/01 - Pete
-// - added ZN stuff... Tekken "IL" texture decoding infos kindly given by smf from the MAME team
-//
-// 2003/08/30 - Pete
-// - added game fix 0x100 (dark forces)
-//
-// 2002/10/03 - Farfetch'd & Pete
-// - changed: mask bit handling
-//
-// 2002/06/04 - Lewpy
-// - new line drawing funcs
-//
-// 2002/05/24 - Pete
-// - added additional handling for tex quads to avoid texture distortions
-//
-// 2002/05/14 - Pete
-// - redone all texture window funcs... much faster now
-//
-// 2002/05/12 - Pete
-// - Mask bit fix on non-textured/sprite prims
-//
-// 2002/03/27 - Pete
-// - doom adjustment
-//
-// 2002/02/12 - Pete
-// - removed "no sprite transparency" fix
-//
-// 2001/12/14 - Pete
-// - added support for 15 bit texture window primitives
-//
-// 2001/12/10 - Pete
-// - fixed a mask bit bug in drawPoly4F, causing troubles in MGS
-//
-// 2001/11/08 - Linuzappz
-// - shl10idiv converted to nasm, C version still works :define __i386_
-//   to use the asm version
-//
-// 2001/10/28 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
 #include "stdafx.h"
-
 #include <algorithm>
 
 #define _IN_SOFT
@@ -84,29 +11,25 @@
 #include "prim.h"
 #include "menu.h"
 
-////////////////////////////////////////////////////////////////////////////////////
-// "NO EDGE BUFFER" POLY VERSION... FUNCS BASED ON FATMAP.TXT FROM MRI / Doomsday
-////////////////////////////////////////////////////////////////////////////////////
+// "No edge buffer" poly version... functions based on fatmap.txt from MRI / Doomsday
 
-////////////////////////////////////////////////////////////////////////////////////
-// defines
-////////////////////////////////////////////////////////////////////////////////////
+// Defines
 
-// switches for painting textured quads as 2 triangles (small glitches, but better shading!)
-// can be toggled by game fix 0x200 in version 1.17 anyway, so let the defines enabled!
+// Switches for painting textured quads as 2 triangles (small glitches, but better shading!)
+// Can be toggled by game fix 0x200 in version 1.17 anyway, so let the defines enabled!
 
 #define POLYQUAD3
 #define POLYQUAD3GT
 
-// fast solid loops... a bit more additional code, of course
+// Fast solid loops... a bit more additional code, of course
 
 #define FASTSOLID
 
-// psx blending mode 3 with 25% incoming color (instead 50% without the define)
+// PS1 blending mode 3 with 25% incoming color (instead 50% without the define)
 
 #define HALFBRIGHTMODE3
 
-// color decode defines
+// Color decode defines
 
 #define XCOL1(x)     (x & 0x1f)
 #define XCOL2(x)     (x & 0x3e0)
@@ -141,22 +64,18 @@
 //#pragma warning (disable:4761)
 //#endif
 
-////////////////////////////////////////////////////////////////////////////////////
-// soft globals
-////////////////////////////////////////////////////////////////////////////////////
+// Soft globals
 
 short g_m1=255,g_m2=255,g_m3=255;
 short DrawSemiTrans=FALSE;
 short Ymin;
 short Ymax;
 
-short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;        // global psx vertex coords
+short          ly0,lx0,ly1,lx1,ly2,lx2,ly3,lx3;        // Global PS1 vertex coordinates
 long           GlobalTextAddrX,GlobalTextAddrY,GlobalTextTP; //!
 long           GlobalTextREST,GlobalTextABR,GlobalTextPAGE;
 
-////////////////////////////////////////////////////////////////////////
-// POLYGON OFFSET FUNCS
-////////////////////////////////////////////////////////////////////////
+// Polygon offset functions
 
 void offsetPSXLine(void)
 {
@@ -171,7 +90,7 @@ void offsetPSXLine(void)
 	dx=x1-x0;
 	dy=y1-y0;
 
-// tricky line width without sqrt
+// Tricky line width without sqrt
 
 	if (dx>=0)
 	{
@@ -253,14 +172,7 @@ void offsetPSX4(void)
 	ly3 += PSXDisplay.DrawOffset.y;
 }
 
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-// PER PIXEL FUNCS
-////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-
+// Per-pixel functions
 
 unsigned char dithertable[16] =
 {
@@ -298,10 +210,6 @@ void Dither16(unsigned short * pdest,unsigned long r,unsigned long g,unsigned lo
 	       ((unsigned short)g<<5) |
 	       (unsigned short)r | sM;
 }
-
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
 
 __inline void GetShadeTransCol_Dither(unsigned short * pdest,long m1,long m2,long m3)
 {
@@ -365,8 +273,6 @@ __inline void GetShadeTransCol_Dither(unsigned short * pdest,long m1,long m2,lon
 	Dither16(pdest,r,b,g,sSetMask);
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline void GetShadeTransCol(unsigned short * pdest,unsigned short color)
 {
 	if (bCheckMask && *pdest&0x8000) return;
@@ -377,7 +283,7 @@ __inline void GetShadeTransCol(unsigned short * pdest,unsigned short color)
 
 		if (GlobalTextABR==0)
 		{
-			*pdest=((((*pdest)&0x7bde)>>1)+(((color)&0x7bde)>>1))|sSetMask;//0x8000;
+			*pdest=((((*pdest)&0x7bde)>>1)+(((color)&0x7bde)>>1))|sSetMask; // 0x8000;
 			return;
 			/*
 			     r=(XCOL1(*pdest)>>1)+((XCOL1(color))>>1);
@@ -419,12 +325,10 @@ __inline void GetShadeTransCol(unsigned short * pdest,unsigned short color)
 		if (b&0x7FFFFC00) b=0x3e0;
 		if (g&0x7FFF8000) g=0x7c00;
 
-		*pdest=(XPSXCOL(r,g,b))|sSetMask;//0x8000;
+		*pdest=(XPSXCOL(r,g,b))|sSetMask; // 0x8000;
 	}
 	else *pdest=color|sSetMask;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void GetShadeTransCol32(unsigned long * pdest,unsigned long color)
 {
@@ -436,7 +340,7 @@ __inline void GetShadeTransCol32(unsigned long * pdest,unsigned long color)
 		{
 			if (!bCheckMask)
 			{
-				*pdest=((((*pdest)&0x7bde7bde)>>1)+(((color)&0x7bde7bde)>>1))|lSetMask;//0x80008000;
+				*pdest=((((*pdest)&0x7bde7bde)>>1)+(((color)&0x7bde7bde)>>1))|lSetMask; // 0x80008000;
 				return;
 			}
 			r=(X32ACOL1(*pdest)>>1)+((X32ACOL1(color))>>1);
@@ -501,29 +405,27 @@ __inline void GetShadeTransCol32(unsigned long * pdest,unsigned long color)
 		if (bCheckMask)
 		{
 			unsigned long ma=*pdest;
-			*pdest=(X32PSXCOL(r,g,b))|lSetMask;//0x80008000;
+			*pdest=(X32PSXCOL(r,g,b))|lSetMask; // 0x80008000;
 			if (ma&0x80000000) *pdest=(ma&0xFFFF0000)|(*pdest&0xFFFF);
 			if (ma&0x00008000) *pdest=(ma&0xFFFF)    |(*pdest&0xFFFF0000);
 			return;
 		}
-		*pdest=(X32PSXCOL(r,g,b))|lSetMask;//0x80008000;
+		*pdest=(X32PSXCOL(r,g,b))|lSetMask; // 0x80008000;
 	}
 	else
 	{
 		if (bCheckMask)
 		{
 			unsigned long ma=*pdest;
-			*pdest=color|lSetMask;//0x80008000;
+			*pdest=color|lSetMask; // 0x80008000;
 			if (ma&0x80000000) *pdest=(ma&0xFFFF0000)|(*pdest&0xFFFF);
 			if (ma&0x00008000) *pdest=(ma&0xFFFF)    |(*pdest&0xFFFF0000);
 			return;
 		}
 
-		*pdest=color|lSetMask;//0x80008000;
+		*pdest=color|lSetMask; // 0x80008000;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void GetTextureTransColG(unsigned short * pdest,unsigned short color)
 {
@@ -597,8 +499,6 @@ __inline void GetTextureTransColG(unsigned short * pdest,unsigned short color)
 	*pdest=(XPSXCOL(r,g,b))|l;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline void GetTextureTransColG_S(unsigned short * pdest,unsigned short color)
 {
 	long r,g,b;
@@ -618,8 +518,6 @@ __inline void GetTextureTransColG_S(unsigned short * pdest,unsigned short color)
 
 	*pdest=(XPSXCOL(r,g,b))|l;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void GetTextureTransColG_SPR(unsigned short * pdest,unsigned short color)
 {
@@ -692,8 +590,6 @@ __inline void GetTextureTransColG_SPR(unsigned short * pdest,unsigned short colo
 
 	*pdest=(XPSXCOL(r,g,b))|l;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void GetTextureTransColG32(unsigned long * pdest,unsigned long color)
 {
@@ -811,8 +707,6 @@ __inline void GetTextureTransColG32(unsigned long * pdest,unsigned long color)
 	*pdest=(X32PSXCOL(r,g,b))|l;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline void GetTextureTransColG32_S(unsigned long * pdest,unsigned long color)
 {
 	long r,g,b;
@@ -843,8 +737,6 @@ __inline void GetTextureTransColG32_S(unsigned long * pdest,unsigned long color)
 
 	*pdest=(X32PSXCOL(r,g,b))|lSetMask|(color&0x80008000);
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void GetTextureTransColG32_SPR(unsigned long * pdest,unsigned long color)
 {
@@ -960,8 +852,6 @@ __inline void GetTextureTransColG32_SPR(unsigned long * pdest,unsigned long colo
 	*pdest=(X32PSXCOL(r,g,b))|lSetMask|(color&0x80008000);
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline void GetTextureTransColGX_Dither(unsigned short * pdest,unsigned short color,long m1,long m2,long m3)
 {
 	long r,g,b;
@@ -1030,8 +920,6 @@ __inline void GetTextureTransColGX_Dither(unsigned short * pdest,unsigned short 
 	Dither16(pdest,r,b,g,sSetMask|(color&0x8000));
 
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void GetTextureTransColGX(unsigned short * pdest,unsigned short color,short m1,short m2,short m3)
 {
@@ -1104,8 +992,6 @@ __inline void GetTextureTransColGX(unsigned short * pdest,unsigned short color,s
 	*pdest=(XPSXCOL(r,g,b))|l;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline void GetTextureTransColGX_S(unsigned short * pdest,unsigned short color,short m1,short m2,short m3)
 {
 	long r,g,b;
@@ -1122,8 +1008,6 @@ __inline void GetTextureTransColGX_S(unsigned short * pdest,unsigned short color
 
 	*pdest=(XPSXCOL(r,g,b))|sSetMask|(color&0x8000);
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void GetTextureTransColGX32_S(unsigned long * pdest,unsigned long color,short m1,short m2,short m3)
 {
@@ -1156,11 +1040,9 @@ __inline void GetTextureTransColGX32_S(unsigned long * pdest,unsigned long color
 	*pdest=(X32PSXCOL(r,g,b))|lSetMask|(color&0x80008000);
 }
 
-////////////////////////////////////////////////////////////////////////
-// FILL FUNCS
-////////////////////////////////////////////////////////////////////////
+// Fill functions
 
-void FillSoftwareAreaTrans(short x0,short y0,short x1, // FILL AREA TRANS
+void FillSoftwareAreaTrans(short x0,short y0,short x1, // Fill area trans
                            short y1,unsigned short col)
 {
 	short j,i,dx,dy;
@@ -1187,7 +1069,7 @@ void FillSoftwareAreaTrans(short x0,short y0,short x1, // FILL AREA TRANS
 	dx=x1-x0;
 	dy=y1-y0;
 
-	if (dx==1 && dy==1 && x0==1020 && y0==511)            // special fix for pinball game... emu protection???
+	if (dx==1 && dy==1 && x0==1020 && y0==511)            // Special fix for pinball game...emulator protection?
 	{
 		/*
 		m->v 1020 511 1 1
@@ -1208,7 +1090,7 @@ void FillSoftwareAreaTrans(short x0,short y0,short x1, // FILL AREA TRANS
 		else iCheat=1;
 	}
 
-	if (dx&1)                                             // slow fill
+	if (dx&1)                                             // Slow fill
 	{
 		unsigned short *DSTPtr;
 		unsigned short LineOffset;
@@ -1221,7 +1103,7 @@ void FillSoftwareAreaTrans(short x0,short y0,short x1, // FILL AREA TRANS
 			DSTPtr += LineOffset;
 		}
 	}
-	else                                                  // fast fill
+	else                                                  // Fast fill
 	{
 		unsigned long *DSTPtr;
 		unsigned short LineOffset;
@@ -1250,10 +1132,8 @@ void FillSoftwareAreaTrans(short x0,short y0,short x1, // FILL AREA TRANS
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void FillSoftwareArea(short x0,short y0,short x1,      // FILL AREA (BLK FILL)
-                      short y1,unsigned short col)     // no draw area check here!
+void FillSoftwareArea(short x0,short y0,short x1,      // Fill area (black fill)
+                      short y1,unsigned short col)     // No draw area, check here!
 {
 	short j,i,dx,dy;
 
@@ -1300,13 +1180,7 @@ void FillSoftwareArea(short x0,short y0,short x1,      // FILL AREA (BLK FILL)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-// EDGE INTERPOLATION
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
+// Edge interpolation
 
 typedef struct SOFTVTAG
 {
@@ -1329,6 +1203,7 @@ static int left_B, delta_left_B, right_B, delta_right_B;
 #ifdef __i386__
 
 // NASM version (external):
+
 #define shl10idiv i386_shl10idiv
 
 extern "C" __inline int shl10idiv(int x, int y);
@@ -1349,7 +1224,7 @@ __inline int shl10idiv(int x, int y)
 		shl   eax, 10
 		sar   edx, 22
 		idiv  ebx
-		// return result in eax
+		// Return result in EAX
 	}
 }
 
@@ -1377,10 +1252,6 @@ __inline int shl10idiv(int x, int y)
 
 */
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
 __inline int RightSection_F(void)
 {
 	soft_vertex * v1 = right_array[ right_section ];
@@ -1395,8 +1266,6 @@ __inline int RightSection_F(void)
 	return height;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline int LeftSection_F(void)
 {
 	soft_vertex * v1 = left_array[ left_section ];
@@ -1410,8 +1279,6 @@ __inline int LeftSection_F(void)
 	left_section_height = height;
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL NextRow_F(void)
 {
@@ -1448,8 +1315,6 @@ __inline BOOL NextRow_F(void)
 	}
 	return FALSE;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL SetupSections_F(short x1, short y1, short x2, short y2, short x3, short y3)
 {
@@ -1537,9 +1402,6 @@ __inline BOOL SetupSections_F(short x1, short y1, short x2, short y2, short x3, 
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
 __inline int RightSection_G(void)
 {
 	soft_vertex * v1 = right_array[ right_section ];
@@ -1553,8 +1415,6 @@ __inline int RightSection_G(void)
 	right_section_height = height;
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline int LeftSection_G(void)
 {
@@ -1576,8 +1436,6 @@ __inline int LeftSection_G(void)
 	left_section_height = height;
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL NextRow_G(void)
 {
@@ -1617,8 +1475,6 @@ __inline BOOL NextRow_G(void)
 	}
 	return FALSE;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL SetupSections_G(short x1,short y1,short x2,short y2,short x3,short y3,long rgb1, long rgb2, long rgb3)
 {
@@ -1722,9 +1578,6 @@ __inline BOOL SetupSections_G(short x1,short y1,short x2,short y2,short x3,short
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
 __inline int RightSection_FT(void)
 {
 	soft_vertex * v1 = right_array[ right_section ];
@@ -1738,8 +1591,6 @@ __inline int RightSection_FT(void)
 	right_section_height = height;
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline int LeftSection_FT(void)
 {
@@ -1759,8 +1610,6 @@ __inline int LeftSection_FT(void)
 	left_section_height = height;
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL NextRow_FT(void)
 {
@@ -1799,8 +1648,6 @@ __inline BOOL NextRow_FT(void)
 	}
 	return FALSE;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL SetupSections_FT(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3)
 {
@@ -1900,7 +1747,7 @@ __inline BOOL SetupSections_FT(short x1, short y1, short x2, short y2, short x3,
 	delta_right_v=shl10idiv(temp*((v3->v - v1->v)>>10)+((v1->v - v2->v)<<6),longest);
 
 	/*
-	Mmm... adjust neg tex deltas... will sometimes cause slight
+	Adjust negative texture deltas...will sometimes cause slight
 	texture distortions
 
 	 longest>>=16;
@@ -1917,9 +1764,6 @@ __inline BOOL SetupSections_FT(short x1, short y1, short x2, short y2, short x3,
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
 __inline int RightSection_GT(void)
 {
 	soft_vertex * v1 = right_array[ right_section ];
@@ -1933,8 +1777,6 @@ __inline int RightSection_GT(void)
 	right_section_height = height;
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline int LeftSection_GT(void)
 {
@@ -1961,8 +1803,6 @@ __inline int LeftSection_GT(void)
 	left_section_height = height;
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL NextRow_GT(void)
 {
@@ -2004,8 +1844,6 @@ __inline BOOL NextRow_GT(void)
 	}
 	return FALSE;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL SetupSections_GT(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, long rgb1, long rgb2, long rgb3)
 {
@@ -2120,9 +1958,8 @@ __inline BOOL SetupSections_GT(short x1, short y1, short x2, short y2, short x3,
 	delta_right_u=shl10idiv(temp*((v3->u - v1->u)>>10)+((v1->u - v2->u)<<6),longest);
 	delta_right_v=shl10idiv(temp*((v3->v - v1->v)>>10)+((v1->v - v2->v)<<6),longest);
 
-
 	/*
-	Mmm... adjust neg tex deltas... will sometimes cause slight
+	Adjust negative texture deltas...will sometimes cause slight
 	texture distortions
 	 longest>>=16;
 	 if(longest)
@@ -2135,12 +1972,8 @@ __inline BOOL SetupSections_GT(short x1, short y1, short x2, short y2, short x3,
 	  }
 	*/
 
-
 	return TRUE;
 }
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
 
 __inline int RightSection_F4(void)
 {
@@ -2159,8 +1992,6 @@ __inline int RightSection_F4(void)
 	return height;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline int LeftSection_F4(void)
 {
 	soft_vertex * v1 = left_array[ left_section ];
@@ -2177,8 +2008,6 @@ __inline int LeftSection_F4(void)
 
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL NextRow_F4(void)
 {
@@ -2209,8 +2038,6 @@ __inline BOOL NextRow_F4(void)
 	}
 	return FALSE;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4)
 {
@@ -2287,7 +2114,7 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 			if (longest1 >= 0)
 			{
 				right_array[0] = v4;                     //  1
-				right_array[1] = v3;                     //     3
+				right_array[1] = v3;                     //  3
 				right_array[2] = v1;                     //  4
 				right_section  = 2;
 			}
@@ -2299,15 +2126,15 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 				if (longest1 >= 0)
 				{
 					right_array[0] = v4;                    //  1
-					right_array[1] = v2;                    //     2
+					right_array[1] = v2;                    //  2
 					right_array[2] = v1;                    //  4
 					right_section  = 2;
 				}
 				else
 				{
 					right_array[0] = v4;                    //  1
-					right_array[1] = v3;                    //     2
-					right_array[2] = v2;                    //     3
+					right_array[1] = v3;                    //  2
+					right_array[2] = v2;                    //  3
 					right_array[3] = v1;                    //  4
 					right_section  = 3;
 				}
@@ -2316,10 +2143,10 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 		else
 		{
 			left_array[0]  = v4;
-			left_array[1]  = v3;                         //    1
-			left_array[2]  = v1;                         //      2
-			left_section   = 2;                          //  3
-			right_array[0] = v4;                         //    4
+			left_array[1]  = v3;                         //     1
+			left_array[2]  = v1;                         //     2
+			left_section   = 2;                          //     3
+			right_array[0] = v4;                        //     4
 			right_array[1] = v2;
 			right_array[2] = v1;
 			right_section  = 2;
@@ -2330,8 +2157,8 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 		if (longest2 < 0)
 		{
 			left_array[0]  = v4;                          //    1
-			left_array[1]  = v2;                          //  2
-			left_array[2]  = v1;                          //      3
+			left_array[1]  = v2;                          //    2
+			left_array[2]  = v1;                          //    3
 			left_section   = 2;                           //    4
 			right_array[0] = v4;
 			right_array[1] = v3;
@@ -2349,9 +2176,9 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 			longest1 = (((v2->y - v1->y) << 16) / height) * ((v3->x - v1->x)>>16) + (v1->x - v2->x);
 			if (longest1<0)
 			{
-				left_array[0]  = v4;                        //    1
+				left_array[0]  = v4;                        //  1
 				left_array[1]  = v3;                        //  3
-				left_array[2]  = v1;                        //    4
+				left_array[2]  = v1;                        //  4
 				left_section   = 2;
 			}
 			else
@@ -2362,16 +2189,16 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 				if (longest1<0)
 				{
 					left_array[0]  = v4;                      //    1
-					left_array[1]  = v2;                      //  2
+					left_array[1]  = v2;                      //    2
 					left_array[2]  = v1;                      //    4
 					left_section   = 2;
 				}
 				else
 				{
 					left_array[0]  = v4;                      //    1
-					left_array[1]  = v3;                      //  2
-					left_array[2]  = v2;                      //  3
-					left_array[3]  = v1;                      //     4
+					left_array[1]  = v3;                      //    2
+					left_array[2]  = v2;                      //    3
+					left_array[3]  = v1;                      //    4
 					left_section   = 3;
 				}
 			}
@@ -2394,9 +2221,6 @@ __inline BOOL SetupSections_F4(short x1, short y1, short x2, short y2, short x3,
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
 __inline int RightSection_FT4(void)
 {
 	soft_vertex * v1 = right_array[ right_section ];
@@ -2418,8 +2242,6 @@ __inline int RightSection_FT4(void)
 	return height;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline int LeftSection_FT4(void)
 {
 	soft_vertex * v1 = left_array[ left_section ];
@@ -2440,8 +2262,6 @@ __inline int LeftSection_FT4(void)
 
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL NextRow_FT4(void)
 {
@@ -2476,8 +2296,6 @@ __inline BOOL NextRow_FT4(void)
 	}
 	return FALSE;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4)
 {
@@ -2565,7 +2383,7 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 			if (longest1 >= 0)
 			{
 				right_array[0] = v4;                     //  1
-				right_array[1] = v3;                     //     3
+				right_array[1] = v3;                     //  3
 				right_array[2] = v1;                     //  4
 				right_section  = 2;
 			}
@@ -2577,15 +2395,15 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 				if (longest1 >= 0)
 				{
 					right_array[0] = v4;                    //  1
-					right_array[1] = v2;                    //     2
+					right_array[1] = v2;                    //  2
 					right_array[2] = v1;                    //  4
 					right_section  = 2;
 				}
 				else
 				{
 					right_array[0] = v4;                    //  1
-					right_array[1] = v3;                    //     2
-					right_array[2] = v2;                    //     3
+					right_array[1] = v3;                    //  2
+					right_array[2] = v2;                    //  3
 					right_array[3] = v1;                    //  4
 					right_section  = 3;
 				}
@@ -2594,10 +2412,10 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 		else
 		{
 			left_array[0]  = v4;
-			left_array[1]  = v3;                         //    1
+			left_array[1]  = v3;                         //      1
 			left_array[2]  = v1;                         //      2
-			left_section   = 2;                          //  3
-			right_array[0] = v4;                         //    4
+			left_section   = 2;                          //      3
+			right_array[0] = v4;                         //     4
 			right_array[1] = v2;
 			right_array[2] = v1;
 			right_section  = 2;
@@ -2608,8 +2426,8 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 		if (longest2 < 0)
 		{
 			left_array[0]  = v4;                          //    1
-			left_array[1]  = v2;                          //  2
-			left_array[2]  = v1;                          //      3
+			left_array[1]  = v2;                          //    2
+			left_array[2]  = v1;                          //    3
 			left_section   = 2;                           //    4
 			right_array[0] = v4;
 			right_array[1] = v3;
@@ -2628,7 +2446,7 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 			if (longest1<0)
 			{
 				left_array[0]  = v4;                        //    1
-				left_array[1]  = v3;                        //  3
+				left_array[1]  = v3;                        //    3
 				left_array[2]  = v1;                        //    4
 				left_section   = 2;
 			}
@@ -2640,16 +2458,16 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 				if (longest1<0)
 				{
 					left_array[0]  = v4;                      //    1
-					left_array[1]  = v2;                      //  2
+					left_array[1]  = v2;                      //    2
 					left_array[2]  = v1;                      //    4
 					left_section   = 2;
 				}
 				else
 				{
 					left_array[0]  = v4;                      //    1
-					left_array[1]  = v3;                      //  2
-					left_array[2]  = v2;                      //  3
-					left_array[3]  = v1;                      //     4
+					left_array[1]  = v3;                      //    2
+					left_array[2]  = v2;                      //    3
+					left_array[3]  = v1;                      //    4
 					left_section   = 3;
 				}
 			}
@@ -2671,9 +2489,6 @@ __inline BOOL SetupSections_FT4(short x1, short y1, short x2, short y2, short x3
 
 	return TRUE;
 }
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
 
 __inline int RightSection_GT4(void)
 {
@@ -2703,8 +2518,6 @@ __inline int RightSection_GT4(void)
 	return height;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 __inline int LeftSection_GT4(void)
 {
 	soft_vertex * v1 = left_array[ left_section ];
@@ -2732,8 +2545,6 @@ __inline int LeftSection_GT4(void)
 
 	return height;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL NextRow_GT4(void)
 {
@@ -2774,8 +2585,6 @@ __inline BOOL NextRow_GT4(void)
 	}
 	return FALSE;
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,long rgb1,long rgb2,long rgb3,long rgb4)
 {
@@ -2875,7 +2684,7 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 			if (longest1 >= 0)
 			{
 				right_array[0] = v4;                     //  1
-				right_array[1] = v3;                     //     3
+				right_array[1] = v3;                     //  3
 				right_array[2] = v1;                     //  4
 				right_section  = 2;
 			}
@@ -2887,15 +2696,15 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 				if (longest1 >= 0)
 				{
 					right_array[0] = v4;                    //  1
-					right_array[1] = v2;                    //     2
+					right_array[1] = v2;                    //  2
 					right_array[2] = v1;                    //  4
 					right_section  = 2;
 				}
 				else
 				{
 					right_array[0] = v4;                    //  1
-					right_array[1] = v3;                    //     2
-					right_array[2] = v2;                    //     3
+					right_array[1] = v3;                    //  2
+					right_array[2] = v2;                    //  3
 					right_array[3] = v1;                    //  4
 					right_section  = 3;
 				}
@@ -2904,9 +2713,9 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 		else
 		{
 			left_array[0]  = v4;
-			left_array[1]  = v3;                         //    1
-			left_array[2]  = v1;                         //      2
-			left_section   = 2;                          //  3
+			left_array[1]  = v3;                         //     1
+			left_array[2]  = v1;                         //     2
+			left_section   = 2;                          //     3
 			right_array[0] = v4;                         //    4
 			right_array[1] = v2;
 			right_array[2] = v1;
@@ -2918,8 +2727,8 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 		if (longest2 < 0)
 		{
 			left_array[0]  = v4;                          //    1
-			left_array[1]  = v2;                          //  2
-			left_array[2]  = v1;                          //      3
+			left_array[1]  = v2;                          //    2
+			left_array[2]  = v1;                          //    3
 			left_section   = 2;                           //    4
 			right_array[0] = v4;
 			right_array[1] = v3;
@@ -2938,7 +2747,7 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 			if (longest1<0)
 			{
 				left_array[0]  = v4;                        //    1
-				left_array[1]  = v3;                        //  3
+				left_array[1]  = v3;                        //    3
 				left_array[2]  = v1;                        //    4
 				left_section   = 2;
 			}
@@ -2950,16 +2759,16 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 				if (longest1<0)
 				{
 					left_array[0]  = v4;                      //    1
-					left_array[1]  = v2;                      //  2
+					left_array[1]  = v2;                      //    2
 					left_array[2]  = v1;                      //    4
 					left_section   = 2;
 				}
 				else
 				{
 					left_array[0]  = v4;                      //    1
-					left_array[1]  = v3;                      //  2
-					left_array[2]  = v2;                      //  3
-					left_array[3]  = v1;                      //     4
+					left_array[1]  = v3;                      //    2
+					left_array[2]  = v2;                      //    3
+					left_array[3]  = v1;                      //    4
 					left_section   = 3;
 				}
 			}
@@ -2982,17 +2791,8 @@ __inline BOOL SetupSections_GT4(short x1, short y1, short x2, short y2, short x3
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-// POLY FUNCS
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////
-// POLY 3/4 FLAT SHADED
-////////////////////////////////////////////////////////////////////////
+// Polygon functions
+// Polygon 3/4 F shaded
 
 __inline void drawPoly3Fi(short x1,short y1,short x2,short y2,short x3,short y3,long rgb)
 {
@@ -3060,8 +2860,6 @@ __inline void drawPoly3Fi(short x1,short y1,short x2,short y2,short x3,short y3,
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3F(long rgb)
 {
 	drawPoly3Fi(lx0,ly0,lx1,ly1,lx2,ly2,rgb);
@@ -3077,7 +2875,7 @@ void drawPoly4F_TRI(long rgb)
 
 #endif
 
-// more exact:
+// More exact
 
 void drawPoly4F(long rgb)
 {
@@ -3144,9 +2942,7 @@ void drawPoly4F(long rgb)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// POLY 3/4 F-SHADED TEX PAL 4
-////////////////////////////////////////////////////////////////////////
+// Polygon 3/4 F shaded texture palette 4
 
 void drawPoly3TEx4(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY)
 {
@@ -3186,7 +2982,7 @@ void drawPoly3TEx4(short x1, short y1, short x2, short y2, short x3, short y3, s
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -3241,7 +3037,7 @@ void drawPoly3TEx4(short x1, short y1, short x2, short y2, short x3, short y3, s
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -3289,8 +3085,6 @@ void drawPoly3TEx4(short x1, short y1, short x2, short y2, short x3, short y3, s
 		}
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly3TEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY)
 {
@@ -3397,7 +3191,7 @@ void drawPoly3TEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -3458,8 +3252,6 @@ void drawPoly3TEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY)
 {
 	int i,j,xmin,xmax,ymin,ymax;
@@ -3499,7 +3291,7 @@ void drawPoly3TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16);//-1; //!!!!!!!!!!!!!!!!
+			xmax=(right_x >> 16);//-1; //!
 			if (xmax>xmin) xmax--;
 
 			if (drawW<xmax) xmax=drawW;
@@ -3557,7 +3349,7 @@ void drawPoly3TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -3607,8 +3399,6 @@ void drawPoly3TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 #ifdef POLYQUAD3
 
 void drawPoly4TEx4_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
@@ -3623,7 +3413,7 @@ void drawPoly4TEx4_TRI(short x1, short y1, short x2, short y2, short x3, short y
 
 #endif
 
-// more exact:
+// More exact
 
 void drawPoly4TEx4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
@@ -3770,8 +3560,6 @@ void drawPoly4TEx4(short x1, short y1, short x2, short y2, short x3, short y3, s
 		if (NextRow_FT4()) return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly4TEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
@@ -3942,8 +3730,6 @@ void drawPoly4TEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly4TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
 	long num;
@@ -4092,8 +3878,6 @@ void drawPoly4TEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly4TEx4_TW_S(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
 	long num;
@@ -4241,9 +4025,8 @@ void drawPoly4TEx4_TW_S(short x1, short y1, short x2, short y2, short x3, short 
 		if (NextRow_FT4()) return;
 	}
 }
-////////////////////////////////////////////////////////////////////////
-// POLY 3 F-SHADED TEX PAL 8
-////////////////////////////////////////////////////////////////////////
+
+// Polygon 3 F shaded texture palette 8
 
 void drawPoly3TEx8(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY)
 {
@@ -4282,7 +4065,7 @@ void drawPoly3TEx8(short x1, short y1, short x2, short y2, short x3, short y3, s
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -4329,7 +4112,7 @@ void drawPoly3TEx8(short x1, short y1, short x2, short y2, short x3, short y3, s
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -4371,8 +4154,6 @@ void drawPoly3TEx8(short x1, short y1, short x2, short y2, short x3, short y3, s
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY)
 {
 	int i,j,xmin,xmax,ymin,ymax,n_xi,n_yi,TXV,TXU;
@@ -4410,7 +4191,7 @@ void drawPoly3TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -4474,7 +4255,7 @@ void drawPoly3TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -4533,8 +4314,6 @@ void drawPoly3TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,short clX, short clY)
 {
 	int i,j,xmin,xmax,ymin,ymax;
@@ -4573,7 +4352,7 @@ void drawPoly3TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16);//-1; //!!!!!!!!!!!!!!!!
+			xmax=(right_x >> 16);//-1; //!
 			if (xmax>xmin) xmax--;
 
 			if (drawW<xmax) xmax=drawW;
@@ -4624,7 +4403,7 @@ void drawPoly3TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -4668,8 +4447,6 @@ void drawPoly3TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 #ifdef POLYQUAD3
 
 void drawPoly4TEx8_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
@@ -4685,7 +4462,7 @@ void drawPoly4TEx8_TRI(short x1, short y1, short x2, short y2, short x3, short y
 
 #endif
 
-// more exact:
+// More exact
 
 void drawPoly4TEx8(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
@@ -4815,8 +4592,6 @@ void drawPoly4TEx8(short x1, short y1, short x2, short y2, short x3, short y3, s
 		if (NextRow_FT4()) return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly4TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
@@ -4979,8 +4754,6 @@ void drawPoly4TEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly4TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
 	long num;
@@ -5065,7 +4838,6 @@ void drawPoly4TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3
 
 #endif
 
-
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
@@ -5115,8 +4887,6 @@ void drawPoly4TEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3
 		if (NextRow_FT4()) return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly4TEx8_TW_S(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,short clX, short clY)
 {
@@ -5253,9 +5023,7 @@ void drawPoly4TEx8_TW_S(short x1, short y1, short x2, short y2, short x3, short 
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// POLY 3 F-SHADED TEX 15 BIT
-////////////////////////////////////////////////////////////////////////
+// Polygon 3 F shaded texture 15 bit
 
 void drawPoly3TD(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3)
 {
@@ -5289,7 +5057,7 @@ void drawPoly3TD(short x1, short y1, short x2, short y2, short x3, short y3, sho
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -5331,7 +5099,7 @@ void drawPoly3TD(short x1, short y1, short x2, short y2, short x3, short y3, sho
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -5367,8 +5135,6 @@ void drawPoly3TD(short x1, short y1, short x2, short y2, short x3, short y3, sho
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3)
 {
 	int i,j,xmin,xmax,ymin,ymax;
@@ -5401,7 +5167,7 @@ void drawPoly3TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, 
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -5446,7 +5212,7 @@ void drawPoly3TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, 
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -5485,9 +5251,6 @@ void drawPoly3TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, 
 	}
 }
 
-
-////////////////////////////////////////////////////////////////////////
-
 #ifdef POLYQUAD3
 
 void drawPoly4TD_TRI(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4)
@@ -5500,7 +5263,7 @@ void drawPoly4TD_TRI(short x1, short y1, short x2, short y2, short x3, short y3,
 
 #endif
 
-// more exact:
+// More exact
 
 void drawPoly4TD(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4)
 {
@@ -5617,8 +5380,6 @@ void drawPoly4TD(short x1, short y1, short x2, short y2, short x3, short y3, sho
 		if (NextRow_FT4()) return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly4TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4)
 {
@@ -5742,8 +5503,6 @@ void drawPoly4TD_TW(short x1, short y1, short x2, short y2, short x3, short y3, 
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly4TD_TW_S(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4)
 {
 	long num;
@@ -5866,9 +5625,7 @@ void drawPoly4TD_TW_S(short x1, short y1, short x2, short y2, short x3, short y3
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// POLY 3/4 G-SHADED
-////////////////////////////////////////////////////////////////////////
+// Polygon 3/4 G shaded
 
 __inline void drawPoly3Gi(short x1,short y1,short x2,short y2,short x3,short y3,long rgb1, long rgb2, long rgb3)
 {
@@ -6011,14 +5768,12 @@ __inline void drawPoly3Gi(short x1,short y1,short x2,short y2,short x3,short y3,
 
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3G(long rgb1, long rgb2, long rgb3)
 {
 	drawPoly3Gi(lx0,ly0,lx1,ly1,lx2,ly2,rgb1,rgb2,rgb3);
 }
 
-// draw two g-shaded tris for right psx shading emulation
+// Draw two G shaded triangles for right PS1 shading emulation
 
 void drawPoly4G(long rgb1, long rgb2, long rgb3, long rgb4)
 {
@@ -6028,9 +5783,7 @@ void drawPoly4G(long rgb1, long rgb2, long rgb3, long rgb4)
 	            rgb1,rgb2,rgb3);
 }
 
-////////////////////////////////////////////////////////////////////////
-// POLY 3/4 G-SHADED TEX PAL4
-////////////////////////////////////////////////////////////////////////
+// Polygon 3/4 G shaded texture palette 4
 
 void drawPoly3TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3)
 {
@@ -6078,7 +5831,7 @@ void drawPoly3TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, 
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=((left_x) >> 16);
-			xmax=((right_x) >> 16)-1; //!!!!!!!!!!!!!
+			xmax=((right_x) >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -6145,7 +5898,7 @@ void drawPoly3TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, 
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -6194,8 +5947,6 @@ void drawPoly3TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, 
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TGEx4_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3)
 {
 	int i,j,xmin,xmax,ymin,ymax,n_xi,n_yi,TXV;
@@ -6242,7 +5993,7 @@ void drawPoly3TGEx4_IL(short x1, short y1, short x2, short y2, short x3, short y
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=((left_x) >> 16);
-			xmax=((right_x) >> 16)-1; //!!!!!!!!!!!!!
+			xmax=((right_x) >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -6322,7 +6073,7 @@ void drawPoly3TGEx4_IL(short x1, short y1, short x2, short y2, short x3, short y
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -6376,8 +6127,6 @@ void drawPoly3TGEx4_IL(short x1, short y1, short x2, short y2, short x3, short y
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3)
 {
 	int i,j,xmin,xmax,ymin,ymax;
@@ -6425,7 +6174,7 @@ void drawPoly3TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=((left_x) >> 16);
-			xmax=((right_x) >> 16)-1; //!!!!!!!!!!!!!
+			xmax=((right_x) >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -6493,7 +6242,7 @@ void drawPoly3TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -6543,12 +6292,12 @@ void drawPoly3TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-// note: the psx is doing g-shaded quads as two g-shaded tris,
-// like the following func... sadly texturing is not 100%
+// Note: The PS1 is doing G shaded quads as two G shaded triangles,
+// like the following function... sadly texturing is not 100%
 // correct that way, so small texture distortions can
-// happen...
+// happen
+
+// If we could test this with homebrew, SDK test files, and other code, we should
 
 void drawPoly4TGEx4_TRI_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4,
                            short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,
@@ -6583,8 +6332,6 @@ void drawPoly4TGEx4_TRI(short x1, short y1, short x2, short y2, short x3, short 
 }
 
 #endif
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly4TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4,
                     short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,
@@ -6768,8 +6515,6 @@ void drawPoly4TGEx4(short x1, short y1, short x2, short y2, short x3, short y3, 
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly4TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4,
                        short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,
                        short clX, short clY,
@@ -6786,9 +6531,7 @@ void drawPoly4TGEx4_TW(short x1, short y1, short x2, short y2, short x3, short y
 	                  col1,col2,col3);
 }
 
-////////////////////////////////////////////////////////////////////////
-// POLY 3/4 G-SHADED TEX PAL8
-////////////////////////////////////////////////////////////////////////
+// Polygon 3/4 G shaded texture palette 8
 
 void drawPoly3TGEx8(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3)
 {
@@ -6835,7 +6578,7 @@ void drawPoly3TGEx8(short x1, short y1, short x2, short y2, short x3, short y3, 
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; // !!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -6895,7 +6638,7 @@ void drawPoly3TGEx8(short x1, short y1, short x2, short y2, short x3, short y3, 
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -6942,8 +6685,6 @@ void drawPoly3TGEx8(short x1, short y1, short x2, short y2, short x3, short y3, 
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TGEx8_IL(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3)
 {
 	int i,j,xmin,xmax,ymin,ymax,n_xi,n_yi,TXV,TXU;
@@ -6989,7 +6730,7 @@ void drawPoly3TGEx8_IL(short x1, short y1, short x2, short y2, short x3, short y
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; // !!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -7066,7 +6807,7 @@ void drawPoly3TGEx8_IL(short x1, short y1, short x2, short y2, short x3, short y
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -7119,8 +6860,6 @@ void drawPoly3TGEx8_IL(short x1, short y1, short x2, short y2, short x3, short y
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short clX, short clY,long col1, long col2, long col3)
 {
 	int i,j,xmin,xmax,ymin,ymax;
@@ -7167,7 +6906,7 @@ void drawPoly3TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; // !!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -7230,7 +6969,7 @@ void drawPoly3TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -7278,9 +7017,9 @@ void drawPoly3TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
+// Note: Two G shaded triangles: small texture distortions can happen
 
-// note: two g-shaded tris: small texture distortions can happen
+// Again, we should test
 
 void drawPoly4TGEx8_TRI_IL(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4,
                            short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,
@@ -7486,8 +7225,6 @@ void drawPoly4TGEx8(short x1, short y1, short x2, short y2, short x3, short y3, 
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly4TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4,
                        short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4,
                        short clX, short clY,
@@ -7503,9 +7240,7 @@ void drawPoly4TGEx8_TW(short x1, short y1, short x2, short y2, short x3, short y
 	                  col1,col2,col3);
 }
 
-////////////////////////////////////////////////////////////////////////
-// POLY 3 G-SHADED TEX 15 BIT
-////////////////////////////////////////////////////////////////////////
+// Polygon 3 G shaded texture 15 bit
 
 void drawPoly3TGD(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,long col1, long col2, long col3)
 {
@@ -7547,7 +7282,7 @@ void drawPoly3TGD(short x1, short y1, short x2, short y2, short x3, short y3, sh
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -7601,7 +7336,7 @@ void drawPoly3TGD(short x1, short y1, short x2, short y2, short x3, short y3, sh
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -7647,8 +7382,6 @@ void drawPoly3TGD(short x1, short y1, short x2, short y2, short x3, short y3, sh
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3,long col1, long col2, long col3)
 {
 	int i,j,xmin,xmax,ymin,ymax;
@@ -7689,7 +7422,7 @@ void drawPoly3TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3,
 		for (i=ymin;i<=ymax;i++)
 		{
 			xmin=(left_x >> 16);
-			xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!!!
+			xmax=(right_x >> 16)-1; //!
 			if (drawW<xmax) xmax=drawW;
 
 			if (xmax>=xmin)
@@ -7746,7 +7479,7 @@ void drawPoly3TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3,
 	for (i=ymin;i<=ymax;i++)
 	{
 		xmin=(left_x >> 16);
-		xmax=(right_x >> 16)-1; //!!!!!!!!!!!!!!!!!!
+		xmax=(right_x >> 16)-1; //!
 		if (drawW<xmax) xmax=drawW;
 
 		if (xmax>=xmin)
@@ -7794,9 +7527,7 @@ void drawPoly3TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3,
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-// note: two g-shaded tris: small texture distortions can happen
+// Note: Two G shaded triangles: small texture distortions can happen
 
 #ifdef POLYQUAD3GT
 
@@ -7966,8 +7697,6 @@ void drawPoly4TGD(short x1, short y1, short x2, short y2, short x3, short y3, sh
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly4TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3, short x4, short y4, short tx1, short ty1, short tx2, short ty2, short tx3, short ty3, short tx4, short ty4, long col1, long col2, long col3, long col4)
 {
 	drawPoly3TGD_TW(x2,y2,x3,y3,x4,y4,
@@ -7978,16 +7707,8 @@ void drawPoly4TGD_TW(short x1, short y1, short x2, short y2, short x3, short y3,
 	                col1,col2,col3);
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
-
 /*
-// no real rect test, but it does its job the way I need it
+// Not real rectangle test, but it does its job the way I need it
 __inline BOOL IsNoRect(void)
 {
  if(lx0==lx1 && lx2==lx3) return FALSE;
@@ -7997,7 +7718,8 @@ __inline BOOL IsNoRect(void)
 }
 */
 
-// real rect test
+// Real rectangle test
+
 __inline BOOL IsNoRect(void)
 {
 	if (!(dwActFixes&0x200)) return FALSE;
@@ -8025,8 +7747,6 @@ __inline BOOL IsNoRect(void)
 	return TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void drawPoly3FT(unsigned char * baseAddr)
 {
 	unsigned long *gpuData = ((unsigned long *) baseAddr);
@@ -8046,7 +7766,7 @@ void drawPoly3FT(unsigned char * baseAddr)
 
 	if (!bUsingTWin && !(dwActFixes&0x100))
 	{
-		switch (GlobalTextTP)  // depending on texture mode
+		switch (GlobalTextTP)  // Depending on texture mode
 		{
 		case 0:
 			drawPoly3TEx4(lx0,ly0,lx1,ly1,lx2,ly2,
@@ -8065,7 +7785,7 @@ void drawPoly3FT(unsigned char * baseAddr)
 		return;
 	}
 
-	switch (GlobalTextTP)  // depending on texture mode
+	switch (GlobalTextTP)  // Depending on texture mode
 	{
 	case 0:
 		drawPoly3TEx4_TW(lx0,ly0,lx1,ly1,lx2,ly2,
@@ -8082,8 +7802,6 @@ void drawPoly3FT(unsigned char * baseAddr)
 		return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly4FT(unsigned char * baseAddr)
 {
@@ -8125,7 +7843,7 @@ void drawPoly4FT(unsigned char * baseAddr)
 
 		switch (GlobalTextTP)
 		{
-		case 0: // grandia investigations needed
+		case 0: // Grandia investigations needed
 			drawPoly4TEx4(lx0,ly0,lx1,ly1,lx3,ly3,lx2,ly2,
 			              (gpuData[2] & 0x000000ff), ((gpuData[2]>>8) & 0x000000ff), (gpuData[4] & 0x000000ff), ((gpuData[4]>>8) & 0x000000ff),(gpuData[8] & 0x000000ff), ((gpuData[8]>>8) & 0x000000ff),(gpuData[6] & 0x000000ff), ((gpuData[6]>>8) & 0x000000ff), ((gpuData[2]>>12) & 0x3f0), ((gpuData[2]>>22) & iGPUHeightMask));
 			return;
@@ -8155,8 +7873,6 @@ void drawPoly4FT(unsigned char * baseAddr)
 		return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly3GT(unsigned char * baseAddr)
 {
@@ -8219,8 +7935,6 @@ void drawPoly3GT(unsigned char * baseAddr)
 		return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void drawPoly4GT(unsigned char *baseAddr)
 {
@@ -8311,9 +8025,7 @@ void drawPoly4GT(unsigned char *baseAddr)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// SPRITE FUNCS
-////////////////////////////////////////////////////////////////////////
+// Sprite functions
 
 void DrawSoftwareSpriteTWin(unsigned char * baseAddr,long w,long h)
 {
@@ -8352,8 +8064,6 @@ void DrawSoftwareSpriteTWin(unsigned char * baseAddr,long w,long h)
 		return;
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void DrawSoftwareSpriteMirror(unsigned char * baseAddr,long w,long h)
 {
@@ -8417,7 +8127,7 @@ void DrawSoftwareSpriteMirror(unsigned char * baseAddr,long w,long h)
 
 	switch (GlobalTextTP)
 	{
-	case 0: // texture is 4-bit
+	case 0: // Texture is 4-bit
 
 		sprtW=sprtW/2;
 		textX0=(GlobalTextAddrX<<1)+(textX0>>1);
@@ -8457,8 +8167,6 @@ void DrawSoftwareSpriteMirror(unsigned char * baseAddr,long w,long h)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void DrawSoftwareSprite_IL(unsigned char * baseAddr,short w,short h,long tx,long ty)
 {
 	long sprtY,sprtX,sprtW,sprtH,tdx,tdy;
@@ -8481,7 +8189,7 @@ void DrawSoftwareSprite_IL(unsigned char * baseAddr,short w,short h,long tx,long
 	sprtW+=sprtX;
 	sprtH+=sprtY;
 
-// Pete is too lazy to make a faster version ;)
+// Pete is too lazy to make a faster version (we aren't, we can look into this later)
 
 	if (GlobalTextTP==0)
 		drawPoly4TEx4_IL(sprtX,sprtY,sprtX,sprtH,sprtW,sprtH,sprtW,sprtY,
@@ -8494,8 +8202,6 @@ void DrawSoftwareSprite_IL(unsigned char * baseAddr,short w,short h,long tx,long
 		                 tx,ty,      tx,tdy,     tdx,tdy,    tdx,ty,
 		                 (gpuData[2]>>12) & 0x3f0, ((gpuData[2]>>22) & iGPUHeightMask));
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void DrawSoftwareSprite(unsigned char * baseAddr,short w,short h,long tx,long ty)
 {
@@ -8741,18 +8447,7 @@ void DrawSoftwareSprite(unsigned char * baseAddr,short w,short h,long tx,long ty
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
-
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-// LINE FUNCS
-////////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-
-
-///////////////////////////////////////////////////////////////////////
+// Line functions
 
 void Line_E_SE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1)
 {
@@ -8811,8 +8506,6 @@ void Line_E_SE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigne
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
-
 void Line_S_SE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1)
 {
 	int dx, dy, incrS, incrSE, d;
@@ -8869,8 +8562,6 @@ void Line_S_SE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigne
 			GetShadeTransCol(&psxVuw[(y0<<10)+x0],(unsigned short)(((r0 >> 9)&0x7c00)|((g0 >> 14)&0x03e0)|((b0 >> 19)&0x001f)));
 	}
 }
-
-///////////////////////////////////////////////////////////////////////
 
 void Line_N_NE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1)
 {
@@ -8929,8 +8620,6 @@ void Line_N_NE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigne
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
-
 void Line_E_NE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigned long rgb1)
 {
 	int dx, dy, incrE, incrNE, d;
@@ -8988,8 +8677,6 @@ void Line_E_NE_Shade(int x0, int y0, int x1, int y1, unsigned long rgb0, unsigne
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
-
 void VertLineShade(int x, int y0, int y1, unsigned long rgb0, unsigned long rgb1)
 {
 	int y, dy;
@@ -9037,8 +8724,6 @@ void VertLineShade(int x, int y0, int y1, unsigned long rgb0, unsigned long rgb1
 		b0+=db;
 	}
 }
-
-///////////////////////////////////////////////////////////////////////
 
 void HorzLineShade(int y, int x0, int x1, unsigned long rgb0, unsigned long rgb1)
 {
@@ -9088,8 +8773,6 @@ void HorzLineShade(int y, int x0, int x1, unsigned long rgb0, unsigned long rgb1
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
-
 void Line_E_SE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 {
 	int dx, dy, incrE, incrSE, d, x, y;
@@ -9120,8 +8803,6 @@ void Line_E_SE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 			GetShadeTransCol(&psxVuw[(y<<10)+x], colour);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////
 
 void Line_S_SE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 {
@@ -9154,8 +8835,6 @@ void Line_S_SE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
-
 void Line_N_NE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 {
 	int dx, dy, incrN, incrNE, d, x, y;
@@ -9186,8 +8865,6 @@ void Line_N_NE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 			GetShadeTransCol(&psxVuw[(y<<10)+x], colour);
 	}
 }
-
-///////////////////////////////////////////////////////////////////////
 
 void Line_E_NE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 {
@@ -9220,8 +8897,6 @@ void Line_E_NE_Flat(int x0, int y0, int x1, int y1, unsigned short colour)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////
-
 void VertLineFlat(int x, int y0, int y1, unsigned short colour)
 {
 	int y;
@@ -9235,8 +8910,6 @@ void VertLineFlat(int x, int y0, int y1, unsigned short colour)
 	for (y = y0; y <= y1; y++)
 		GetShadeTransCol(&psxVuw[(y<<10)+x], colour);
 }
-
-///////////////////////////////////////////////////////////////////////
 
 void HorzLineFlat(int y, int x0, int x1, unsigned short colour)
 {
@@ -9252,9 +8925,8 @@ void HorzLineFlat(int y, int x0, int x1, unsigned short colour)
 		GetShadeTransCol(&psxVuw[(y<<10)+x], colour);
 }
 
-///////////////////////////////////////////////////////////////////////
+/* Bresenham line drawing function */
 
-/* Bresenham Line drawing function */
 void DrawSoftwareLineShade(long rgb0, long rgb1)
 {
 	short x0, y0, x1, y1, xt, yt;
@@ -9325,8 +8997,6 @@ void DrawSoftwareLineShade(long rgb0, long rgb1)
 					Line_E_NE_Shade(x0, y0, x1, y1, rgb0, rgb1);
 		}
 }
-
-///////////////////////////////////////////////////////////////////////
 
 void DrawSoftwareLineFlat(long rgb)
 {

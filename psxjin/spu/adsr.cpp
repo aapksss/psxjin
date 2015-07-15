@@ -1,64 +1,29 @@
-/***************************************************************************
-                          adsr.c  -  description
-                             -------------------
-    begin                : Wed May 15 2002
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2004/09/18 - LDChen
-// - Speed optimized ADSR mixing
-//
-// 2003/05/14 - xodnizel
-// - removed stopping of reverb on sample end
-//
-// 2003/01/06 - Pete
-// - added Neill's ADSR timings
-//
-// 2002/05/15 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
 #include "adsr.h"
 
 static const unsigned long int TableDisp[] =
 {
-	-0x18+0+32,-0x18+4+32,-0x18+6+32,-0x18+8+32,       // release/decay
+	-0x18+0+32,-0x18+4+32,-0x18+6+32,-0x18+8+32,       // Release/decay
 	-0x18+9+32,-0x18+10+32,-0x18+11+32,-0x18+12+32,
 
-	-0x1B+0+32,-0x1B+4+32,-0x1B+6+32,-0x1B+8+32,       // sustain
+	-0x1B+0+32,-0x1B+4+32,-0x1B+6+32,-0x1B+8+32,       // Sustain
 	-0x1B+9+32,-0x1B+10+32,-0x1B+11+32,-0x1B+12+32,
 };
 
 
 static unsigned long int RateTable[160];
 
-void StaticInitADSR(void)                                    // INIT ADSR
+void StaticInitADSR(void)                                    // Initialize ADSR
 {
 	unsigned long r,rs,rd;
 	int i;
 
-	memset(RateTable,0,sizeof(unsigned long)*160);        // build the rate table according to Neill's rules (see at bottom of file)
+	memset(RateTable,0,sizeof(unsigned long)*160);        // Build the rate table according to Neill's rules (see at bottom of file)
 
 	r=3;
 	rs=1;
 	rd=0;
 
-	for (i=32;i<160;i++)                                  // we start at pos 32 with the real values... everything before is 0
+	for (i=32;i<160;i++)                                  // We start at pos 32 with the real values...everything before is 0
 	{
 		if (r<0x3FFFFFFF)
 		{
@@ -76,27 +41,24 @@ void StaticInitADSR(void)                                    // INIT ADSR
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void StartADSR(SPU_chan * pChannel)
 {
 	pChannel->ADSR.lVolume=0;
 	pChannel->ADSR.State=0;
 	pChannel->ADSR.EnvelopeVol=0;
 
-	//test case: without this, SOTN will check some ADSR envelopes too early before the attack kicks in and kill the sounds prematurely
-	MixADSR(pChannel); //tick the ADSR once
+	// Test case: without this, Symphony Of The Night will check some ADSR envelopes too early before the attack kicks in and kill the sounds prematurely
+	
+	MixADSR(pChannel); // Tick the ADSR once
 }
-
-////////////////////////////////////////////////////////////////////////
 
 int MixADSR(SPU_chan *ch)
 {
 	unsigned long int disp;
 	signed long int EnvelopeVol = ch->ADSR.EnvelopeVol;
 
-	if (ch->status == CHANSTATUS_KEYOFF)                                 // should be stopped:
-	{                                                    // do release
+	if (ch->status == CHANSTATUS_KEYOFF)                                 // Should be stopped:
+	{                                                    // Do release
 
 		//printf("[%02d] decaying with release rate %d\n",(ch->ch), ch->ADSR.ReleaseRate);
 		if (ch->ADSR.ReleaseModeExp)
@@ -121,9 +83,9 @@ int MixADSR(SPU_chan *ch)
 		ch->ADSR.lVolume=(EnvelopeVol>>=21);
 		return EnvelopeVol;
 	}
-	else                                                  // not stopped yet?
+	else                                                  // Not stopped yet?
 	{
-		if (ch->ADSR.State==0)                      // -> attack
+		if (ch->ADSR.State==0)                      // Attack
 		{
 			disp = -0x10+32;
 			if (ch->ADSR.AttackModeExp)
@@ -143,8 +105,8 @@ int MixADSR(SPU_chan *ch)
 			ch->ADSR.lVolume=(EnvelopeVol>>=21);
 			return EnvelopeVol;
 		}
-		//--------------------------------------------------//
-		if (ch->ADSR.State==1)                      // -> decay
+
+		if (ch->ADSR.State==1)                      // Decay
 		{
 			disp = TableDisp[(EnvelopeVol>>28)&0x7];
 			EnvelopeVol-=RateTable[ch->ADSR.DecayRate+disp];
@@ -159,8 +121,8 @@ int MixADSR(SPU_chan *ch)
 			ch->ADSR.lVolume=(EnvelopeVol>>=21);
 			return EnvelopeVol;
 		}
-		//--------------------------------------------------//
-		if (ch->ADSR.State==2)                      // -> sustain
+
+		if (ch->ADSR.State==2)                      // Sustain
 		{
 			if (ch->ADSR.SustainIncrease)
 			{
@@ -202,6 +164,7 @@ int MixADSR(SPU_chan *ch)
 	return 0;
 }
 
+// Can we remove this huge amount of documentation at the bottom too?
 
 /*
 James Higgs ADSR investigations:

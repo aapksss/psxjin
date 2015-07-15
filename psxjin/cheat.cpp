@@ -1,7 +1,7 @@
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 #ifdef WIN32
-#include "Win32.h"
+#include "win32.h"
 #endif
 
 // global variables

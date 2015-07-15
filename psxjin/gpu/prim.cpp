@@ -1,86 +1,3 @@
-/***************************************************************************
-                          prim.c  -  description
-                             -------------------
-    begin                : Sun Oct 28 2001
-    copyright            : (C) 2001 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2004/01/31 - Pete
-// - added zn bits and two zn cheats (TileS & move image - 2004/03/13)
-//
-// 2003/07/22 - Pete
-// - added sprite x coord wrap (skullmonkey) - new: sprite y coord wrap as well
-//
-// 2002/12/14 - Pete
-// - added dithering flag
-//
-// 2002/10/03 - Farfetch'd & Pete
-// - changed: polylines, 11 bit coords, polygon discarding, BlkFill align, mask bits
-//
-// 2002/09/19 - Farfetch'd
-// - STP: read control register is now masked correctly with 0x3
-//
-// 2002/08/16 - Pete
-// - additional mask bit handling for sprites (Alone in the Dark 4 & FF6)
-//
-// 2002/08/10 - Lewpy & E}I{
-// - correct TW coord adjustment (RRT4)
-//
-// 2002/07/22 - Pete
-// - problem with the "2002/05/19 fixed mdec mask bit problem in FF9" fixed (hopefully)
-//
-// 2002/06/04 - Lewpy
-// - new line drawing funcs
-//
-// 2002/05/19 - Pete
-// - mdec mask bit problem in FF9 fixed
-//
-// 2002/05/14 - Pete
-// - new coord check
-//
-// 2002/03/29 - Pete
-// - tex window coord adjustment - thanx to E}I{
-// - faster generic coord check - thanx to E}I{
-// - StoreImage wrap (Devilsummoner Soul Hackers)
-//
-// 2002/03/27 - Pete
-// - improved sprite texture wrapping func on _very_ big sprites
-//
-// 2002/02/23 - Pete
-// - added Lunar "ignore blending color" fix
-//
-// 2002/02/12 - Pete
-// - removed "no sprite transparency" and "black poly" fixes
-//
-// 2002/02/10 - Pete
-// - additional Load/MoveImage checks for a few FF9/BOF4 effects
-//
-// 2001/12/10 - Pete
-// - additional coord checks for Nascar and SF2 (and more...?)
-//
-// 2001/11/08 - Linuzappz
-// - BGR24to16 converted to nasm, C version still works: define __i386_
-//   to use the asm version
-//
-// 2001/10/28 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
 #include "stdafx.h"
 
 #define _IN_PRIMDRAW
@@ -90,14 +7,12 @@
 #include "draw.h"
 #include "soft.h"
 
-////////////////////////////////////////////////////////////////////////
-// globals
-////////////////////////////////////////////////////////////////////////
+// Globals
 
 BOOL           bUsingTWin=FALSE; //!
 TWin_t         TWin;
-unsigned long  clutid;                                 // global clut
-unsigned short usMirror=0;                             // sprite mirror //!
+unsigned long  clutid;                                 // Global clut
+unsigned short usMirror=0;                             // Sprite mirror
 int            iDither=0;
 long           drawX; //!
 long           drawY; //!
@@ -110,9 +25,7 @@ int            iUseFixes;
 int            iUseDither=0;
 BOOL           bDoVSyncUpdate=FALSE;
 
-////////////////////////////////////////////////////////////////////////
-// Some ASM color convertion by LEWPY
-////////////////////////////////////////////////////////////////////////
+// Some ASM color conversion by LEWPY
 
 #ifdef __i386__
 
@@ -128,13 +41,11 @@ __inline unsigned short BGR24to16 (unsigned long BGR)
 
 #endif
 
-////////////////////////////////////////////////////////////////////////
-// Update global TP infos
-////////////////////////////////////////////////////////////////////////
+// Update global TP info
 
 __inline void UpdateGlobalTP(unsigned short gdata)
 {
-	GlobalTextAddrX = (gdata << 6) & 0x3c0;               // texture addr
+	GlobalTextAddrX = (gdata << 6) & 0x3c0;               // Texture addr
 
 	if (iGPUHeight==1024)
 	{
@@ -148,7 +59,8 @@ __inline void UpdateGlobalTP(unsigned short gdata)
 			usMirror =0;
 			lGPUstatusRet = (lGPUstatusRet & 0xffffe000 ) | (gdata & 0x1fff );
 
-			// tekken dithering? right now only if dithering is forced by user
+			// Tekken dithering? Right now, only if dithering is forced by user
+			
 			if (iUseDither==2) iDither=2;
 			else iDither=0;
 
@@ -173,17 +85,15 @@ __inline void UpdateGlobalTP(unsigned short gdata)
 		else iDither=0;
 	}
 
-	GlobalTextTP = (gdata >> 7) & 0x3;                    // tex mode (4,8,15)
+	GlobalTextTP = (gdata >> 7) & 0x3;                    // Texture mode (4,8,15)
 
-	if (GlobalTextTP==3) GlobalTextTP=2;                  // seen in Wild9 :(
+	if (GlobalTextTP==3) GlobalTextTP=2;                  // Seen in Wild9
 
-	GlobalTextABR = (gdata >> 5) & 0x3;                   // blend mode
+	GlobalTextABR = (gdata >> 5) & 0x3;                   // Blend mode
 
 	lGPUstatusRet&=~0x07ff;                               // Clear the necessary bits
-	lGPUstatusRet|=(gdata & 0x07ff);                      // set the necessary bits
+	lGPUstatusRet|=(gdata & 0x07ff);                      // Set the necessary bits
 }
-
-////////////////////////////////////////////////////////////////////////
 
 __inline void SetRenderMode(unsigned long DrawAttributes)
 {
@@ -204,21 +114,20 @@ __inline void SetRenderMode(unsigned long DrawAttributes)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-// oki, here are the psx gpu coord rules: poly coords are
+// OK, here are the PS1 GPU coordinate rules: polygon coordinatess are
 // 11 bit signed values (-1024...1023). If the x or y distance
 // exceeds 1024, the polygon will not be drawn.
-// Since quads are treated as two triangles by the real gpu,
-// this 'discard rule' applies to each of the quad's triangle
+// Since quadrilaterals are treated as two triangles by the real GPU,
+// this 'discard rule' applies to each of the quadrilaterals triangle
 // (so one triangle can be drawn, the other one discarded).
 // Also, y drawing is wrapped at 512 one time,
 // then it will get negative (and therefore not drawn). The
-// 'CheckCoord' funcs are a simple (not comlete!) approach to
+// 'CheckCoord' functions are a simple (not complete!) approach to
 // do things right, I will add a better detection soon... the
-// current approach will be easier to do in hw/accel plugins, imho
+// current approach will be easier to do in hardware accelerated plugins
 
 // 11 bit signed
+
 #define SIGNSHIFT 21
 #define CHKMAX_X 1024
 #define CHKMAX_Y 512
@@ -265,12 +174,10 @@ void AdjustCoord1()
 		ly0+=2048;
 }
 
-////////////////////////////////////////////////////////////////////////
-// special checks... nascar, syphon filter 2, mgs
-////////////////////////////////////////////////////////////////////////
+// Special checks...Nascar, Syphon Filter 2, Metal Gear Solid
 
-// xenogears FT4: not removed correctly right now... the tri 0,1,2
-// should get removed, the tri 1,2,3 should stay... pfff
+// Xenogears FT4: not removed correctly right now...the triangle 0,1,2
+// Should get removed, the triangle 1,2,3 should stay
 
 // x -466 1023 180 1023
 // y   20 -228 222 -100
@@ -426,10 +333,7 @@ __inline BOOL CheckCoordL(short slx0,short sly0,short slx1,short sly1)
 	return FALSE;
 }
 
-
-////////////////////////////////////////////////////////////////////////
-// mask stuff... used in silent hill
-////////////////////////////////////////////////////////////////////////
+// Mask stuff...used in Silent Hill
 
 void cmdSTP(unsigned char * baseAddr)
 {
@@ -453,9 +357,7 @@ void cmdSTP(unsigned char * baseAddr)
 	else        bCheckMask=FALSE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: Set texture page infos
-////////////////////////////////////////////////////////////////////////
+// cmd: Set texture page info
 
 void cmdTexturePage(unsigned char * baseAddr)
 {
@@ -465,9 +367,7 @@ void cmdTexturePage(unsigned char * baseAddr)
 	GlobalTextREST = (gdata&0x00ffffff)>>9;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: turn on/off texture window
-////////////////////////////////////////////////////////////////////////
+// cmd: Turn on/off texture window
 
 void cmdTextureWindow(unsigned char *baseAddr)
 {
@@ -515,74 +415,66 @@ void cmdTextureWindow(unsigned char *baseAddr)
 	TWin.Position.y0 = (short)(((gdata >> 15) & YAlign) << 3);
 	TWin.Position.x0 = (short)(((gdata >> 10) & XAlign) << 3);
 
-	if ((TWin.Position.x0 == 0 &&                         // tw turned off
+	if ((TWin.Position.x0 == 0 &&                         // TW turned off
 	     TWin.Position.y0 == 0 &&
 	     TWin.Position.x1 == 0 &&
 	     TWin.Position.y1 == 0) ||
 	    (TWin.Position.x1 == 256 &&
 	     TWin.Position.y1 == 256))
 	{
-		bUsingTWin = FALSE;                                 // -> just do it
+		bUsingTWin = FALSE;                                 // Just do it
 	}
-	else                                                  // otherwise
+	else                                                  // Otherwise
 	{
-		bUsingTWin = TRUE;                                  // -> tw turned on
+		bUsingTWin = TRUE;                                  // TW turned on
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: start of drawing area... primitives will be clipped inside
-////////////////////////////////////////////////////////////////////////
-
-
+// cmd: Start of drawing area...primitives will be clipped inside
 
 void cmdDrawAreaStart(unsigned char * baseAddr)
 {
 	unsigned long gdata = ((unsigned long*)baseAddr)[0];
 
-	drawX  = gdata & 0x3ff;                               // for soft drawing
+	drawX  = gdata & 0x3ff;                               // For software drawing
 
 	if (dwGPUVersion==2)
 	{
 		lGPUInfoVals[INFO_DRAWSTART]=gdata&0x3FFFFF;
 		drawY  = (gdata>>12)&0x3ff;
-		if (drawY>=1024) drawY=1023;                        // some security
+		if (drawY>=1024) drawY=1023;                        // Some security
 	}
 	else
 	{
 		lGPUInfoVals[INFO_DRAWSTART]=gdata&0xFFFFF;
 		drawY  = (gdata>>10)&0x3ff;
-		if (drawY>=512) drawY=511;                          // some security
+		if (drawY>=512) drawY=511;                          // Some security
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: end of drawing area... primitives will be clipped inside
-////////////////////////////////////////////////////////////////////////
+// cmd: End of drawing area...primitives will be clipped inside
 
 void cmdDrawAreaEnd(unsigned char * baseAddr)
 {
 	unsigned long gdata = ((unsigned long*)baseAddr)[0];
 
-	drawW  = gdata & 0x3ff;                               // for soft drawing
+	drawW  = gdata & 0x3ff;                               // For software drawing
 
 	if (dwGPUVersion==2)
 	{
 		lGPUInfoVals[INFO_DRAWEND]=gdata&0x3FFFFF;
 		drawH  = (gdata>>12)&0x3ff;
-		if (drawH>=1024) drawH=1023;                        // some security
+		if (drawH>=1024) drawH=1023;                        // Some security
 	}
 	else
 	{
 		lGPUInfoVals[INFO_DRAWEND]=gdata&0xFFFFF;
 		drawH  = (gdata>>10)&0x3ff;
-		if (drawH>=512) drawH=511;                          // some security
+		if (drawH>=512) drawH=511;                          // Some security
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: draw offset... will be added to prim coords
-////////////////////////////////////////////////////////////////////////
+// cmd: Draw offset...will be added to primitive coordinates
 
 void cmdDrawOffset(unsigned char * baseAddr)
 {
@@ -605,9 +497,7 @@ void cmdDrawOffset(unsigned char * baseAddr)
 	PSXDisplay.DrawOffset.x=(short)(((int)PSXDisplay.DrawOffset.x<<21)>>21);
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: load image to vram
-////////////////////////////////////////////////////////////////////////
+// cmd: Load image to VRAM
 
 void primLoadImage(unsigned char * baseAddr)
 {
@@ -625,9 +515,7 @@ void primLoadImage(unsigned char * baseAddr)
 	VRAMWrite.ColsRemaining = VRAMWrite.Height;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: vram -> psx mem
-////////////////////////////////////////////////////////////////////////
+// cmd: VRAM to PS1 memory
 
 void primStoreImage(unsigned char * baseAddr)
 {
@@ -647,9 +535,7 @@ void primStoreImage(unsigned char * baseAddr)
 	lGPUstatusRet |= GPUSTATUS_READYFORVRAM;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: blkfill - NO primitive! Doesn't care about draw areas...
-////////////////////////////////////////////////////////////////////////
+// cmd: black fill - NO primitive! Doesn't care about draw areas
 
 void primBlkFill(unsigned char * baseAddr)
 {
@@ -667,7 +553,7 @@ void primBlkFill(unsigned char * baseAddr)
 	if (sH >= 1023) sH=1024;
 	if (sW >= 1023) sW=1024;
 
-// x and y of end pos
+// x and y of end position
 	sW+=sX;
 	sH+=sY;
 
@@ -676,9 +562,7 @@ void primBlkFill(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: move image vram -> vram
-////////////////////////////////////////////////////////////////////////
+// cmd: Move image VRAM to VRAM
 
 void primMoveImage(unsigned char * baseAddr)
 {
@@ -727,7 +611,7 @@ void primMoveImage(unsigned char * baseAddr)
 		return;
 	}
 
-	if (imageSX&1)                                        // not dword aligned? slower func
+	if (imageSX&1)                                        // Not dword aligned? Slower function
 	{
 		unsigned short *SRCPtr, *DSTPtr;
 		unsigned short LineOffset;
@@ -767,7 +651,7 @@ void primMoveImage(unsigned char * baseAddr)
 	imageSY+=imageY1;
 
 	/*
-	 if(!PSXDisplay.Interlaced)                            // stupid frame skip stuff
+	 if(!PSXDisplay.Interlaced)                            // Stupid frame skip stuff
 	  {
 	   if(UseFrameSkip &&
 	      imageX1<PSXDisplay.DisplayEnd.x &&
@@ -781,9 +665,7 @@ void primMoveImage(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: draw free-size Tile
-////////////////////////////////////////////////////////////////////////
+// cmd: Draw free-size tile
 
 //#define SMALLDEBUG
 //#include <dbgout.h>
@@ -793,7 +675,7 @@ void primTileS(unsigned char * baseAddr)
 	unsigned long *gpuData = ((unsigned long*)baseAddr);
 	short *sgpuData = ((short *) baseAddr);
 	short sW = sgpuData[4] & 0x3ff;
-	short sH = sgpuData[5] & iGPUHeightMask;              // mmm... limit tiles to 0x1ff or height?
+	short sH = sgpuData[5] & iGPUHeightMask;              // Limit tiles to 0x1ff or height?
 
 	lx0 = sgpuData[2];
 	ly0 = sgpuData[3];
@@ -801,6 +683,7 @@ void primTileS(unsigned char * baseAddr)
 	if (!(dwActFixes&8)) AdjustCoord1();
 
 // x and y of start
+
 	ly2 = ly3 = ly0+sH +PSXDisplay.DrawOffset.y;
 	ly0 = ly1 = ly0    +PSXDisplay.DrawOffset.y;
 	lx1 = lx2 = lx0+sW +PSXDisplay.DrawOffset.x;
@@ -808,16 +691,14 @@ void primTileS(unsigned char * baseAddr)
 
 	DrawSemiTrans = (SEMITRANSBIT(gpuData[0])) ? TRUE : FALSE;
 
-	if (!(iTileCheat && sH==32 && gpuData[0]==0x60ffffff)) // special cheat for certain ZiNc games
+	if (!(iTileCheat && sH==32 && gpuData[0]==0x60ffffff)) // Special cheat for certain ZiNc games
 		FillSoftwareAreaTrans(lx0,ly0,lx2,ly2,
 		                      BGR24to16(gpuData[0]));
 
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: draw 1 dot Tile (point)
-////////////////////////////////////////////////////////////////////////
+// cmd: Draw 1 dot tile (point)
 
 void primTile1(unsigned char * baseAddr)
 {
@@ -832,6 +713,7 @@ void primTile1(unsigned char * baseAddr)
 	if (!(dwActFixes&8)) AdjustCoord1();
 
 // x and y of start
+
 	ly2 = ly3 = ly0+sH +PSXDisplay.DrawOffset.y;
 	ly0 = ly1 = ly0    +PSXDisplay.DrawOffset.y;
 	lx1 = lx2 = lx0+sW +PSXDisplay.DrawOffset.x;
@@ -840,14 +722,12 @@ void primTile1(unsigned char * baseAddr)
 	DrawSemiTrans = (SEMITRANSBIT(gpuData[0])) ? TRUE : FALSE;
 
 	FillSoftwareAreaTrans(lx0,ly0,lx2,ly2,
-	                      BGR24to16(gpuData[0]));         // Takes Start and Offset
+	                      BGR24to16(gpuData[0]));         // Takes start and offset
 
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: draw 8 dot Tile (small rect)
-////////////////////////////////////////////////////////////////////////
+// cmd: Draw 8 dot tile (small rectangle)
 
 void primTile8(unsigned char * baseAddr)
 {
@@ -862,6 +742,7 @@ void primTile8(unsigned char * baseAddr)
 	if (!(dwActFixes&8)) AdjustCoord1();
 
 // x and y of start
+
 	ly2 = ly3 = ly0+sH +PSXDisplay.DrawOffset.y;
 	ly0 = ly1 = ly0    +PSXDisplay.DrawOffset.y;
 	lx1 = lx2 = lx0+sW +PSXDisplay.DrawOffset.x;
@@ -870,14 +751,12 @@ void primTile8(unsigned char * baseAddr)
 	DrawSemiTrans = (SEMITRANSBIT(gpuData[0])) ? TRUE : FALSE;
 
 	FillSoftwareAreaTrans(lx0,ly0,lx2,ly2,
-	                      BGR24to16(gpuData[0]));         // Takes Start and Offset
+	                      BGR24to16(gpuData[0]));         // Takes start and offset
 
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: draw 16 dot Tile (medium rect)
-////////////////////////////////////////////////////////////////////////
+// cmd: Draw 16 dot tile (medium rectangle)
 
 void primTile16(unsigned char * baseAddr)
 {
@@ -892,6 +771,7 @@ void primTile16(unsigned char * baseAddr)
 	if (!(dwActFixes&8)) AdjustCoord1();
 
 // x and y of start
+
 	ly2 = ly3 = ly0+sH +PSXDisplay.DrawOffset.y;
 	ly0 = ly1 = ly0    +PSXDisplay.DrawOffset.y;
 	lx1 = lx2 = lx0+sW +PSXDisplay.DrawOffset.x;
@@ -900,14 +780,12 @@ void primTile16(unsigned char * baseAddr)
 	DrawSemiTrans = (SEMITRANSBIT(gpuData[0])) ? TRUE : FALSE;
 
 	FillSoftwareAreaTrans(lx0,ly0,lx2,ly2,
-	                      BGR24to16(gpuData[0]));         // Takes Start and Offset
+	                      BGR24to16(gpuData[0]));         // Takes start and offset
 
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: small sprite (textured rect)
-////////////////////////////////////////////////////////////////////////
+// cmd: Small sprite (textured rectangle)
 
 void primSprt8(unsigned char * baseAddr)
 {
@@ -931,9 +809,7 @@ void primSprt8(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: medium sprite (textured rect)
-////////////////////////////////////////////////////////////////////////
+// cmd: Medium sprite (textured rectangle)
 
 void primSprt16(unsigned char * baseAddr)
 {
@@ -957,11 +833,10 @@ void primSprt16(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: free-size sprite (textured rect)
-////////////////////////////////////////////////////////////////////////
+// cmd: Free-size sprite (textured rectangle)
 
-// func used on texture coord wrap
+// Function used on texture coordinate wrap
+
 void primSprtSRest(unsigned char * baseAddr,unsigned short type)
 {
 	unsigned long *gpuData = ((unsigned long *) baseAddr);
@@ -1053,8 +928,6 @@ void primSprtSRest(unsigned char * baseAddr,unsigned short type)
 
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void primSprtS(unsigned char * baseAddr)
 {
 	unsigned long *gpuData = ((unsigned long *) baseAddr);
@@ -1105,9 +978,7 @@ void primSprtS(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: flat shaded Poly4
-////////////////////////////////////////////////////////////////////////
+// cmd: Flat shaded Polygon 4
 
 void primPolyF4(unsigned char *baseAddr)
 {
@@ -1137,9 +1008,7 @@ void primPolyF4(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: smooth shaded Poly4
-////////////////////////////////////////////////////////////////////////
+// cmd: Smooth shaded Polygon 4
 
 void primPolyG4(unsigned char * baseAddr)
 {
@@ -1169,9 +1038,7 @@ void primPolyG4(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: flat shaded Texture3
-////////////////////////////////////////////////////////////////////////
+// cmd: Flat shaded texture 3
 
 void primPolyFT3(unsigned char * baseAddr)
 {
@@ -1202,9 +1069,7 @@ void primPolyFT3(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: flat shaded Texture4
-////////////////////////////////////////////////////////////////////////
+// cmd: Flat shaded texture 4
 
 void primPolyFT4(unsigned char * baseAddr)
 {
@@ -1238,9 +1103,7 @@ void primPolyFT4(unsigned char * baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: smooth shaded Texture3
-////////////////////////////////////////////////////////////////////////
+// cmd: Smooth shaded texture 3
 
 void primPolyGT3(unsigned char *baseAddr)
 {
@@ -1278,9 +1141,7 @@ void primPolyGT3(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: smooth shaded Poly3
-////////////////////////////////////////////////////////////////////////
+// cmd: Smooth shaded Polygon 3
 
 void primPolyG3(unsigned char *baseAddr)
 {
@@ -1308,9 +1169,7 @@ void primPolyG3(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: smooth shaded Texture4
-////////////////////////////////////////////////////////////////////////
+// cmd: Smooth shaded texture 4
 
 void primPolyGT4(unsigned char *baseAddr)
 {
@@ -1351,9 +1210,7 @@ void primPolyGT4(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: smooth shaded Poly3
-////////////////////////////////////////////////////////////////////////
+// cmd: Smooth shaded Polygon 3
 
 void primPolyF3(unsigned char *baseAddr)
 {
@@ -1381,9 +1238,7 @@ void primPolyF3(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: skipping shaded polylines
-////////////////////////////////////////////////////////////////////////
+// cmd: Skipping shaded polylines
 
 void primLineGSkip(unsigned char *baseAddr)
 {
@@ -1404,9 +1259,7 @@ void primLineGSkip(unsigned char *baseAddr)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: shaded polylines
-////////////////////////////////////////////////////////////////////////
+// cmd: Shaded polylines
 
 void primLineGEx(unsigned char *baseAddr)
 {
@@ -1439,7 +1292,7 @@ void primLineGEx(unsigned char *baseAddr)
 
 		i++;
 
-		// no check needed on gshaded polyline positions
+		// No check needed on G shaded polyline positions
 		// if((gpuData[i] & 0xF000F000) == 0x50005000) break;
 
 		sly1 = (short)((gpuData[i]>>16) & 0xffff);
@@ -1470,9 +1323,7 @@ void primLineGEx(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: shaded polyline2
-////////////////////////////////////////////////////////////////////////
+// cmd: Shaded polyline 2
 
 void primLineG2(unsigned char *baseAddr)
 {
@@ -1503,9 +1354,7 @@ void primLineG2(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: skipping flat polylines
-////////////////////////////////////////////////////////////////////////
+// cmd: Skipping flat polylines
 
 void primLineFSkip(unsigned char *baseAddr)
 {
@@ -1524,9 +1373,7 @@ void primLineFSkip(unsigned char *baseAddr)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: drawing flat polylines
-////////////////////////////////////////////////////////////////////////
+// cmd: Drawing flat polylines
 
 void primLineFEx(unsigned char *baseAddr)
 {
@@ -1578,9 +1425,7 @@ void primLineFEx(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: drawing flat polyline2
-////////////////////////////////////////////////////////////////////////
+// cmd: Drawing flat polyline 2
 
 void primLineF2(unsigned char *baseAddr)
 {
@@ -1612,17 +1457,13 @@ void primLineF2(unsigned char *baseAddr)
 	bDoVSyncUpdate=TRUE;
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd: well, easiest command... not implemented
-////////////////////////////////////////////////////////////////////////
+// cmd: Well, easiest command...not implemented (we should implement this if it really isn't)
 
 void primNI(unsigned char *bA)
 {
 }
 
-////////////////////////////////////////////////////////////////////////
-// cmd func ptr table
-////////////////////////////////////////////////////////////////////////
+// cmd function ptr table
 
 
 void (*primTableJ[256])(unsigned char *) =
@@ -1693,9 +1534,7 @@ void (*primTableJ[256])(unsigned char *) =
 	primNI,primNI,primNI,primNI,primNI,primNI,primNI,primNI
 };
 
-////////////////////////////////////////////////////////////////////////
-// cmd func ptr table for skipping
-////////////////////////////////////////////////////////////////////////
+// cmd function ptr table for skipping
 
 void (*primTableSkip[256])(unsigned char *) =
 {

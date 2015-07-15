@@ -1,12 +1,12 @@
 #include <string.h>
 
-#include "PsxCommon.h"
-#include "Win32/Win32.h"
-#include "Win32/ramsearch.h"
-#include "Win32/ramwatch.h"
+#include "psxcommon.h"
+#include "win32/win32.h"
+#include "win32/ramsearch.h"
+#include "win32/ramwatch.h"
 
+// Global variables
 
-// global variables
 psxCounter psxCounters[5];
 unsigned long psxNextCounter, psxNextsCounter;
 
@@ -34,7 +34,7 @@ static void psxRcntReset(unsigned long index) {
 	psxHu32ref(0x1070)|= SWAPu32(psxCounters[index].interrupt);
 	if (!(psxCounters[index].mode & 0x40)) { // Only 1 interrupt
 		psxCounters[index].Cycle = 0xffffffff;
-	} // else Continuos interrupt mode
+	} // else continues interrupt mode
 }
 
 static void psxRcntSet() {
@@ -80,7 +80,7 @@ void psxRcntInit() {
 		psxCounters[4].target = 1;
 		psxCounters[4].mode = 0x58;
 	//}
-	//else 
+	// else
 	//	cnts = 4;
 
 	psxRcntUpd(0); psxRcntUpd(1); psxRcntUpd(2); psxRcntUpd(3);
@@ -88,7 +88,7 @@ void psxRcntInit() {
 }
 
 void psxUpdateVSyncRate() {
-	if (Config.PsxType) // ntsc - 0 | pal - 1
+	if (Config.PsxType) // NTSC - 0 | PAL - 1
 	     psxCounters[3].rate = (PSXCLK / 50);// / BIAS;
 	else psxCounters[3].rate = (PSXCLK / 60);// / BIAS;
 	psxCounters[3].rate-= (psxCounters[3].rate / 262) * 22;
@@ -96,30 +96,30 @@ void psxUpdateVSyncRate() {
 }
 
 void psxUpdateVSyncRateEnd() {
-	if (Config.PsxType) // ntsc - 0 | pal - 1
+	if (Config.PsxType) // NTSC - 0 | PAL - 1
 	     psxCounters[3].rate = (PSXCLK / 50);// / BIAS;
 	else psxCounters[3].rate = (PSXCLK / 60);// / BIAS;
 	psxCounters[3].rate = (psxCounters[3].rate / 262) * 22;
 	if (Config.VSyncWA) psxCounters[3].rate/= 2;
 }
 
-extern int iVSyncFlag;      //has a VSync already occured? (we can only save just after a VSync+iGpuHasUpdated)
+extern int iVSyncFlag;      // Has VSync already occurred (we can only save just after a VSync + iGpuHasUpdated)?
 void psxRcntUpdate() {
 
-
 	if ((psxRegs.cycle - psxCounters[3].sCycle) >= psxCounters[3].Cycle) {
-		if (psxCounters[3].mode & 0x10000) { // VSync End (22 hsyncs)
+		if (psxCounters[3].mode & 0x10000) { // VSync end (22 horizontal syncs)
 				psxCounters[3].mode&=~0x10000;
 				psxUpdateVSyncRate();
 				psxRcntUpd(3);
-				GPUupdateLace(); // updateGPU
+				GPUupdateLace(); // Update GPU
 				//SysUpdate();
 	#ifdef GTE_LOG
 				GTE_LOG("VSync\n");
 	#endif
 
-					/* movie stuff start */
-// raise VSync flag
+// Movie stuff start
+// Raise VSync flag
+
 iVSyncFlag = 1;
 
 	PadDataS paddtemp;
@@ -130,16 +130,16 @@ iVSyncFlag = 1;
 	//printf("frame: %d\n",Movie.currentFrame);
 	if (Movie.currentFrame > Movie.MaxRecFrames) Movie.MaxRecFrames = Movie.currentFrame;
 
-	// update OSD information
+	// Update OSD information
 	GPUsetframecounter(Movie.currentFrame,Movie.totalFrames);
 
-	// handle movie end while in replay mode
+	// Handle movie end while in replay mode
 	if (Movie.mode == MOVIEMODE_PLAY) 
 	{
-		// pause at last movie frame
+		// Pause at last movie frame
 		if (Movie.currentFrame==Movie.totalFrames && Config.PauseAfterPlayback)
 			iPause = 1;
-		// stop if we're beyond last frame
+		// Stop if we're beyond last frame
 		if (Movie.currentFrame>Movie.totalFrames)
 		{
 			GPUdisplayText("*PSXjin*: Movie End");
@@ -147,9 +147,8 @@ iVSyncFlag = 1;
 		}
 	}
 
-
-	// write/read joypad information for this frame
-	if (iJoysToPoll == 2) //if no joypad has been poll for this frame
+	// Write/read controller information for this frame
+	if (iJoysToPoll == 2) // If no controller has been polled for this frame
 	{
 		if (!Movie.Port1_Mtap)
 		{
@@ -205,7 +204,7 @@ iVSyncFlag = 1;
 		GPUsetlagcounter(Movie.lagCounter);
 	}
 	else if (iJoysToPoll == 1)
-	{ //this should never happen, but one can never be sure (only 1 pad has been polled for this frame)
+	{ // This should never happen, but one can never be sure (only 1 pad has been polled for this frame)
 		printf("CATASTROPHIC FAILURE: CONTACT DARKKOBOLD");
 		if (Movie.mode == MOVIEMODE_RECORD)		
 			MOV_WriteJoy(&Movie.lastPads2[0],Movie.padType2);
@@ -213,7 +212,8 @@ iVSyncFlag = 1;
 			MOV_ReadJoy(&paddtemp,Movie.padType2);
 	}
 
-	// write/read control byte for this frame
+	// Write/read control byte for this frame
+	
 	if (Movie.mode == MOVIEMODE_RECORD)	
 		MOV_WriteControl();
 	else if (Movie.mode == MOVIEMODE_PLAY)
@@ -221,7 +221,8 @@ iVSyncFlag = 1;
 
 	MOV_ProcessControlFlags();
 
-	// write file once in a while to prevent data loss
+	// Write file once in a while to prevent data loss
+	
 	if ((Movie.mode == MOVIEMODE_RECORD) && (Movie.currentFrame%1800 == 0))
 		MOV_WriteMovieFile();
 
@@ -239,14 +240,14 @@ iVSyncFlag = 1;
 		modeFlags |= MODE_FLAG_REPLAY;
 	GPUsetcurrentmode(modeFlags);
 
-	//Update tools
+	// Update tools
 	PSXjinApplyCheats();
 	UpdateToolWindows();
 
 	CallRegisteredLuaFunctions(LUACALL_AFTEREMULATION);
 
-					/* movie stuff end */
-		} else { // VSync Start (240 hsyncs) 
+// movie stuff end
+		} else { // VSync start (240 horizontal syncs)
 			CallRegisteredLuaFunctions(LUACALL_BEFOREEMULATION);
 			psxCounters[3].mode|= 0x10000;
 			psxUpdateVSyncRateEnd();
@@ -292,7 +293,7 @@ void psxRcntWmode(unsigned long index, unsigned long value)  {
 	if(index == 0) {
 		switch (value & 0x300) {
 			case 0x100:
-				psxCounters[index].rate = ((psxCounters[3].rate /** BIAS*/) / 386) / 262; // seems ok
+				psxCounters[index].rate = ((psxCounters[3].rate /** BIAS*/) / 386) / 262; // Seems OK
 				break;
 			default:
 				psxCounters[index].rate = 1;
@@ -301,7 +302,7 @@ void psxRcntWmode(unsigned long index, unsigned long value)  {
 	else if(index == 1) {
 		switch (value & 0x300) {
 			case 0x100:
-				psxCounters[index].rate = (psxCounters[3].rate /** BIAS*/) / 262; // seems ok
+				psxCounters[index].rate = (psxCounters[3].rate /** BIAS*/) / 262; // Seems OK
 				break;
 			default:
 				psxCounters[index].rate = 1;

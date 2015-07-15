@@ -1,7 +1,7 @@
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
-// Dma0/1 in Mdec.c
-// Dma3   in CdRom.c
+// DMA 0/1 in mdec.c
+// DMA 3   in cdrom.c
 
 void psxDma4(u32 madr, u32 bcr, u32 chcr) { // SPU
 	u16 *ptr;
@@ -22,7 +22,7 @@ void psxDma4(u32 madr, u32 bcr, u32 chcr) { // SPU
 			SPUwriteDMAMem(ptr, (bcr >> 16) * (bcr & 0xffff) * 2);
 			break;
 
-		case 0x01000200: //spu to cpu transfer
+		case 0x01000200: // SPU to CPU transfer
 #ifdef PSXDMA_LOG
 			PSXDMA_LOG("*** DMA4 SPU - spu2mem *** %lx addr = %lx size = %lx\n", chcr, madr, bcr);
 #endif
@@ -136,7 +136,7 @@ void psxDma6(u32 madr, u32 bcr, u32 chcr) {
 	}
 #ifdef PSXDMA_LOG
 	else {
-		// Unknown option
+		// Unknown option - we should investigate
 		PSXDMA_LOG("*** DMA6 OT - unknown *** %lx addr = %lx size = %lx\n", chcr, madr, bcr);
 	}
 #endif

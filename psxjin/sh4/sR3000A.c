@@ -1,8 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "R3000A.h"
-#include "PsxCommon.h"
+#include "r3000a.h"
+#include "psxcommon.h"
 #include "sh4.h"
 
 u32 *recLUT;
@@ -18,14 +18,14 @@ u32 *recLUT;
 
 #define CalcDispL(rx) (((u32)&(psxRegs.rx) - (u32)&psxRegs)>>2)
 
-static char *recMem;				/* the recompiled blocks will be here */
-static char *recRAM;				/* and the ptr to the blocks here */
-static char *recROM;				/* and here */
+static char *recMem;				// The recompiled blocks will be here
+static char *recRAM;				// and the ptr to the blocks here
+static char *recROM;				// and here
 
-static u32 pc;			/* recompiler pc */
-static int count;					/* recompiler intruction count */
-static int branch;					/* set for branch */
-static u32 target;		/* branch target */
+static u32 pc;			// Recompiler pc
+static int count;					// Recompiler instruction count
+static int branch;					// Set for branch
+static u32 target;		// Branch target
 
 static void (*recBSC[64])();
 static void (*recSPC[64])();
@@ -34,8 +34,8 @@ static void (*recCP0[32])();
 static void (*recCP2[64])();
 static void (*recCP2BSC[32])();
 
+// Set a pending branch (target stored in R8)
 
-/* set a pending branch (target stored in R8) */
 #define SetBranch() { \
 	branch = 1; \
 	psxRegs.code = PSXMu32(pc); \
@@ -152,10 +152,8 @@ static void recNULL() {
 //	SysMessage("recUNK: %8.8x\n", psxRegs.code);
 }
 
-/*********************************************************
-* goes to opcodes tables...                              *
-* Format:  table[something....]                          *
-*********************************************************/
+// Goes to opcodes tables
+// Format: table[something....]
 
 //REC_SYS(SPECIAL);
 static void recSPECIAL() {
@@ -179,12 +177,10 @@ static void recBASIC() {
 	recCP2BSC[_Rs_]();
 }
 
-//end of Tables opcodes...
+// End of table opcodes
 
-/*********************************************************
-* Arithmetic with immediate operand                      *
-* Format:  OP rt, rs, immediate                          *
-*********************************************************/
+// Arithmetic with immediate operand
+// Format:  OP rt, rs, immediate
 
 //REC_FUNC(ADDI);
 //REC_FUNC(ADDIU);
@@ -314,12 +310,12 @@ void recXORI() {
 	}		
 	MOVLSG(CalcDispL(GPR.r[_Rt_]));
 }
-//end of * Arithmetic with immediate operand  
 
-/*********************************************************
-* Load higher 16 bits of the first word in GPR with imm  *
-* Format:  OP rt, immediate                              *
-*********************************************************/
+// End of * Arithmetic with immediate operand
+
+// Load higher 16-bits of the first word in GPR with imm
+// Format:  OP rt, immediate
+
 //REC_FUNC(LUI);
 
 void recLUI()  {
@@ -329,12 +325,11 @@ void recLUI()  {
 	LoadImmediate32(psxRegs.code << 16, R0);
 	MOVLSG(CalcDispL(GPR.r[_Rt_]));
 }
-//End of Load Higher .....
 
-/*********************************************************
-* Register arithmetic                                    *
-* Format:  OP rd, rs, rt                                 *
-*********************************************************/
+// End of load higher
+
+// Register arithmetic
+// Format:  OP rd, rs, rt
 
 //REC_FUNC(ADD);
 //REC_FUNC(ADDU);
@@ -489,12 +484,12 @@ void recSLTU() {
 	MOVT(R0);
 	MOVLSG(CalcDispL(GPR.r[_Rd_]));
 }
-//End of * Register arithmetic
 
-/*********************************************************
-* Register mult/div & Register trap logic                *
-* Format:  OP rs, rt                                     *
-*********************************************************/
+// End of * Register arithmetic
+
+
+// Register mult/div & Register trap logic
+// Format:  OP rs, rt
 
 //REC_FUNC(MULT);
 //REC_FUNC(MULTU);
@@ -527,7 +522,7 @@ void recMULTU() {
 	MOVLSG(CalcDispL(GPR.n.hi));
 }
 
-//End of * Register mult/div & Register trap logic  
+// End of * Register mult/div & Register trap logic
 
 //REC_FUNC(LB);
 //REC_FUNC(LBU);
@@ -809,6 +804,7 @@ REC_FUNC(MTHI);
 REC_FUNC(MFLO);
 REC_FUNC(MTLO);
 */
+
 void recMFHI() {
 // Rd = Hi
 	if (!_Rd_) return;
@@ -1132,7 +1128,6 @@ void recNCLIP() {
 	CALLFunc((u32)asmNCLIP);
 }
 
-
 void recMVMVA() {
 
 	switch (psxRegs.code & 0x18000) {
@@ -1248,7 +1243,8 @@ void recCFC2() {
 //	psxRegs.GPR.r[_Rt_] = psxRegs.CP2C.r[_Rd_];
 }
 
-/* Loads an element into matrix mx: lower word at pos _p1, upper word at pos _p2 */
+// Loads an element into matrix mx: lower word at pos _p1, upper word at pos _p2
+
 #define _LOAD_MATRIX(mx, _p1, _p2) { \
 	LoadImmediate32((u32)mx##Matrix, R5); \
 	MOVI(_p1*4, R6); \
@@ -1271,7 +1267,7 @@ void recCTC2() {
 			MOV(R0, R4); _LOAD_MATRIX(r, 5, 9); break;
 		case 3:
 			MOV(R0, R4); _LOAD_MATRIX(r, 2, 6); break;
-		case 4: // clear upper 16 Bit
+		case 4: // Clear upper 16-bit
 			EXTUW(R0, R4); _LOAD_MATRIX(r, 10, 3); break;
 			
 		case 5: {
@@ -1297,7 +1293,7 @@ void recCTC2() {
 			MOV(R0, R4); _LOAD_MATRIX(l, 5, 9); break;
 		case 11:
 			MOV(R0, R4); _LOAD_MATRIX(l, 2, 6); break;
-		case 12: // clear upper 16 Bit
+		case 12: // Clear upper 16-bit
 			EXTUW(R0, R4); _LOAD_MATRIX(l, 10, 3); break;
 
 		case 13: {
@@ -1323,7 +1319,7 @@ void recCTC2() {
 			MOV(R0, R4); _LOAD_MATRIX(c, 5, 9); break;
 		case 19: 
 			MOV(R0, R4); _LOAD_MATRIX(c, 2, 6); break;
-		case 20: // clear upper 16 Bit
+		case 20: // Clear upper 16-bit
 			EXTUW(R0, R4); _LOAD_MATRIX(c, 10, 3); break;
 
 		case 21: {
@@ -1373,13 +1369,10 @@ void recCTC2() {
 	}
 }
 
-
 static void recHLE() {
 	CALLFunc((u32)psxHLEt[psxRegs.code & 0xff]);
 	branch = 2;
 }
-
-//
 
 static void (*recBSC[64])() = {
 	recSPECIAL, recREGIMM, recJ   , recJAL  , recBEQ , recBNE , recBLEZ, recBGTZ,
@@ -1445,7 +1438,7 @@ static void recRecompile() {
 
 	immCount = 0;
 	
-	STSMPR(R15);	// Save Return Address
+	STSMPR(R15);	// Save return address
 	STCMGBR(R15);
 	MOVLM(R8, R15);
 	
@@ -1473,7 +1466,7 @@ static void recRecompile() {
 		MOVLSG(CalcDispL(pc));
 	}
 
-	/* store cycle */
+	// Store cycle
 	LoadImmediate32(count, R1);
 	MOVLLG(CalcDispL(cycle));
 	ADD(R1, R0);

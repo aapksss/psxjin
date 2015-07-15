@@ -1,22 +1,3 @@
-/***************************************************************************
-																										draw.c  -  description
-																													-------------------
-				begin                : Sun Oct 28 2001
-				copyright            : (C) 2001 by Pete Bernert
-				email                : BlackDove@addcom.de
-	***************************************************************************/
-
-/***************************************************************************
-	*                                                                         *
-	*   This program is free software; you can redistribute it and/or modify  *
-	*   it under the terms of the GNU General Public License as published by  *
-	*   the Free Software Foundation; either version 2 of the License, or     *
-	*   (at your option) any later version. See also the license.txt file for *
-	*   additional informations.                                              *
-	*                                                                         *
-	***************************************************************************/
-
-
 #include "stdafx.h"
 
 #define _IN_DRAW
@@ -25,11 +6,10 @@
 #include "draw.h"
 #include "prim.h"
 #include "menu.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
-////////////////////////////////////////////////////////////////////////////////////
 // misc globals
-////////////////////////////////////////////////////////////////////////////////////
+
 int            iResX;
 int            iResY;
 long           lLowerpart;
@@ -49,11 +29,11 @@ PSXPoint_t     ptCursorPoint[8];
 unsigned short usCursorActive=0;
 BOOL           bKkaptureMode=FALSE;
 
-
 extern "C" unsigned int   LUT16to32[65536];
 extern "C" unsigned int   RGBtoYUV[65536];
 
-// prototypes
+// Prototypes
+
 extern "C" void hq2x_16( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
 extern "C" void hq3x_16( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
 extern "C" void hq2x_32( unsigned char * srcPtr, DWORD srcPitch, unsigned char * dstPtr, int width, int height);
@@ -63,11 +43,7 @@ void NoStretchedBlit3x(void);
 void StretchedBlit2x(void);
 void StretchedBlit3x(void);
 
-
-
-////////////////////////////////////////////////////////////////////////
-// HQ Initialize Lookup Table
-////////////////////////////////////////////////////////////////////////
+// HQ initialize lookup table
 
 void SetRes(int X, int Y)
 {
@@ -95,10 +71,10 @@ int InitLUTs(void)
 				RGBtoYUV[ (i << 11) + (j << 5) + k ] = (Y<<16) + (u<<8) + v;
 			}
 
-// This part of the function isn't really needed
-// Could just snip this and make it return void
-// and make MMX detection it's own function
-
+// This part of the function isn't really needed,
+// we could just snip this and make it return void
+// and make MMX detection it's own function.
+// We should look into that.
 
 	__asm
 	{
@@ -110,9 +86,7 @@ int InitLUTs(void)
 	return nMMXsupport;
 }
 
-////////////////////////////////////////////////////////////////////////
-// generic 2xSaI helpers
-////////////////////////////////////////////////////////////////////////
+// Generic 2xSaI helpers
 
 void *         pSaISmallBuff=NULL;
 void *         pSaIBigBuff=NULL;
@@ -184,7 +158,7 @@ void Super2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 			dP = (DWORD *)(dstBitmap + line*dstPitch);
 			for (finish = width; finish; finish -= 1 )
 			{
-//---------------------------------------    B1 B2
+//                                           B1 B2
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                           A1 A2
@@ -322,16 +296,14 @@ void Super2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for ( finish = width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void Std2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
                   unsigned char *dstBitmap, int width, int height)
@@ -360,11 +332,12 @@ void Std2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 			dP = (DWORD *)(dstBitmap + line*dstPitch);
 			for (finish = width; finish; finish -= 1 )
 			{
-//---------------------------------------
+
 // Map of the pixels:                    I|E F|J
 //                                       G|A B|K
 //                                       H|C D|L
 //                                       M|N O|P
+
 				if (finish==finWidth) iXA=0;
 				else                 iXA=1;
 				if (finish>4)
@@ -547,7 +520,6 @@ void Std2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 								}
 						}
 
-//////////////////////////
 
 				*dP=colorA;
 				*(dP+1)=product;
@@ -556,16 +528,14 @@ void Std2xSaI_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish = width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void SuperEagle_ex8(unsigned char *srcPtr, DWORD srcPitch,
                     unsigned char  *dstBitmap, int width, int height)
@@ -743,8 +713,6 @@ void SuperEagle_ex8(unsigned char *srcPtr, DWORD srcPitch,
 							product1b = Q_INTERPOLATE8(color6, color6, color6, product1b);
 						}
 
-////////////////////////////////
-
 				*dP=product1a;
 				*(dP+1)=product1b;
 				*(dP+(srcPitchHalf))=product2a;
@@ -752,21 +720,19 @@ void SuperEagle_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish = width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-/////////////////////////
 
 static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* dst1, const unsigned long* src0, const unsigned long* src1, const unsigned long* src2, unsigned count)
 {
 
-	// first pixel
+	// First pixel
 	if (src0[0] != src2[0] && src1[0] != src1[1])
 	{
 		dst0[0] = src1[0] == src0[0] ? src0[0] : src1[0];
@@ -787,7 +753,8 @@ static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* ds
 	dst0 += 2;
 	dst1 += 2;
 
-	// central pixels
+	// Central pixels
+	
 	count -= 2;
 	while (count)
 	{
@@ -814,7 +781,8 @@ static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* ds
 		--count;
 	}
 
-	// last pixel
+	// Last pixel
+	
 	if (src0[0] != src2[0] && src1[-1] != src1[0])
 	{
 		dst0[0] = src1[-1] == src0[0] ? src0[0] : src1[0];
@@ -830,8 +798,6 @@ static __inline void scale2x_32_def_whole(unsigned long* dst0, unsigned long* ds
 		dst1[1] = src1[0];
 	}
 }
-
-
 
 #ifndef MAX
 #define MAX(a,b)    (((a) > (b)) ? (a) : (b))
@@ -871,7 +837,7 @@ void Scale2x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 
 static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* dst1, unsigned short* dst2, const unsigned short* src0, const unsigned short* src1, const unsigned short* src2, unsigned count)
 {
-	// first pixel
+	// First pixel
 	if (src0[0] != src2[0] && src1[0] != src1[1])
 	{
 		dst0[0] = src1[0];
@@ -903,7 +869,7 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 	dst1 += 3;
 	dst2 += 3;
 
-	// central pixels
+	// Central pixels
 	count -= 2;
 	while (count)
 	{
@@ -941,7 +907,8 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 		--count;
 	}
 
-	// last pixel
+	// Last pixel
+	
 	if (src0[0] != src2[0] && src1[-1] != src1[0])
 	{
 		dst0[0] = src1[-1] == src0[0] ? src1[-1] : src1[0];
@@ -971,7 +938,8 @@ static __inline void scale3x_16_def_whole(unsigned short* dst0, unsigned short* 
 static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* dst1, unsigned long* dst2, const unsigned long* src0, const unsigned long* src1, const unsigned long* src2, unsigned count)
 {
 
-	// first pixel
+	// First pixel
+	
 	if (src0[0] != src2[0] && src1[0] != src1[1])
 	{
 		dst0[0] = src1[0];
@@ -1003,7 +971,8 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 	dst1 += 3;
 	dst2 += 3;
 
-	// central pixels
+	// Central pixels
+	
 	count -= 2;
 	while (count)
 	{
@@ -1041,7 +1010,7 @@ static __inline void scale3x_32_def_whole(unsigned long* dst0, unsigned long* ds
 		--count;
 	}
 
-	// last pixel
+	// Last pixel
 	if (src0[0] != src2[0] && src1[-1] != src1[0])
 	{
 		dst0[0] = src1[-1] == src0[0] ? src1[-1] : src1[0];
@@ -1142,9 +1111,6 @@ void Scale3x_ex8(unsigned char *srcPtr, DWORD srcPitch,
 	scale3x_32_def_whole(dst0, dst1, dst2, src0, src1, src1, width);
 }
 
-
-////////////////////////////////////////////////////////////////////////
-
 #define colorMask6     0x0000F7DE
 #define lowPixelMask6  0x00000821
 #define qcolorMask6    0x0000E79c
@@ -1180,7 +1146,7 @@ void Super2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
 			dP = (unsigned short *)(dstBitmap + line*dstPitch);
 			for (finish = width; finish; finish -= 1 )
 			{
-//---------------------------------------    B1 B2
+//                                           B1 B2
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                           A1 A2
@@ -1242,7 +1208,6 @@ void Super2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
 				colorA2 = *(bP + iYC + iXB);
 				colorA3 = *(bP + iYC + iXC);
 
-//--------------------------------------
 				if (color2 == color6 && color5 != color3)
 				{
 					product2b = product1b = color2;
@@ -1314,16 +1279,14 @@ void Super2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish= width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void Std2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
                   unsigned char  *dstBitmap, int width, int height)
@@ -1351,11 +1314,12 @@ void Std2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
 			dP = (unsigned short *)(dstBitmap + line*dstPitch);
 			for (finish = width; finish; finish -= 1 )
 			{
-//---------------------------------------
+
 // Map of the pixels:                    I|E F|J
 //                                       G|A B|K
 //                                       H|C D|L
 //                                       M|N O|P
+
 				if (finish==finWidth) iXA=0;
 				else                 iXA=1;
 				if (finish>4)
@@ -1538,16 +1502,14 @@ void Std2xSaI_ex6(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish= width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void SuperEagle_ex6(unsigned char *srcPtr, DWORD srcPitch,
                     unsigned char  *dstBitmap, int width, int height)
@@ -1725,16 +1687,14 @@ void SuperEagle_ex6(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish= width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 #ifndef MAX
 #define MAX(a,b)    (((a) > (b)) ? (a) : (b))
@@ -1787,14 +1747,6 @@ void Scale2x_ex6_5(unsigned char *srcPtr, DWORD srcPitch,
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-////////////////////////////////////////////////////////////////////////
-
 /*
 #define colorMask5     0x0000F7DE
 #define lowPixelMask5  0x00000821
@@ -1837,7 +1789,7 @@ void Super2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
 			dP = (unsigned short *)(dstBitmap + line*dstPitch);
 			for (finish = width; finish; finish -= 1 )
 			{
-//---------------------------------------    B1 B2
+//                                           B1 B2
 //                                         4  5  6 S2
 //                                         1  2  3 S1
 //                                           A1 A2
@@ -1899,7 +1851,6 @@ void Super2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
 				colorA2 = *(bP + iYC + iXB);
 				colorA3 = *(bP + iYC + iXC);
 
-//--------------------------------------
 				if (color2 == color6 && color5 != color3)
 				{
 					product2b = product1b = color2;
@@ -1971,16 +1922,14 @@ void Super2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish= width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void Std2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
                   unsigned char  *dstBitmap, int width, int height)
@@ -2007,7 +1956,6 @@ void Std2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
 			dP = (unsigned short *)(dstBitmap + line*dstPitch);
 			for (finish = width; finish; finish -= 1 )
 			{
-//---------------------------------------
 // Map of the pixels:                    I|E F|J
 //                                       G|A B|K
 //                                       H|C D|L
@@ -2194,16 +2142,14 @@ void Std2xSaI_ex5(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish= width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void SuperEagle_ex5(unsigned char *srcPtr, DWORD srcPitch,
                     unsigned char  *dstBitmap, int width, int height)
@@ -2381,18 +2327,16 @@ void SuperEagle_ex5(unsigned char *srcPtr, DWORD srcPitch,
 
 				bP += 1;
 				dP += 2;
-			}//end of for ( finish= width etc..)
+			} // End of for (finish= width etc)
 
 			line += 2;
 			srcPtr += srcPitch;
 		}
-		; //endof: for (; height; height--)
+		; // End of for (; height; height--)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// own swap buffer func (window/fullscreen)
-////////////////////////////////////////////////////////////////////////
+// Our own swap buffer function (window or fullscreen)
 
 sDX            DX;
 static DDSURFACEDESC ddsd;
@@ -2409,8 +2353,6 @@ void (*BlitScreen) (unsigned char *,long,long);
 void (*pExtraBltFunc) (void);
 void (*p2XSaIFunc) (unsigned char *,DWORD,unsigned char *,int,int);
 
-////////////////////////////////////////////////////////////////////////
-
 static __inline void WaitVBlank(void)
 {
 	if (bVsync_Key)
@@ -2419,9 +2361,7 @@ static __inline void WaitVBlank(void)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void BlitScreen32(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
+void BlitScreen32(unsigned char * surf,long x,long y)  // Blit in 32-bit color mode
 {
 	unsigned char * pD;
 	unsigned long lu;
@@ -2452,7 +2392,7 @@ void BlitScreen32(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MO
 	}
 
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -2510,9 +2450,7 @@ void BlitScreen32(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MO
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
+void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // Blit in 32-bit color mode
 {
 	unsigned char * pD;
 	unsigned long lu;
@@ -2530,7 +2468,7 @@ void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit CO
 		return;
 	}
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*2048;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -2587,8 +2525,8 @@ void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit CO
 		}
 	}
 
-	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
-	// now do a 2xSai blit to pSaIBigBuff
+	// OK, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
+	// Now do a 2xSai blit to pSaIBigBuff
 
 
 	p2XSaIFunc((unsigned char *)pSaISmallBuff, 2048,
@@ -2596,8 +2534,8 @@ void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit CO
 	           PreviousPSXDisplay.DisplayMode.x,
 	           PreviousPSXDisplay.DisplayMode.y);
 
-	// ok, here we have pSaIBigBuff filled with the 2xSai image...
-	// now transfer it to the surface
+	// OK, here we have pSaIBigBuff filled with the 2xSai image...
+	// Now transfer it to the surface
 
 	dx=(short)PreviousPSXDisplay.DisplayMode.x<<1;
 	dy=(short)PreviousPSXDisplay.DisplayMode.y<<1;
@@ -2618,8 +2556,9 @@ void BlitScreen32_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 32bit CO
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
+
+
+void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // Blit in 32-bit color mode
 {
 	unsigned long lu;
 	unsigned int off1,off2;
@@ -2635,7 +2574,7 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 		return;
 	}
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -2709,18 +2648,17 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 			DSTPtr += SurfOffset;
 		}
 	}
-	// pSaISmallBuff holds 16 bit data
-	// 32 bit conversion done in asm function and written to pSaIBigBuff
-
-
+	
+	// pSaISmallBuff holds 16-bit data
+	// 32-bit conversion done in ASM function and written to pSaIBigBuff
 
 	hq2x_32((unsigned char *)pSaISmallBuff, ddsd.lPitch,
 	        (unsigned char *)pSaIBigBuff,
 	        PreviousPSXDisplay.DisplayMode.x,
 	        PreviousPSXDisplay.DisplayMode.y);
 
-	// ok, here we have pSaIBigBuff filled with the hq2x 32 bit image...
-	// now transfer it to the surface
+	// OK, here we have pSaIBigBuff filled with the hq2x 32-bit image...
+	// Now transfer it to the surface
 
 	dx=(short)PreviousPSXDisplay.DisplayMode.x<<1;
 	dy=(short)PreviousPSXDisplay.DisplayMode.y<<1;
@@ -2740,8 +2678,8 @@ void BlitScreen32_hq2x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 		pS2+=off2;
 	}
 }
-///////////////////////////////////////////////////////////////////////
-void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
+
+void BlitScreen32_3x(unsigned char * surf,long x,long y)  // Blit in 32-bit color mode
 {
 	unsigned char * pD;
 	unsigned long lu;
@@ -2760,7 +2698,6 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 	}
 
 	// This should keep games from crashing when 3x is too much
-
 
 	if (PreviousPSXDisplay.DisplayMode.x>341)
 	{
@@ -2777,7 +2714,7 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 		pExtraBltFunc=StretchedBlit3x;
 	if (pExtraBltFunc==NoStretchedBlit2x)
 		pExtraBltFunc=NoStretchedBlit3x;
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*2048;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -2834,17 +2771,17 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 		}
 	}
 
-	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
-	// now do a 2xSai blit to pSaIBigBuff
+	// OK, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
+	// Now do a 2xSai blit to pSaIBigBuff
 
 	Scale3x_ex8((unsigned char *)pSaISmallBuff,2048,
 	            (unsigned char *)pSaIBigBuff,
 	            PreviousPSXDisplay.DisplayMode.x,
 	            PreviousPSXDisplay.DisplayMode.y);
 
-	// ok, here we have pSaIBigBuff filled with the 2xSai image...
-	// now transfer it to the surface
-	//CHANGED << 1 to * 3
+	// OK, here we have pSaIBigBuff filled with the 2xSai image...
+	// Now transfer it to the surface
+	// Changed << 1 to * 3
 
 	dx=(short)PreviousPSXDisplay.DisplayMode.x * 3;
 	dy=(short)PreviousPSXDisplay.DisplayMode.y * 3;
@@ -2865,10 +2802,8 @@ void BlitScreen32_3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR
 		pS2+=off2;
 	}
 }
-//////////////////////////////////////////////////////////////////////
 
-
-void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COLOR MODE
+void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // Blit in 32-bit color mode
 {
 
 	unsigned long lu;
@@ -2886,6 +2821,7 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	}
 
 	// This should keep games from crashing when 3x is too much
+	
 	if (PreviousPSXDisplay.DisplayMode.x>341)
 	{
 		if (pExtraBltFunc==StretchedBlit3x)
@@ -2901,7 +2837,7 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 	if (pExtraBltFunc==NoStretchedBlit2x)
 		pExtraBltFunc=NoStretchedBlit3x;
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -2976,16 +2912,16 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 		}
 	}
 
-	// pSaISmallBuff holds 16 bit data
-	// 32 bit conversion done in asm function and written to pSaIBigBuff
+	// pSaISmallBuff holds 16-bit data
+	// 32-bit conversion done in ASM function and written to pSaIBigBuff
 
 	p2XSaIFunc((unsigned char *)pSaISmallBuff, ddsd.lPitch ,
 	           (unsigned char *)pSaIBigBuff,
 	           PreviousPSXDisplay.DisplayMode.x,
 	           PreviousPSXDisplay.DisplayMode.y);
 
-	// ok, here we have pSaIBigBuff filled with the hq3x 32 bit image...
-	// now transfer it to the surface
+	// OK, here we have pSaIBigBuff filled with the hq3x 32-bit image...
+	// Now transfer it to the surface
 
 	dx=(short)PreviousPSXDisplay.DisplayMode.x * 3;
 	dy=(short)PreviousPSXDisplay.DisplayMode.y * 3;
@@ -3006,11 +2942,8 @@ void BlitScreen32_hq3x(unsigned char * surf,long x,long y)  // BLIT IN 32bit COL
 		pS2+=off2;
 	}
 }
-//////////////////////////////////////////////////////////////////////
 
-
-
-void BlitScreen16(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MODE
+void BlitScreen16(unsigned char * surf,long x,long y)  // Blit in 16-bit color mode
 {
 	unsigned long lu;
 	unsigned short row,column;
@@ -3051,7 +2984,7 @@ void BlitScreen16(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MO
 		return;
 	}
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -3127,9 +3060,7 @@ void BlitScreen16(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MO
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void BlitScreen16_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MODE
+void BlitScreen16_2xSaI(unsigned char * surf,long x,long y)  // Blit in 16-bit color mode
 {
 	unsigned long lu;
 	unsigned short row,column,off1,off2;
@@ -3144,7 +3075,7 @@ void BlitScreen16_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 		return;
 	}
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -3219,8 +3150,9 @@ void BlitScreen16_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 		}
 	}
 
-	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
-	// now do a 2xSai blit to pSaIBigBuff
+	// OK, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
+	// Now do a 2xSai blit to pSaIBigBuff
+	
 	if (p2XSaIFunc == hq2x_16)
 		p2XSaIFunc((unsigned char *)pSaISmallBuff, ddsd.lPitch,
 		           (unsigned char *)pSaIBigBuff,
@@ -3231,9 +3163,9 @@ void BlitScreen16_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 		           (unsigned char *)pSaIBigBuff,
 		           PreviousPSXDisplay.DisplayMode.x,
 		           PreviousPSXDisplay.DisplayMode.y);
-	// ok, here we have pSaIBigBuff filled with the 2xSai image...
-	// now transfer it to the surface
-
+				   
+	// OK, here we have pSaIBigBuff filled with the 2xSai image...
+	// Now transfer it to the surface
 
 	dx=(short)PreviousPSXDisplay.DisplayMode.x;
 	dy=(short)PreviousPSXDisplay.DisplayMode.y<<1;
@@ -3255,7 +3187,7 @@ void BlitScreen16_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 
 }
 
-void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MODE
+void BlitScreen16_3x(unsigned char * surf,long x,long y)  // Blit in 16-bit color mode
 {
 	unsigned long lu;
 	unsigned short row,column,off1,off2;
@@ -3296,7 +3228,7 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 	else if (p2XSaIFunc==Scale2x_ex6_5)
 		p2XSaIFunc=Scale3x_ex6_5;
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -3371,8 +3303,9 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 		}
 	}
 
-	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
-	// now do a 2xSai blit to pSaIBigBuff
+	// OK, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
+	// Now do a 2xSai blit to pSaIBigBuff
+	
 	if (p2XSaIFunc == hq3x_16)
 		p2XSaIFunc((unsigned char *)pSaISmallBuff, ddsd.lPitch,
 		           (unsigned char *)pSaIBigBuff,
@@ -3384,8 +3317,8 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 		           PreviousPSXDisplay.DisplayMode.x,
 		           PreviousPSXDisplay.DisplayMode.y);
 
-	// ok, here we have pSaIBigBuff filled with the 2xSai image...
-	// now transfer it to the surface
+	// OK, here we have pSaIBigBuff filled with the 2xSai image...
+	// Now transfer it to the surface
 
 	dx=(short)(PreviousPSXDisplay.DisplayMode.x * 1.5);
 	dy=(short)PreviousPSXDisplay.DisplayMode.y*3;
@@ -3406,16 +3339,15 @@ void BlitScreen16_3x(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR
 		pS2+=off2;
 	}
 }
-////////////////////////////////////////////////////////////////////////
 
-void BlitScreen15(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MODE
+void BlitScreen15(unsigned char * surf,long x,long y)  // Blit in 16-bit color mode
 {
 	unsigned long lu;
 	unsigned short row,column;
 	unsigned short dx=(unsigned short)PreviousPSXDisplay.Range.x1;
 	unsigned short dy=(unsigned short)PreviousPSXDisplay.DisplayMode.y;
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -3500,9 +3432,7 @@ void BlitScreen15(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MO
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void BlitScreen15_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit COLOR MODE
+void BlitScreen15_2xSaI(unsigned char * surf,long x,long y)  // Blit in 16-bit color mode
 {
 	unsigned long lu;
 	unsigned short row,column,off1,off2;
@@ -3517,7 +3447,7 @@ void BlitScreen15_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 		return;
 	}
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		pS+=PreviousPSXDisplay.Range.y0*1024;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -3600,16 +3530,16 @@ void BlitScreen15_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 		}
 	}
 
-	// ok, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
-	// now do a 2xSai blit to pSaIBigBuff
+	// OK, here we have filled pSaISmallBuff with PreviousPSXDisplay.DisplayMode.x * PreviousPSXDisplay.DisplayMode.y (*4) data
+	// Now do a 2xSai blit to pSaIBigBuff
 
 	p2XSaIFunc((unsigned char *)pSaISmallBuff, 1024,
 	           (unsigned char *)pSaIBigBuff,
 	           PreviousPSXDisplay.DisplayMode.x,
 	           PreviousPSXDisplay.DisplayMode.y);
 
-	// ok, here we have pSaIBigBuff filled with the 2xSai image...
-	// now transfer it to the surface
+	// OK, here we have pSaIBigBuff filled with the 2xSai image...
+	// Now transfer it to the surface
 
 	dx=(short)PreviousPSXDisplay.DisplayMode.x;
 	dy=(short)PreviousPSXDisplay.DisplayMode.y<<1;
@@ -3630,9 +3560,7 @@ void BlitScreen15_2xSaI(unsigned char * surf,long x,long y)  // BLIT IN 16bit CO
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void DoClearScreenBuffer(void)                         // CLEAR DX BUFFER
+void DoClearScreenBuffer(void)                         // Clear DX buffer
 {
 	DDBLTFX     ddbltfx;
 
@@ -3647,9 +3575,7 @@ void DoClearScreenBuffer(void)                         // CLEAR DX BUFFER
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void DoClearFrontBuffer(void)                         // CLEAR PRIMARY BUFFER
+void DoClearFrontBuffer(void)                         // Clear primary buffer
 {
 	DDBLTFX     ddbltfx;
 
@@ -3659,14 +3585,13 @@ void DoClearFrontBuffer(void)                         // CLEAR PRIMARY BUFFER
 	IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void NoStretchedBlit(void)
 {
 	static int iOldDX=0;
 	static int iOldDY=0;
 
 	//int iDX,iDY;
+	
 	int iDX=iResX-PreviousPSXDisplay.DisplayMode.x;
 	int iDY=iResY-PreviousPSXDisplay.DisplayMode.y;
 
@@ -3677,8 +3602,6 @@ void NoStretchedBlit(void)
 	if(fXS<fYS) fS=fXS; else fS=fYS;
 	*/
 
-	
-	
 	if (iOldDX!=iDX || iOldDY!=iDY)
 	{		
 		DDBLTFX     ddbltfx;
@@ -3731,8 +3654,6 @@ void NoStretchedBlit(void)
 	}
 	if (DX.DDSScreenPic) DisplayPic();
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void NoStretchedBlitEx(void)
 {	
@@ -3815,8 +3736,6 @@ void NoStretchedBlitEx(void)
 	if (DX.DDSScreenPic) DisplayPic();
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void StretchedBlit2x(void)
 {
 	printf("hi\n");
@@ -3842,7 +3761,7 @@ void StretchedBlit2x(void)
 			ViewportRect.bottom+=ViewportRect.bottom;
 		}
 
-		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		if (iUseScanLines==2 || bKkaptureMode) // Stupid Nvidia scanline mode
 		{
 			RECT HelperRect={0,0,iResX,iResY};
 
@@ -3873,7 +3792,7 @@ void StretchedBlit2x(void)
 			ViewportRect.bottom+=ViewportRect.bottom;
 		}
 
-		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		if (iUseScanLines==2 || bKkaptureMode) // Stupid Nvidia scanline mode
 		{
 			WaitVBlank();
 
@@ -3894,7 +3813,6 @@ void StretchedBlit2x(void)
 
 }
 
-////////////////////////////////////////////////////////////////////////
 void StretchedBlit3x(void)
 {
 	if (iWindowMode)
@@ -3921,7 +3839,7 @@ void StretchedBlit3x(void)
 			ViewportRect.bottom*=3;
 		}
 
-		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		if (iUseScanLines==2 || bKkaptureMode) // Stupid Nvidia scanline mode
 		{
 			RECT HelperRect={0,0,iResX,iResY};
 
@@ -3954,7 +3872,7 @@ void StretchedBlit3x(void)
 			ViewportRect.bottom*=3;
 		}
 
-		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		if (iUseScanLines==2 || bKkaptureMode) // Stupid Nvidia scanline mode
 		{
 			WaitVBlank();
 
@@ -3975,7 +3893,6 @@ void StretchedBlit3x(void)
 
 }
 
-////////////////////////////////////////////////////////////////////////
 void NoStretchedBlit2x(void)
 {
 	static int iOldDX=0;
@@ -4068,7 +3985,6 @@ void NoStretchedBlit2x(void)
 	if (DX.DDSScreenPic) DisplayPic();
 }
 
-////////////////////////////////////////////////////////////////////////
 void NoStretchedBlit3x(void)
 {
 	static int iOldDX=0;
@@ -4162,17 +4078,13 @@ void NoStretchedBlit3x(void)
 	if (DX.DDSScreenPic) DisplayPic();
 }
 
-
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
 void ShowGunCursor(unsigned char * surf)
 {
 	unsigned short dx=(unsigned short)PreviousPSXDisplay.Range.x1;
 	unsigned short dy=(unsigned short)PreviousPSXDisplay.DisplayMode.y;
 	int x,y,iPlayer,sx,ex,sy,ey;
 
-	if (PreviousPSXDisplay.Range.y0)                      // centering needed?
+	if (PreviousPSXDisplay.Range.y0)                      // Centering needed?
 	{
 		surf+=PreviousPSXDisplay.Range.y0*ddsd.lPitch;
 		dy-=PreviousPSXDisplay.Range.y0;
@@ -4189,17 +4101,17 @@ void ShowGunCursor(unsigned char * surf)
 		dy*=3;
 	}
 
-	if (iDesktopCol==32)                                  // 32 bit color depth
+	if (iDesktopCol==32)                                  // 32-bit color depth
 	{
 		const unsigned long crCursorColor32[8]={0xffff0000,0xff00ff00,0xff0000ff,0xffff00ff,0xffffff00,0xff00ffff,0xffffffff,0xff7f7f7f};
 
-		surf+=PreviousPSXDisplay.Range.x0<<2;               // -> add x left border
+		surf+=PreviousPSXDisplay.Range.x0<<2;               // Add x left border
 
-		for (iPlayer=0;iPlayer<8;iPlayer++)                 // -> loop all possible players
+		for (iPlayer=0;iPlayer<8;iPlayer++)                 // Loop all possible players
 		{
-			if (usCursorActive&(1<<iPlayer))                  // -> player active?
+			if (usCursorActive&(1<<iPlayer))                  // Player active?
 			{
-				const int ty=(ptCursorPoint[iPlayer].y*dy)/256;  // -> calculate the cursor pos in the current display
+				const int ty=(ptCursorPoint[iPlayer].y*dy)/256;  // Calculate the cursor position in the current display
 				const int tx=(ptCursorPoint[iPlayer].x*dx)/512;
 				sx=tx-5;
 				if (sx<0)
@@ -4218,18 +4130,18 @@ void ShowGunCursor(unsigned char * surf)
 				ey=ty+6;
 				if (ey>dy) ey=dy;
 
-				for (x=tx,y=sy;y<ey;y+=2)                   // -> do dotted y line
+				for (x=tx,y=sy;y<ey;y+=2)                   // Do dotted y line
 					*((unsigned long *)((surf)+(y*ddsd.lPitch)+x*4))=crCursorColor32[iPlayer];
-				for (y=ty,x=sx;x<ex;x+=2)                   // -> do dotted x line
+				for (y=ty,x=sx;x<ex;x+=2)                   // Do dotted x line
 					*((unsigned long *)((surf)+(y*ddsd.lPitch)+x*4))=crCursorColor32[iPlayer];
 			}
 		}
 	}
-	else                                                  // 16 bit color depth
+	else                                                  // 16-bit color depth
 	{
 		const unsigned short crCursorColor16[8]={0xf800,0x07c0,0x001f,0xf81f,0xffc0,0x07ff,0xffff,0x7bdf};
 
-		surf+=PreviousPSXDisplay.Range.x0<<1;               // -> same stuff as above
+		surf+=PreviousPSXDisplay.Range.x0<<1;               // Same stuff as above
 
 		for (iPlayer=0;iPlayer<8;iPlayer++)
 		{
@@ -4263,10 +4175,8 @@ void ShowGunCursor(unsigned char * surf)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void DoBufferSwap(void)                                // SWAP BUFFERS
-{                                                      // (we don't swap... we blit only)
+void DoBufferSwap(void)                                // Swap buffers
+{                                                      // We don't swap...we only blit
 	HRESULT ddrval;
 	long x,y;
 
@@ -4283,14 +4193,10 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 		return;
 	}
 
-	//----------------------------------------------------//
-
 	x=PSXDisplay.DisplayPosition.x;
 	y=PSXDisplay.DisplayPosition.y;
 
-	//----------------------------------------------------//
-
-	BlitScreen((unsigned char *)ddsd.lpSurface,x,y);      // fill DDSRender surface
+	BlitScreen((unsigned char *)ddsd.lpSurface,x,y);      // Fill DDSRender surface
 
 	if(fpPSXjin_LuaGui)
 		fpPSXjin_LuaGui((void *)ddsd.lpSurface,PreviousPSXDisplay.Range.x1,
@@ -4302,7 +4208,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 	if (ulKeybits&KEY_SHOWFPS)
 	{
-		DisplayText();              // paint menu text			
+		DisplayText();              // Paint menu text
 		DisplayMovMode();
 		if (ulKeybits&KEY_SHOWFCOUNT)
 		{
@@ -4322,8 +4228,6 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 			DisplayAnalog(Movie.lastPads1[0],Movie.lastPads2[0]);
 		}
 	}
-
-	
 
 	if (pExtraBltFunc)
 	{
@@ -4374,7 +4278,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 
 		}
 
-		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		if (iUseScanLines==2 || bKkaptureMode) // Stupid Nvidia scanline mode
 		{
 			RECT HelperRect={0,0,iResX,iResY};
 
@@ -4416,7 +4320,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 			}
 		}
 
-		if (iUseScanLines==2 || bKkaptureMode) // stupid nvidia scanline mode
+		if (iUseScanLines==2 || bKkaptureMode) // Stupid Nvidia scanline mode
 		{
 			WaitVBlank();
 
@@ -4436,9 +4340,7 @@ void DoBufferSwap(void)                                // SWAP BUFFERS
 	if (DX.DDSScreenPic) DisplayPic();
 }
 
-////////////////////////////////////////////////////////////////////////
 // GAMMA
-////////////////////////////////////////////////////////////////////////
 
 int iUseGammaVal=2048;
 
@@ -4451,7 +4353,7 @@ void DXSetGamma(void)
 	if (g>512) g=((g-512)*2)+512;
 	g=0.5f+((g)/1024.0f);
 
-// some cards will cheat... so we don't trust the caps here
+// Some cards will cheat...so we don't trust the caps here
 // if (DD_Caps.dwCaps2 & DDCAPS2_PRIMARYGAMMA)
 	{
 		float f;
@@ -4474,9 +4376,7 @@ void DXSetGamma(void)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// SCAN LINE STUFF
-////////////////////////////////////////////////////////////////////////
+// Scanline stuff
 
 void SetScanLineList(LPDIRECTDRAWCLIPPER Clipper)
 {
@@ -4514,8 +4414,6 @@ void SetScanLineList(LPDIRECTDRAWCLIPPER Clipper)
 	free(lpCL);
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void MoveScanLineArea(HWND hwnd)
 {
 	LPDIRECTDRAWCLIPPER Clipper;
@@ -4531,7 +4429,7 @@ void MoveScanLineArea(HWND hwnd)
 	ddbltfx.dwSize = sizeof(ddbltfx);
 	ddbltfx.dwFillColor = 0x00000000;
 
-	// Fixed Scanline Mode for FullScreen where desktop was visible
+	// Fixed scanline mode for Fullscreen where desktop was visible
 	// in background
 
 	if (iWindowMode)
@@ -4557,9 +4455,7 @@ void MoveScanLineArea(HWND hwnd)
 	IDirectDrawClipper_Release(Clipper);
 }
 
-////////////////////////////////////////////////////////////////////////
-// MAIN DIRECT DRAW INIT
-////////////////////////////////////////////////////////////////////////
+// Main direct draw initialize
 
 BOOL ReStart=FALSE;
 
@@ -4575,12 +4471,12 @@ int DXinitialize()
 	DDBLTFX ddbltfx;
 	DDPIXELFORMAT dd;
 
-	// init some DX vars
+	// Initialize some DX variables
 	DX.hWnd = (HWND)hWGPU;
 	DX.DDSHelper=0;
 	DX.DDSScreenPic=0;
 
-	// make guid !
+	// Make GUID
 	c=(unsigned char *)&guiDev;
 	for (i=0;i<sizeof(GUID);i++,c++)
 	{
@@ -4591,7 +4487,7 @@ int DXinitialize()
 		}
 	}
 
-	// create dd
+	// Create DD
 	if (DirectDrawCreate(guid,&DD,0))
 	{
 		MessageBox(NULL, "This GPU requires DirectX!", "Error", MB_OK);
@@ -4600,9 +4496,7 @@ int DXinitialize()
 
 	DX.DD=DD;
 
-	//////////////////////////////////////////////////////// co-op level
-
-	if (iWindowMode)                                      // win mode?
+	if (iWindowMode)                                      // Window mode?
 	{
 		if (IDirectDraw_SetCooperativeLevel(DX.DD,DX.hWnd,DDSCL_NORMAL))
 			return 0;
@@ -4634,13 +4528,13 @@ int DXinitialize()
 		}
 	}
 
-	//////////////////////////////////////////////////////// main surfaces
+	// Main surfaces
 
 	memset(&ddsd, 0, sizeof(DDSURFACEDESC));
 	memset(&ddscaps, 0, sizeof(DDSCAPS));
 	ddsd.dwSize = sizeof(DDSURFACEDESC);
 
-	ddsd.dwFlags = DDSD_CAPS;                             // front buffer
+	ddsd.dwFlags = DDSD_CAPS;                             // Front buffer
 
 	if (iSysMemory)
 		ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE | DDSCAPS_SYSTEMMEMORY;
@@ -4651,10 +4545,9 @@ int DXinitialize()
 	if (IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSPrimary, NULL))
 		return 0;
 
-	//----------------------------------------------------//
-	if (iSysMemory && iUseScanLines==2) iUseScanLines=1;  // pete: nvidia hack not needed on system mem
+	if (iSysMemory && iUseScanLines==2) iUseScanLines=1;  // Pete: Nvidia hack not needed on system memory
 
-	if (iUseScanLines==2 || bKkaptureMode)                                 // special nvidia hack
+	if (iUseScanLines==2 || bKkaptureMode)                                 // Special Nvidia hack (should probably remove any hacks for specific cards if we can)
 	{
 		memset(&ddsd, 0, sizeof(DDSURFACEDESC));
 		ddsd.dwSize = sizeof(DDSURFACEDESC);
@@ -4666,9 +4559,8 @@ int DXinitialize()
 		if (IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSHelper, NULL))
 			return 0;
 	}
-	//----------------------------------------------------//
 
-	memset(&ddsd, 0, sizeof(DDSURFACEDESC));              // back buffer
+	memset(&ddsd, 0, sizeof(DDSURFACEDESC));              // Back buffer
 	ddsd.dwSize = sizeof(DDSURFACEDESC);
 	ddsd.dwFlags = DDSD_WIDTH | DDSD_HEIGHT | DDSD_CAPS;
 // ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN;//|DDSCAPS_VIDEOMEMORY;
@@ -4694,7 +4586,7 @@ int DXinitialize()
 	if (IDirectDraw_CreateSurface(DX.DD,&ddsd, &DX.DDSRender, NULL))
 		return 0;
 
-	// check for desktop color depth
+	// Check for desktop color depth
 	dd.dwSize=sizeof(DDPIXELFORMAT);
 	IDirectDrawSurface_GetPixelFormat(DX.DDSRender,&dd);
 
@@ -4735,7 +4627,7 @@ int DXinitialize()
 			iDesktopCol=32;
 		}
 
-	//////////////////////////////////////////////////////// extra blts
+	// Extra blts
 
 	switch (iUseNoStretchBlt)
 	{
@@ -4841,7 +4733,7 @@ int DXinitialize()
 		break;
 	}
 
-	//////////////////////////////////////////////////////// clipper init
+	// Clipper initialization
 
 	if (FAILED(h=IDirectDraw_CreateClipper(DX.DD,0,&Clipper,NULL)))
 		return 0;
@@ -4853,7 +4745,7 @@ int DXinitialize()
 	IDirectDrawSurface_SetClipper(DX.DDSPrimary,Clipper);
 	IDirectDrawClipper_Release(Clipper);
 
-	//////////////////////////////////////////////////////// small screen clean up
+	// Small screen clean up
 
 	DXSetGamma();
 
@@ -4863,7 +4755,7 @@ int DXinitialize()
 	IDirectDrawSurface_Blt(DX.DDSPrimary,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
 	IDirectDrawSurface_Blt(DX.DDSRender,NULL,NULL,NULL,DDBLT_COLORFILL,&ddbltfx);
 
-	//////////////////////////////////////////////////////// finish init
+	// Finish initialization
 
 	if (iUseNoStretchBlt>=3)
 	{
@@ -4875,27 +4767,25 @@ int DXinitialize()
 
 	bUsingTWin=FALSE;
 
-	InitMenu();                                           // menu init
+	InitMenu();                                           // Menu initialization
 /*
-	if (iShowFPS)                                         // fps on startup
+	if (iShowFPS)                                         // FPS on startup
 	{
 		ulKeybits|=KEY_SHOWFPS;
 		szDispBuf[0]=0;
 		BuildDispMenu(0);
 	}
-*/	//adelikat: TODO: remove this block
-	bIsFirstFrame = FALSE;                                // done
+*/	// adelikat: To do: remove this block (we should)
+	bIsFirstFrame = FALSE;                                // Done
 
 	return 0;
 }
 
-////////////////////////////////////////////////////////////////////////
-// clean up DX stuff
-////////////////////////////////////////////////////////////////////////
+// Clean up DX stuff
 
-void DXcleanup()                                       // DX CLEANUP
+void DXcleanup()                                       // DX Cleanup
 {
-	CloseMenu();                                          // bye display lists
+	CloseMenu();                                          // Get rid of display lists
 
 	if (iUseNoStretchBlt>=3)
 	{
@@ -4922,11 +4812,7 @@ void DXcleanup()                                       // DX CLEANUP
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////
-
-DWORD  dwGPUStyle=0;                                   // vars to store some wimdows stuff
+DWORD  dwGPUStyle=0;                                   // Variables to store some window stuff
 HANDLE hGPUMenu=NULL;
 
 unsigned long ulInitDisplay(void)
@@ -4934,10 +4820,10 @@ unsigned long ulInitDisplay(void)
 	HDC hdc;
 	RECT r;
 
-	if (iWindowMode)                                      // win mode?
+	if (iWindowMode)                                      // Windowed mode?
 	{
 
-		DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // -> adjust wnd style		//TODO: why any of this?
+		DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // Adjust window style - To do: why any of this? (Yes, I agree. We should check)
 		dwGPUStyle=dw;
 		dw&=~WS_THICKFRAME;
 		dw|=WS_BORDER|WS_CAPTION;
@@ -4948,18 +4834,18 @@ unsigned long ulInitDisplay(void)
 		if (iUseScanLines)
 			SetWindowPos(hWGPU,HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE);
 /*
-		MoveWindow(hWGPU,                            // -> move wnd
+		MoveWindow(hWGPU,                            // Move window
 		           GetSystemMetrics(SM_CXFULLSCREEN)/2-iResX/2,
 		           GetSystemMetrics(SM_CYFULLSCREEN)/2-iResY/2,
 		           iResX+GetSystemMetrics(SM_CXFIXEDFRAME)+3,
 		           iResY+GetSystemMetrics(SM_CYFIXEDFRAME)+GetSystemMetrics(SM_CYCAPTION)+3,
 		           TRUE);
 */	//adelikat: Respect the existing window position
-		UpdateWindow(hWGPU);                         // -> let windows do some update
+		UpdateWindow(hWGPU);                         // Let windows update
 	}
-	else                                                  // no window mode:
+	else                                                  // No window mode
 	{
-		DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // -> adjust wnd style
+		DWORD dw=GetWindowLong(hWGPU, GWL_STYLE);    // Adjust window style
 		dwGPUStyle=dw;
 		hGPUMenu=GetMenu(hWGPU);
 
@@ -4967,35 +4853,31 @@ unsigned long ulInitDisplay(void)
 		SetWindowLong(hWGPU, GWL_STYLE, dw);
 		SetMenu(hWGPU,NULL);
 
-		ShowWindow(hWGPU,SW_SHOWMAXIMIZED);          // -> max mode
+		ShowWindow(hWGPU,SW_SHOWMAXIMIZED);          // Max mode
 	}
 
 	r.left=r.top=0;
 	r.right=iResX;
-	r.bottom=iResY;          // init bkg with black
+	r.bottom=iResY;          // Initialize bkg with black
 	hdc = GetDC(hWGPU);
 	FillRect(hdc,&r,(HBRUSH)GetStockObject(BLACK_BRUSH));
 	ReleaseDC(hWGPU, hdc);
 
-	DXinitialize();                                       // init direct draw (not D3D... oh, well)
+	DXinitialize();                                       // Initialize DirectDraw (not Direct3D)
 
-	if (!iWindowMode)                                     // fullscreen mode?
-		ShowWindow(hWGPU,SW_SHOWMAXIMIZED);           // -> maximize again (fixes strange DX behavior)
+	if (!iWindowMode)                                     // Fullscreen mode?
+		ShowWindow(hWGPU,SW_SHOWMAXIMIZED);           // Maximize again (fixes strange DX behavior)
 
 	return 1;
 }
 
-////////////////////////////////////////////////////////////////////////
-
 void CloseDisplay(void)
 {
-	DXcleanup();                                          // cleanup dx
+	DXcleanup();                                          // Cleanup DX
 
-	SetWindowLong(hWGPU, GWL_STYLE,dwGPUStyle);    // repair window
+	SetWindowLong(hWGPU, GWL_STYLE,dwGPUStyle);    // Repair window
 	if (hGPUMenu) SetMenu(hWGPU,(HMENU)hGPUMenu);
 }
-
-////////////////////////////////////////////////////////////////////////
 
 void CreatePic(unsigned char * pMem)
 {
@@ -5089,8 +4971,6 @@ void CreatePic(unsigned char * pMem)
 	IDirectDrawSurface_Unlock(DX.DDSScreenPic,&xddsd);
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-
 void DestroyPic(void)
 {
 	if (DX.DDSScreenPic)
@@ -5117,8 +4997,6 @@ void DestroyPic(void)
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////////////
-
 void DisplayPic(void)
 {
 	RECT ScreenRect={iResX-128,0,iResX,96},
@@ -5133,14 +5011,12 @@ void DisplayPic(void)
 		ScreenRect.bottom+=Point.y;
 	}
 
-// ??? eh... no need to wait here!
+// No need to wait here!
 // WaitVBlank();
 
 	IDirectDrawSurface_Blt(DX.DDSPrimary,&ScreenRect,DX.DDSScreenPic,&HelperRect,
 	                       DDBLT_WAIT,NULL);
 }
-
-///////////////////////////////////////////////////////////////////////////////////////
 
 void ShowGpuPic(void)
 {
@@ -5151,7 +5027,7 @@ void ShowGpuPic(void)
 	int x,y;
 	unsigned long * pDMem;
 
-	// turn off any screen pic, if it does already exist
+	// Turn off any screen picture, if it does already exist
 	if (DX.DDSScreenPic)
 	{
 		DestroyPic();
@@ -5164,14 +5040,17 @@ void ShowGpuPic(void)
 		return;
 	}
 
-	// load and lock the bitmap (lock is kinda obsolete in win32)
+	// Load and lock the bitmap (lock is obsolete in win32)
+	
 	hR=FindResource(hInst,MAKEINTRESOURCE(IDB_GPU),RT_BITMAP);
 	hG=LoadResource(hInst,hR);
 
-	// get long ptr to bmp data
+	// Get long ptr to bitmap data
+	
 	pRMem=((unsigned long *)LockResource(hG))+10;
 
-	// change the data upside-down
+	// Change the data upside down
+	
 	pMem=(unsigned char *)malloc(128*96*3);
 
 	for (y=0;y<96;y++)
@@ -5180,40 +5059,38 @@ void ShowGpuPic(void)
 		for (x=0;x<96;x++) *pDMem++=*pRMem++;
 	}
 
-	// show the pic
+	// show the picture
 	CreatePic(pMem);
 
-	// clean up
+	// Clean up
 	free(pMem);
 	DeleteObject(hG);
 }
 
-////////////////////////////////////////////////////////////////////////
-
-void ShowTextGpuPic(void)                              // CREATE TEXT SCREEN PIC
-{                                                      // gets an Text and paints
+void ShowTextGpuPic(void)                              // Create text screen picture
+{                                                      // Gets a text and paints it into a RGB24 bitmap
 	unsigned char * pMem;
-	BITMAPINFO bmi;                  // it into a rgb24 bitmap
+	BITMAPINFO bmi;
 	HDC hdc,hdcMem;
 	HBITMAP hBmp,hBmpMem;
-	HFONT hFontMem;   // to display it in the gpu
+	HFONT hFontMem;   // To display it in the GPU
 	HBRUSH hBrush,hBrushMem;
 	HPEN hPen,hPenMem;
 	char szB[256];
-	RECT r={0,0,128,96};                                  // size of bmp... don't change that
-	COLORREF crFrame = RGB(128,255,128);                  // some example color inits
+	RECT r={0,0,128,96};                                  // Size of bitmap (don't change this)
+	COLORREF crFrame = RGB(128,255,128);                  // Some example color initializations
 	COLORREF crBkg   = RGB(0,0,0);
 	COLORREF crText  = RGB(0,255,0);
 
 	if (DX.DDSScreenPic) DestroyPic();
 
-	//----------------------------------------------------// creation of the dc & bitmap
+	// Creation of the DC and bitmap
 
-	hdc   =GetDC(NULL);                                   // create a dc
+	hdc   =GetDC(NULL);                                   // Create a DC
 	hdcMem=CreateCompatibleDC(hdc);
 	ReleaseDC(NULL,hdc);
 
-	memset(&bmi,0,sizeof(BITMAPINFO));                    // create a 24bit dib
+	memset(&bmi,0,sizeof(BITMAPINFO));                    // Create a 24-bit dib
 	bmi.bmiHeader.biSize=sizeof(BITMAPINFOHEADER);
 	bmi.bmiHeader.biWidth=128;
 	bmi.bmiHeader.biHeight=-96;
@@ -5223,10 +5100,11 @@ void ShowTextGpuPic(void)                              // CREATE TEXT SCREEN PIC
 	hBmp=CreateDIBSection(hdcMem,&bmi,DIB_RGB_COLORS,
 	                      (void **)&pMem,NULL,0);         // pMem will point to 128x96x3 bitmap data
 
-	hBmpMem   = (HBITMAP)SelectObject(hdcMem,hBmp);       // sel the bmp into the dc
+	hBmpMem   = (HBITMAP)SelectObject(hdcMem,hBmp);       // Select the bitmap into the DC
 
-	//----------------------------------------------------// ok, the following is just a drawing example... change it...
-	// create & select an additional font... whatever you want to paint, paint it in the dc :)
+	// OK, the following is just a drawing example...change it (we will)
+	// Create & select an additional font... whatever you want to paint, paint it in the DC
+	
 	hBrush=CreateSolidBrush(crBkg);
 	hPen=CreatePen(PS_SOLID,0,crFrame);
 
@@ -5237,25 +5115,25 @@ void ShowTextGpuPic(void)                              // CREATE TEXT SCREEN PIC
 	SetTextColor(hdcMem,crText);
 	SetBkColor(hdcMem,crBkg);
 
-	Rectangle(hdcMem,r.left,r.top,r.right,r.bottom);      // our example: fill rect and paint border
-	InflateRect(&r,-3,-2);                                // reduce the text area
+	Rectangle(hdcMem,r.left,r.top,r.right,r.bottom);      // Our example: Fill rectangle and paint border
+	InflateRect(&r,-3,-2);                                // Reduce the text area
 
 	LoadString(hInst,IDS_INFO0+iMPos,szB,255);
-	DrawText(hdcMem,szB,strlen(szB),&r,                   // paint the text (including clipping and word break)
+	DrawText(hdcMem,szB,strlen(szB),&r,                   // Paint the text (including clipping and word break)
 	         DT_LEFT|DT_WORDBREAK);
 
-	//----------------------------------------------------// ok, now store the pMem data, or just call the gpu func
+	//----------------------------------------------------// OK, now store the pMem data, or just call the GPU function
 
 	CreatePic(pMem);
 
-	//----------------------------------------------------// finished, now we clean up... needed, or you will get resource leaks :)
+	// Finished, now we clean up (this is needed, or you will get resource leaks)
 
-	SelectObject(hdcMem,hBmpMem);                         // sel old mem dc objects
+	SelectObject(hdcMem,hBmpMem);                         // Select old memory DC objects
 	SelectObject(hdcMem,hBrushMem);
 	SelectObject(hdcMem,hPenMem);
 	SelectObject(hdcMem,hFontMem);
-	DeleteDC(hdcMem);                                     // delete mem dcs
+	DeleteDC(hdcMem);                                     // Delete memory DCs
 	DeleteObject(hBmp);
-	DeleteObject(hBrush);                                 // delete created objects
+	DeleteObject(hBrush);                                 // Delete created objects
 	DeleteObject(hPen);
 }

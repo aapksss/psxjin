@@ -1,4 +1,4 @@
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 static void hleDummy() {
 	psxRegs.pc = psxRegs.GPR.n.ra;

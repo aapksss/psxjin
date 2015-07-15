@@ -1,6 +1,6 @@
-#include "../PsxCommon.h"
+#include "../psxcommon.h"
 #ifdef WIN32
-#include "Win32.h"
+#include "win32.h"
 #endif
 
 #include "resource.h"
@@ -29,11 +29,11 @@ static HMENU rwrecentmenu;
 /*static*/ HACCEL RamWatchAccels = NULL;
 char rw_recent_files[MAX_RECENT_WATCHES][1024];
 //char Watch_Dir[1024]="";
-bool RWfileChanged = false; //Keeps track of whether the current watch file has been changed, if so, ramwatch will prompt to save changes
-bool AutoRWLoad = false;    //Keeps track of whether Auto-load is checked
-bool RWSaveWindowPos = false; //Keeps track of whether Save Window position is checked
+bool RWfileChanged = false; // Keeps track of whether the current watch file has been changed, if so, ramwatch will prompt to save changes
+bool AutoRWLoad = false;    // Keeps track of whether auto load is checked
+bool RWSaveWindowPos = false; // Keeps track of whether save window position is checked
 char currentWatch[1024];
-int ramw_x, ramw_y;			//Used to store ramwatch dialog window positions
+int ramw_x, ramw_y;			// Used to store ramwatch dialog window positions
 AddressWatcher rswatches[MAX_WATCH_COUNT];
 int WatchCount=0;
 
@@ -52,7 +52,7 @@ HWND RamWatchHWnd;
 #define hInst gApp.hInstance
 static char Str_Tmp [1024];
 
-void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidths); //initializes the ram search and/or ram watch listbox
+void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidths); // Initializes the ram search and/or ram watch listbox
 
 #define MESSAGEBOXPARENT (RamWatchHWnd ? RamWatchHWnd : hWnd)
 
@@ -108,7 +108,7 @@ bool InsertWatch(const AddressWatcher& Watch, char *Comment)
 	return true;
 }
 
-LRESULT CALLBACK PromptWatchNameProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) //Gets the description of a watched address
+LRESULT CALLBACK PromptWatchNameProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) // Gets the description of a watched address
 {
 	RECT r;
 	RECT r2;
@@ -188,7 +188,7 @@ void Update_RAM_Watch()
 
 	if(WatchCount)
 	{
-		// update cached values and detect changes to displayed listview items
+		// Update cached values and detect changes to displayed listview items
 
 		for(int i = 0; i < WatchCount; i++)
 		{
@@ -202,7 +202,8 @@ void Update_RAM_Watch()
 		}
 	}
 
-	// refresh any visible parts of the listview box that changed
+	// Refresh any visible parts of the listview box that changed
+	
 	HWND lv = GetDlgItem(RamWatchHWnd,IDC_WATCHLIST);
 	int top = ListView_GetTopIndex(lv);
 	int bottom = top + ListView_GetCountPerPage(lv) + 1; // +1 is so we will update a partially-displayed last item
@@ -232,8 +233,9 @@ void Update_RAM_Watch()
 
 bool AskSave()
 {
-	//This function asks to save changes if the watch file contents have changed
-	//returns false only if a save was attempted but failed or was cancelled
+	// This function asks to save changes if the watch file contents have changed
+	// Will return false only if a save was attempted but failed or was canceled
+	
 	if (RWfileChanged)
 	{
 		int answer = MessageBox(MESSAGEBOXPARENT, "Save Changes?", "Ram Watch", MB_YESNOCANCEL);
@@ -269,13 +271,13 @@ void UpdateRW_RMenu(HMENU menu, unsigned int mitem, unsigned int baseid)
 
 	SetMenuItemInfo(GetSubMenu(ramwatchmenu, 0), mitem, FALSE, &moo);
 
-	// Remove all recent files submenus
+	// Remove all recent files sub menus
 	for(x = 0; x < MAX_RECENT_WATCHES; x++)
 	{
 		RemoveMenu(menu, baseid + x, MF_BYCOMMAND);
 	}
 
-	// Recreate the menus
+	// Re-create the menus
 	for(x = MAX_RECENT_WATCHES - 1; x >= 0; x--)
 	{  
 		char tmp[128 + 5];
@@ -289,7 +291,7 @@ void UpdateRW_RMenu(HMENU menu, unsigned int mitem, unsigned int baseid)
 		moo.cbSize = sizeof(moo);
 		moo.fMask = MIIM_DATA | MIIM_ID | MIIM_TYPE;
 
-		// Fill in the menu text.
+		// Fill in the menu text
 		if(strlen(rw_recent_files[x]) < 128)
 		{
 			sprintf(tmp, "&%d. %s", ( x + 1 ) % 10, rw_recent_files[x]);
@@ -309,35 +311,36 @@ void UpdateRW_RMenu(HMENU menu, unsigned int mitem, unsigned int baseid)
 
 	// I don't think one function shall do so many things in a row
 //	WriteRecentRWFiles();	// write recent menu to ini
+
 }
 
 void UpdateRWRecentArray(const char* addString, unsigned int arrayLen, HMENU menu, unsigned int menuItem, unsigned int baseId)
 {
 	const size_t len = 1024; // Avoid magic numbers
 
-	// Try to find out if the filename is already in the recent files list.
+	// Try to find out if the filename is already in the recent files list
 	for(unsigned int x = 0; x < arrayLen; x++)
 	{
 		if(strlen(rw_recent_files[x]))
 		{
-			if(!strncmp(rw_recent_files[x], addString, 1024))    // Item is already in list.
+			if(!strncmp(rw_recent_files[x], addString, 1024))    // Item is already in list
 			{
-				// If the filename is in the file list don't add it again.
-				// Move it up in the list instead.
+				// If the filename is in the file list don't add it again
+				// Move it up in the list instead
 
 				int y;
 				char tmp[len];
 
-				// Save pointer.
+				// Save pointer
 				strncpy(tmp, rw_recent_files[x], len);
 				
 				for(y = x; y; y--)
 				{
-					// Move items down.
+					// Move items down
 					strncpy(rw_recent_files[y],rw_recent_files[y - 1], len);
 				}
 
-				// Put item on top.
+				// Put item on top
 				strncpy(rw_recent_files[0],tmp, len);
 
 				// Update the recent files menu
@@ -348,15 +351,15 @@ void UpdateRWRecentArray(const char* addString, unsigned int arrayLen, HMENU men
 		}
 	}
 
-	// The filename wasn't found in the list. That means we need to add it.
+	// The filename wasn't found in the list. That means we need to add it
 
-	// Move the other items down.
+	// Move the other items down
 	for(unsigned int x = arrayLen - 1; x; x--)
 	{
 		strncpy(rw_recent_files[x],rw_recent_files[x - 1], len);
 	}
 
-	// Add the new item.
+	// Add the new item
 	strncpy(rw_recent_files[0], addString, len);
 
 	// Update the recent files menu
@@ -375,7 +378,7 @@ void OpenRWRecentFile(int memwRFileNumber)
 
 	int rnum = memwRFileNumber;
 	if ((unsigned int)rnum >= MAX_RECENT_WATCHES)
-		return; //just in case
+		return; // Just in case
 
 	char* x;
 
@@ -383,9 +386,9 @@ void OpenRWRecentFile(int memwRFileNumber)
 	{
 		x = rw_recent_files[rnum];
 		if (!*x) 
-			return;		//If no recent files exist just return.  Useful for Load last file on startup (or if something goes screwy)
+			return;		// If no recent files exist just return. Useful for loading the last file on startup (or if something goes screwy)
 
-		if (rnum) //Change order of recent files if not most recent
+		if (rnum) // Change order of recent files if not most recent
 		{
 			RWAddRecentFile(x);
 			rnum = 0;
@@ -406,8 +409,8 @@ void OpenRWRecentFile(int memwRFileNumber)
 		int answer = MessageBox(MESSAGEBOXPARENT,"Error opening file.","ERROR",MB_OKCANCEL);
 		if (answer == IDOK)
 		{
-			rw_recent_files[rnum][0] = '\0';	//Clear file from list 
-			if (rnum)							//Update the ramwatch list
+			rw_recent_files[rnum][0] = '\0';	// Clear file from list 
+			if (rnum)							// Update the ramwatch list
 				RWAddRecentFile(rw_recent_files[0]); 
 			else
 				RWAddRecentFile(rw_recent_files[1]);
@@ -540,7 +543,10 @@ bool Save_Watches()
 		
 		fclose(WatchFile);
 		RWfileChanged=false;
-		//TODO: Add to recent list function call here
+		
+		// To do: Add to recent list function call here
+		// We should do that
+		
 		return true;
 	}
 	return false;
@@ -548,8 +554,8 @@ bool Save_Watches()
 
 bool QuickSaveWatches()
 {
-if (RWfileChanged==false) return true; //If file has not changed, no need to save changes
-if (currentWatch[0] == NULL) //If there is no currently loaded file, run to Save as and then return
+if (RWfileChanged==false) return true; // If file has not changed, no need to save changes
+if (currentWatch[0] == NULL) // If there is no currently loaded file, run to save as and then return
 	{
 		return Save_Watches();
 	}
@@ -675,7 +681,7 @@ void RefreshWatchListSelectedItemControlStatus(HWND hDlg)
 	}
 }
 
-LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) //Gets info for a RAM Watch, and then inserts it into the Watch List
+LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam) // Gets info for a RAM Watch, and then inserts it into the Watch List
 {
 	RECT r;
 	RECT r2;
@@ -768,7 +774,7 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						AddressWatcher Temp;
 						Temp.Size = s;
 						Temp.Type = t;
-						Temp.WrongEndian = false; //replace this when I get little endian working properly
+						Temp.WrongEndian = false; // Replace this when I get little endian working properly (We will as soon as we become endian-agnostic)
 						GetDlgItemText(hDlg,IDC_EDIT_COMPAREADDRESS,Str_Tmp,1024);
 						char *addrstr = Str_Tmp;
 						if (strlen(Str_Tmp) > 8) addrstr = &(Str_Tmp[strlen(Str_Tmp) - 9]);
@@ -823,9 +829,6 @@ LRESULT CALLBACK EditWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 	return false;
 }
 
-
-
-
 void RamWatchEnableCommand(HWND hDlg, HMENU hMenu, UINT uIDEnableItem, bool enable)
 {
 	EnableWindow(GetDlgItem(hDlg, uIDEnableItem), (enable?TRUE:FALSE));
@@ -876,7 +879,7 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 		}	break;
 
 		case WM_INITDIALOG: {
-			GetWindowRect(hWnd, &r);  //Ramwatch window
+			GetWindowRect(hWnd, &r);  // RAM watch window
 			dx1 = (r.right - r.left) / 2;
 			dy1 = (r.bottom - r.top) / 2;
 
@@ -885,7 +888,8 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			dy2 = (r2.bottom - r2.top) / 2;
 
 			
-			// push it away from the main window if we can
+			// Push it away from the main window if we can
+			
 			const int width = (r.right-r.left);
 			const int height = (r.bottom - r.top);
 			const int width2 = (r2.right-r2.left); 
@@ -900,18 +904,17 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 				r.left -= width2;
 			}
 			
-			//-----------------------------------------------------------------------------------
-			//If user has Save Window Pos selected, override default positioning
+			// If user has save window position selected, override default positioning
 			if (RWSaveWindowPos)	
 			{
-				//If ramwindow is for some reason completely off screen, use default instead 
+				// If RAM window is for some reason completely off screen, use default instead
 				if (ramw_x > (-width*2) || ramw_x < (width*2 + GetSystemMetrics(SM_CYSCREEN))   ) 
-					r.left = ramw_x;	  //This also ignores cases of windows -32000 error codes
-				//If ramwindow is for some reason completely off screen, use default instead 
+					r.left = ramw_x;	  // This also ignores cases of windows -32000 error codes
+				// If RAM window is for some reason completely off screen, use default instead
 				if (ramw_y > (0-height*2) ||ramw_y < (height*2 + GetSystemMetrics(SM_CYSCREEN))	)
-					r.top = ramw_y;		  //This also ignores cases of windows -32000 error codes
+					r.top = ramw_y;		  // This also ignores cases of windows -32000 error codes
 			}
-			//-------------------------------------------------------------------------------------
+
 			SetWindowPos(hDlg, NULL, r.left, r.top, NULL, NULL, SWP_NOSIZE | SWP_NOZORDER | SWP_SHOWWINDOW);
 			
 			ramwatchmenu=GetMenu(hDlg);
@@ -931,7 +934,9 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 
 			RamWatchAccels = LoadAccelerators(hInst, MAKEINTRESOURCE(IDR_RWACCELERATOR));
 
-			// due to some bug in windows, the arrow button width from the resource gets ignored, so we have to set it here
+			// Due to some bugs in Windows, the arrow button width from the resource gets ignored, so we have to set it here
+			// Check and see if this stuff is still necessary with modern Windows versions
+			
 			SetWindowPos(GetDlgItem(hDlg,ID_WATCHES_UPDOWN), 0,0,0, 30,60, SWP_NOMOVE);
 
 			Update_RAM_Watch();
@@ -972,13 +977,13 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 					LPNMHDR lP = (LPNMHDR) lParam;
 					switch (lP->code)
 					{
-						case LVN_ITEMCHANGED: // selection changed event
+						case LVN_ITEMCHANGED: // Selection changed event
 						{
 							NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)lP;
 							if(pNMListView->uNewState & LVIS_FOCUSED ||
 								(pNMListView->uNewState ^ pNMListView->uOldState) & LVIS_SELECTED)
 							{
-								// disable buttons that we don't have the right number of selected items for
+								// Disable buttons that we don't have the right number of selected items for
 								RefreshWatchListSelectedCountControlStatus(hDlg);
 							}
 						}	break;
@@ -1022,8 +1027,8 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						}
 						case LVN_ODFINDITEM:
 						{	
-							// disable search by keyboard typing,
-							// because it interferes with some of the accelerators
+							// Disable search by keyboard typing,
+							// because it interferes with some of the accelerators,
 							// and it isn't very useful here anyway
 							SetWindowLong(hDlg, DWL_MSGRESULT, ListView_GetSelectionMark(GetDlgItem(hDlg,IDC_WATCHLIST)));
 							return 1;
@@ -1179,7 +1184,8 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 						else if(rswatches[watchIndex].Type == 'h')
 							numberType = 2;
 
-						// TODO: open add-cheat dialog
+						// To do: open add-cheat dialog
+						// We should implement this ASAP if it isn't already
 					}
 				}
 				break;
@@ -1196,8 +1202,9 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 			break;
 
 #if 0
-		// this message is never received
-		case WM_KEYDOWN: // handle accelerator keys
+		// This message is never received
+		// Why is it here if it is never received? Maybe I am misunderstanding, but we should look into it
+		case WM_KEYDOWN: // Handle accelerator keys
 		{
 			SetFocus(GetDlgItem(hDlg,IDC_WATCHLIST));
 			MSG msg;
@@ -1217,10 +1224,10 @@ LRESULT CALLBACK RamWatchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam
 //			return false;
 
 		case WM_DESTROY:
-			// this is the correct place
+			// This is the correct place
 			RamWatchHWnd = NULL;
 			DragAcceptFiles(hDlg, FALSE);
-			WriteRecentRWFiles();	// write recent menu to ini
+			WriteRecentRWFiles();	// Write recent menu to ini
 			break;
 
 		case WM_DROPFILES:

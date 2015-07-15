@@ -20,7 +20,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
 
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "emufile.h"
 
 #include <vector>
@@ -110,7 +110,6 @@ void EMUFILE::write64le(u64 val)
 	fwrite(&val,8);
 #endif
 }
-
 
 size_t EMUFILE::read64le(u64 *Bufo)
 {
@@ -216,7 +215,6 @@ void EMUFILE::write8le(u8* val)
 {
 	write8le(*val);
 }
-
 
 void EMUFILE::write8le(u8 val)
 {

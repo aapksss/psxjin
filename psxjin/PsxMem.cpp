@@ -1,9 +1,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
-// global variables
+// Global variables
 s8 *psxM;
 s8 *psxP;
 s8 *psxR;
@@ -63,7 +63,7 @@ void psxMemReset() {
 	memset(psxM, 0, 0x00200000);
 	memset(psxP, 0, 0x00010000);
 
-	Config.HLE = 0; //adelikat: Meh, just in case, TODO: delete this variable
+	Config.HLE = 0; // Just in case. Can probably delete this variable.
 }
 
 void psxMemShutdown() {

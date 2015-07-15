@@ -3,13 +3,13 @@
 
 #include <stdio.h>
 
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 typedef struct {
 	int  (*Init)();
 	void (*Reset)();
-	void (*Execute)();		/* executes up to a break */
-	void (*ExecuteBlock)();	/* executes up to a jump */
+	void (*Execute)();		// Executes up to a break
+	void (*ExecuteBlock)();	// Executes up to a jump
 	void (*Clear)(u32 Addr, u32 Size);
 	void (*Shutdown)();
 } R3000Acpu;
@@ -107,12 +107,12 @@ typedef union {
 } psxCP2Ctrl;
 
 typedef struct {
-	psxGPRRegs GPR;		/* General Purpose Registers */
-	psxCP0Regs CP0;		/* Coprocessor0 Registers */
-	psxCP2Data CP2D; 	/* Cop2 data registers */
-	psxCP2Ctrl CP2C; 	/* Cop2 control registers */
-    u32 pc;				/* Program counter */
-    u32 code;			/* The instruction */
+	psxGPRRegs GPR;		// General purpose registers
+	psxCP0Regs CP0;		// Coprocessor0 registers
+	psxCP2Data CP2D; 	// COP2 data registers
+	psxCP2Ctrl CP2C; 	// COP2 control registers
+    u32 pc;				// Program counter
+    u32 code;			// The instruction
 	u32 cycle;
 	u32 interrupt;
 	u32 intCycle[32];
@@ -129,7 +129,7 @@ extern psxRegisters psxRegs;
 #define _i8(x) (char)x
 #define _u8(x) (unsigned char)x
 
-/**** R3000A Instruction Macros ****/
+/**** R3000A instruction macros ****/
 #define _PC_       psxRegs.pc       // The next PC to be executed
 
 #define _fOp_(code)		((code >> 26)       )  // The opcode part of the instruction register 
@@ -141,8 +141,8 @@ extern psxRegisters psxRegs;
 #define _fIm_(code)		((u16)code)            // The immediate part of the instruction register
 #define _fTarget_(code)	(code & 0x03ffffff)    // The target part of the instruction register
 
-#define _fImm_(code)	((s16)code)            // sign-extended immediate
-#define _fImmU_(code)	(code&0xffff)          // zero-extended immediate
+#define _fImm_(code)	((s16)code)            // Sign-extended immediate
+#define _fImmU_(code)	(code&0xffff)          // Zero-extended immediate
 
 #define _Op_     _fOp_(psxRegs.code)
 #define _Funct_  _fFunct_(psxRegs.code)
@@ -162,10 +162,10 @@ extern psxRegisters psxRegs;
 #define _rSa_   psxRegs.GPR.r[_Sa_]   // Sa register
 #define _rFs_   psxRegs.CP0.r[_Rd_]   // Fs register
 
-#define _c2dRs_ psxRegs.CP2D.r[_Rs_]  // Rs cop2 data register
-#define _c2dRt_ psxRegs.CP2D.r[_Rt_]  // Rt cop2 data register
-#define _c2dRd_ psxRegs.CP2D.r[_Rd_]  // Rd cop2 data register
-#define _c2dSa_ psxRegs.CP2D.r[_Sa_]  // Sa cop2 data register
+#define _c2dRs_ psxRegs.CP2D.r[_Rs_]  // Rs COP2 data register
+#define _c2dRt_ psxRegs.CP2D.r[_Rt_]  // Rt COP2 data register
+#define _c2dRd_ psxRegs.CP2D.r[_Rd_]  // Rd COP2 data register
+#define _c2dSa_ psxRegs.CP2D.r[_Sa_]  // Sa COP2 data register
 
 #define _rHi_   psxRegs.GPR.n.hi   // The HI register
 #define _rLo_   psxRegs.GPR.n.lo   // The LO register

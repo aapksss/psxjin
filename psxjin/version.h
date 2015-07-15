@@ -17,7 +17,9 @@
 #define _Py_STRINGIZE1(X) _Py_STRINGIZE2 ## X
 #define _Py_STRINGIZE2(X) #X
 #else
-// TODO: make for others compilers
+	
+// To do: "make" it work on other compilers (see what I did there?)
+
 #define PCSXRR_COMPILER ""
 #define PCSXRR_COMPILER_DETAIL ""
 #endif

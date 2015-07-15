@@ -9,8 +9,6 @@
 using std::min;
 using std::max;
 
-
-
 extern "C" {
 	#include <lua.h>
 	#include <lauxlib.h>
@@ -18,12 +16,12 @@ extern "C" {
 	#include <lstate.h>
 }
 
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #ifdef WIN32
-#include "Win32/Win32.h"
-#include "Win32/resource.h"
+#include "win32/win32.h"
+#include "win32/resource.h"
 #endif
-#include "LuaEngine.h"
+#include "luaengine.h"
 
 #ifndef TRUE
 #define TRUE 1
@@ -84,7 +82,7 @@ static int frameAdvanceWaiting = FALSE;
 // Transparency strength. 255=opaque, 0=so transparent it's invisible
 static int transparencyModifier = 255;
 
-// Our joypads.
+// Our controllers.
 static uint32 lua_joypads[2];
 static uint8 lua_joypads_used;
 static LuaAnalogJoy lua_analogjoy[2];
@@ -230,17 +228,14 @@ void PSXjin_LuaWriteInform() {
 	lua_settop(LUA, 0);
 }
 
-///////////////////////////
-
-
-
 // psxjin.speedmode(string mode)
 //
 //   Takes control of the emulation speed
-//   of the system. Normal is normal speed (60fps, 50 for PAL),
-//   nothrottle disables speed control but renders every frame,
+//   of the system. Normal is normal speed (60FPS for NTSC, 50FPS for PAL),
+//   no throttle disables speed control but renders every frame,
 //   turbo renders only a few frames in order to speed up emulation,
 //   maximum renders no frames
+
 static int psxjin_speedmode(lua_State *L) {
 	const char *mode = luaL_checkstring(L,1);
 	
@@ -308,7 +303,7 @@ static inline bool isalphaorunderscore(char c)
 }
 
 static std::vector<const void*> s_tableAddressStack; // prevents infinite recursion of a table within a table (when cycle is found, print something like table:parent)
-static std::vector<const void*> s_metacallStack; // prevents infinite recursion if something's __tostring returns another table that contains that something (when cycle is found, print the inner result without using __tostring)
+static std::vector<const void*> s_metacallStack; // prevents infinite recursion if anythings __tostring returns another table that contains that something (when cycle is found, print the inner result without using __tostring)
 
 #define APPENDPRINT { int _n = snprintf(ptr, remaining,
 #define END ); if(_n >= 0) { ptr += _n; remaining -= _n; } else { remaining = 0; } }
@@ -346,11 +341,11 @@ static void toCStringConverter(lua_State* L, int i, char*& ptr, int& remaining)
 		case LUA_TFUNCTION: 
 			if((L->base + i-1)->value.gc->cl.c.isC)
 			{
-				//lua_CFunction func = lua_tocfunction(L, i);
-				//std::map<lua_CFunction, const char*>::iterator iter = s_cFuncInfoMap.find(func);
-				//if(iter == s_cFuncInfoMap.end())
+				// lua_CFunction func = lua_tocfunction(L, i);
+				// std::map<lua_CFunction, const char*>::iterator iter = s_cFuncInfoMap.find(func);
+				// if(iter == s_cFuncInfoMap.end())
 					goto defcase;
-				//APPENDPRINT "function(%s)", iter->second END 
+				// APPENDPRINT "function(%s)", iter->second END 
 			}
 			else
 			{
@@ -502,7 +497,7 @@ static char* rawToCString(lua_State* L, int idx)
 
 
 // replacement for luaB_tostring() that is able to show the contents of tables (and formats numbers better, and show function prototypes)
-// can be called directly from lua via tostring(), assuming tostring hasn't been reassigned
+// can be called directly from Lua via tostring(), assuming tostring hasn't been reassigned
 static int tostring(lua_State *L)
 {
 	char* str = rawToCString(L);
@@ -549,15 +544,15 @@ static int print(lua_State *L)
 {
 	const char* str = toCString(L);
 
-	int uid = info_uid;//luaStateToUIDMap[L->l_G->mainthread];
-	//LuaContextInfo& info = GetCurrentInfo();
+	int uid = info_uid; // luaStateToUIDMap[L->l_G->mainthread];
+	// LuaContextInfo& info = GetCurrentInfo();
 
 	if(info_print)
 		info_print(uid, str);
 	else
 		puts(str);
 
-	//worry(L, 100);
+	// worry(L, 100);
 	return 0;
 }
 
@@ -626,7 +621,8 @@ static int copytable(lua_State *L)
 // because print traditionally shows the address of tables,
 // and the print function I provide instead shows the contents of tables,
 // I also provide this function
-// (otherwise there would be no way to see a table's address, AFAICT)
+// (otherwise there would be no way to see a table's address, as far as I can tell)
+
 static int addressof(lua_State *L)
 {
 	const void* ptr = lua_topointer(L,-1);
@@ -684,7 +680,6 @@ int psxjin_lagged(lua_State *L) {
 }
 
 
-
 static int memory_readbyte(lua_State *L)
 {
 	lua_pushinteger(L, psxMu8(luaL_checkinteger(L,1)));
@@ -714,7 +709,7 @@ static int memory_readdword(lua_State *L)
 	uint32 addr = luaL_checkinteger(L,1);
 	uint32 val = psxMu32(addr);
 
-	// lua_pushinteger doesn't work properly for 32bit system, does it?
+	// lua_pushinteger doesn't work properly for 32-bit systems, does it?
 	if (val >= 0x80000000 && sizeof(int) <= 4)
 		lua_pushnumber(L, val);
 	else
@@ -778,7 +773,7 @@ static int memory_writedword(lua_State *L)
 // memory.registerwrite(int address, function func)
 //
 //  Calls the given function when the indicated memory address is
-//  written to. No args are given to the function. The write has already
+//  written to. No arguments are given to the function. The write has already
 //  occurred, so the new address is readable.
 static int memory_registerwrite(lua_State *L) {
 	// Check args
@@ -791,7 +786,7 @@ static int memory_registerwrite(lua_State *L) {
 	if (addr > 0x200000)
 		luaL_error(L, "arg 1 should be between 0x0000 and 0x200000");
 
-	// Commit it to the registery
+	// Commit it to the registry
 	lua_getfield(L, LUA_REGISTRYINDEX, memoryWatchTable);
 	lua_pushvalue(L,1);
 	lua_pushvalue(L,2);
@@ -810,13 +805,13 @@ static int memory_registerwrite(lua_State *L) {
 
 // table joypad.read(int which = 1)
 //
-//  Reads the joypads as inputted by the user.
+//  Reads the controllers as input by the user.
 static int joy_get_internal(lua_State *L, bool reportUp, bool reportDown) {
 	unsigned short buttons=0;
 	int which;
 	int i;
 	
-	// Reads the joypads as inputted by the user
+	// Reads the controllers as input by the user
 	which = luaL_checkinteger(L,1);
 	if(which == 1) {
 		PadDataS padd;
@@ -875,7 +870,7 @@ static int joypad_set(lua_State *L) {
 	int which;
 	int i;
 
-	// Which joypad we're tampering with
+	// Which controller we're tampering with
 	which = luaL_checkinteger(L,1);
 	if (which < 1 || which > 2) {
 		luaL_error(L,"Invalid output port (valid range 1-2, specified %d)", which);
@@ -914,7 +909,7 @@ int joypad_controltype(lua_State *L)
 
 static int joypad_getanalog(lua_State *L) {
 
-	// Reads the joypads as inputted by the user
+	// Reads the controller as input by the user
 	PadDataS padd;
 	int which = luaL_checkinteger(L,1);
 	if(which == 1)
@@ -1037,7 +1032,7 @@ static int savestate_create(lua_State *L) {
 
 	if (which > 0) {
 		// Find an appropriate filename. This is OS specific, unfortunately.
-		// So I turned the filename selection code into my bitch. :)
+		// So I tamed the filename selection code
 		// Numbers are 0 through 9 though.
 		filename = GetSavestateFilename(which -1);
 	}
@@ -1048,7 +1043,7 @@ static int savestate_create(lua_State *L) {
 	// Our "object". We don't care about the type, we just need the memory and GC services.
 	lua_newuserdata(L,1);
 	
-	// The metatable we use, protected from Lua and contains garbage collection info and stuff.
+	// The metatable we use, protected from Lua and contains garbage collection info and other stuff.
 	lua_newtable(L);
 	
 	// First, we must protect it
@@ -1060,7 +1055,7 @@ static int savestate_create(lua_State *L) {
 	lua_pushstring(L, filename);
 	lua_setfield(L, -2, "filename");
 	
-	// If it's an anonymous savestate, we must delete the file from disk should it be gargage collected
+	// If it's an anonymous savestate, we must delete the file from disk since it should be garbage collected
 	if (which < 0) {
 		lua_pushcfunction(L, savestate_gc);
 		lua_setfield(L, -2, "__gc");
@@ -1069,10 +1064,10 @@ static int savestate_create(lua_State *L) {
 	// Set the metatable
 	lua_setmetatable(L, -2);
 
-	// The filename was allocated using malloc. Do something about that.
+	// The filename was allocated using malloc. Let's do something about that.
 	free(filename);
 	
-	// Awesome. Return the object
+	// Return the object
 	return 1;
 	
 }
@@ -1103,7 +1098,6 @@ static int savestate_load(lua_State *L) {
 	return 0;
 
 }
-
 
 // int movie.framecount()
 //
@@ -1142,7 +1136,6 @@ static int movie_isplaying(lua_State *L) {
 	return 1;
 }
 
-
 static int movie_getname(lua_State *L) {
 	if(Movie.mode != MOVIEMODE_INACTIVE)
 		lua_pushstring(L, Movie.movieFilename);
@@ -1173,7 +1166,6 @@ static int movie_setrerecordcount(lua_State *L) {
 	return 0;
 }
 
-
 static int movie_rerecordcounting(lua_State *L) {
 	if (lua_gettop(L) == 0)
 		luaL_error(L, "no parameters specified");
@@ -1181,7 +1173,6 @@ static int movie_rerecordcounting(lua_State *L) {
 	skipRerecords = lua_toboolean(L,1);
 	return 0;
 }
-
 
 // movie.stop()
 //
@@ -1198,7 +1189,7 @@ static int movie_stop(lua_State *L) {
 int LUA_SCREEN_WIDTH  = 640;
 int LUA_SCREEN_HEIGHT = 512;
 
-// Common code by the gui library: make sure the screen array is ready
+// Common code by the GUI library: make sure the screen array is ready
 static void gui_prepare() {
 	int x,y;
 	if (!gui_data)
@@ -1216,8 +1207,8 @@ static void gui_prepare() {
 	gui_used = GUI_USED_SINCE_LAST_DISPLAY;
 }
 
+// Pixform for Lua graphics
 
-// pixform for lua graphics
 #define BUILD_PIXEL_ARGB8888(A,R,G,B) (((int) (A) << 24) | ((int) (R) << 16) | ((int) (G) << 8) | (int) (B))
 #define DECOMPOSE_PIXEL_ARGB8888(PIX,A,R,G,B) { (A) = ((PIX) >> 24) & 0xff; (R) = ((PIX) >> 16) & 0xff; (G) = ((PIX) >> 8) & 0xff; (B) = (PIX) & 0xff; }
 #define LUA_BUILD_PIXEL BUILD_PIXEL_ARGB8888
@@ -1234,7 +1225,7 @@ static void gui_prepare() {
 	two = temp;   \
 }
 
-// write a pixel to buffer
+// Write a pixel to buffer
 static inline void blend32(uint32 *dstPixel, uint32 colour)
 {
 	uint8 *dst = (uint8*) dstPixel;
@@ -1242,14 +1233,14 @@ static inline void blend32(uint32 *dstPixel, uint32 colour)
 	LUA_DECOMPOSE_PIXEL(colour, a, r, g, b);
 
 	if (a == 255 || dst[3] == 0) {
-		// direct copy
+		// Direct copy
 		*(uint32*)(dst) = colour;
 	}
 	else if (a == 0) {
-		// do not copy
+		// Don't copy
 	}
 	else {
-		// alpha-blending
+		// Alpha-blending
 		int a_dst = ((255 - a) * dst[3] + 128) / 255;
 		int a_new = a + a_dst;
 
@@ -1260,31 +1251,133 @@ static inline void blend32(uint32 *dstPixel, uint32 colour)
 	}
 }
 
-// check if a pixel is in the lua canvas
+// Check if a pixel is in the Lua canvas
+
 static inline uint8 gui_check_boundary(int x, int y) {
 	return !(x < 0 || x >= LUA_SCREEN_WIDTH || y < 0 || y >= LUA_SCREEN_HEIGHT);
 }
 
-// write a pixel to gui_data (do not check boundaries for speedup)
+// Write a pixel to gui_data (do not check boundaries for speedup)
 static inline void gui_drawpixel_fast(int x, int y, uint32 colour) {
 	//gui_prepare();
 	blend32((uint32*) &gui_data[(y*LUA_SCREEN_WIDTH+x)*4], colour);
 }
 
-// write a pixel to gui_data (check boundaries)
+// Write a pixel to gui_data (check boundaries)
 static inline void gui_drawpixel_internal(int x, int y, uint32 colour) {
 	//gui_prepare();
 	if (gui_check_boundary(x, y))
 		gui_drawpixel_fast(x, y, colour);
 }
 
-// draw a line on gui_data (checks boundaries)
+// Draw a line on gui_data (checks boundaries)
 static void gui_drawline_internal(int x1, int y1, int x2, int y2, uint8 lastPixel, uint32 colour) {
 
 	//gui_prepare();
 
 	// Note: New version of Bresenham's Line Algorithm
-	// http://groups.google.co.jp/group/rec.games.roguelike.development/browse_thread/thread/345f4c42c3b25858/29e07a3af3a450e6?show_docid=29e07a3af3a450e6
+	// Added the text of the link in case the link goes down in the future (it will)
+
+/*
+This version of Bresenham's Line Algorithm is symmetric, and can find
+distances. This code is in C. It uses function pointers to determine
+when a line is blocked and how to plot a point. max_len is the maximum
+length of the line. It is also symmetric. To use it for line of sight,
+call this function for every square that might be within the field of
+view.
+To use the function, add it to your code and use something similar to
+"bresenham(player.x, player.y, target.x, target.y, is_blocking,
+display_point, max_len)". is_blocking and display_point are names of
+functions.
+
+void bresenham(int x1, int y1, int x2, int y2, int blocking(int, int),
+void plot(int, int), int max_len) {
+
+        max_len <<= 1;
+        int len = 0;
+
+        int swappedx = 0;
+        int swappedy = 0;
+
+        int xtemp = x2-x1;
+        int ytemp = y2-y1;
+        if (xtemp < 0) {
+                xtemp = -xtemp;
+                swappedx = 1;
+        }
+        if (ytemp < 0) {
+                ytemp = -ytemp;
+                swappedy = 1;
+        }
+
+        int delta_x = xtemp << 1;
+        int delta_y = ytemp << 1;
+
+        signed char ix = x2 > x1?1:-1;
+        signed char iy = y2 > y1?1:-1;
+
+        plot(x1, y1);
+
+        if (delta_x >= delta_y) {
+                int error = delta_y - (delta_x >> 1);
+
+                while (x1 != x2) {
+                        if (error == 0 && !swappedx) {
+                                plot(x1+ix, y1);
+                                if (blocking(x1+ix, y1))
+                                        return;
+                        }
+                        if (error >= 0) {
+                                if (error || (ix > 0)) {
+                                        y1 += iy;
+                                        error -= delta_x;
+                                        len++;
+                                }
+                        }
+                        x1 += ix;
+                        plot(x1, y1);
+                        len += 2;
+                        if (blocking(x1, y1) || len >= max_len)
+                                return;
+                        if (error == 0 && swappedx) {
+                                plot(x1, y1+iy);
+                                if (blocking(x1, y1+iy))
+                                        return;
+                        }
+                        error += delta_y;
+                }
+        }
+        else {
+                int error = delta_x - (delta_y >> 1);
+
+                while (y1 != y2) {
+                        if (error == 0 && !swappedy) {
+                                plot(x1, y1+iy);
+                                if (blocking(x1, y1+iy))
+                                        return;
+                        }
+                        if (error >= 0) {
+                                if (error || (iy > 0)) {
+                                        x1 += ix;
+                                        error -= delta_y;
+                                        len++;
+                                }
+                        }
+                        y1 += iy;
+                        plot(x1, y1);
+                        len += 2;
+                        if (blocking(x1, y1) || len >= max_len)
+                                return;
+                        if (error == 0 && swappedy) {
+                                plot(x1+ix, y1);
+                                if (blocking(x1+ix, y1))
+                                        return;
+                        }
+                        error += delta_x;
+                }
+        }
+}
+*/
 
 	int swappedx = 0;
 	int swappedy = 0;
@@ -1360,7 +1453,7 @@ static void gui_drawline_internal(int x1, int y1, int x2, int y2, uint8 lastPixe
 	}
 }
 
-// draw a rect on gui_data
+// Draw a rectangle on gui_data
 static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) {
 
 	if (x1 > x2) 
@@ -1384,7 +1477,7 @@ static void gui_drawbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 	gui_drawline_internal(x2, y1, x2, y2, TRUE, colour);
 }
 
-// draw a circle on gui_data
+// Draw a circle on gui_data
 static void gui_drawcircle_internal(int x0, int y0, int radius, uint32 colour) {
 
 	int f;
@@ -1417,9 +1510,9 @@ static void gui_drawcircle_internal(int x0, int y0, int radius, uint32 colour) {
 	gui_drawpixel_internal(x0 + radius, y0, colour);
 	gui_drawpixel_internal(x0 - radius, y0, colour);
  
-	// same pixel shouldn't be drawed twice,
+	// Same pixel shouldn't be drawn twice,
 	// because each pixel has opacity.
-	// so now the routine gets ugly.
+	// So now the routine gets ugly.
 	while(TRUE)
 	{
 		assert(ddF_x == 2 * x + 1);
@@ -1456,7 +1549,7 @@ static void gui_drawcircle_internal(int x0, int y0, int radius, uint32 colour) {
 	}
 }
 
-// draw fill rect on gui_data
+// Draw filled rectangle on gui_data
 static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour) {
 
 	int ix, iy;
@@ -1483,7 +1576,7 @@ static void gui_fillbox_internal(int x1, int y1, int x2, int y2, uint32 colour) 
 	}
 }
 
-// fill a circle on gui_data
+// Fill a circle on gui_data
 static void gui_fillcircle_internal(int x0, int y0, int radius, uint32 colour) {
 
 	int f;
@@ -1571,7 +1664,7 @@ s_colorMapping [] =
 	{"magenta",   0xFF00FFFF},
 };
 
-/**
+/*
  * Converts an integer or a string on the stack at the given
  * offset to a RGB32 colour. Several encodings are supported.
  * The user may construct their own RGB value, given a simple colour name,
@@ -1629,7 +1722,7 @@ static inline uint32 gui_getcolour_wrapped(lua_State *L, int offset, uint8 hasDe
 	case LUA_TTABLE:
 		{
 			int color = 0xFF;
-			lua_pushnil(L); // first key
+			lua_pushnil(L); // First key
 			int keyIndex = lua_gettop(L);
 			int valueIndex = keyIndex + 1;
 			bool first = true;
@@ -1692,6 +1785,7 @@ static uint32 gui_optcolour(lua_State *L, int offset, uint32 defaultColour) {
 }
 
 // gui.drawpixel(x,y,colour)
+
 static int gui_drawpixel(lua_State *L) {
 
 	int x = luaL_checkinteger(L, 1);
@@ -1710,6 +1804,7 @@ static int gui_drawpixel(lua_State *L) {
 }
 
 // gui.drawline(x1,y1,x2,y2,color,skipFirst)
+
 static int gui_drawline(lua_State *L) {
 
 	int x1,y1,x2,y2;
@@ -1729,6 +1824,7 @@ static int gui_drawline(lua_State *L) {
 }
 
 // gui.drawbox(x1, y1, x2, y2, fillcolor, outlinecolor)
+
 static int gui_drawbox(lua_State *L) {
 
 	int x1,y1,x2,y2;
@@ -1757,6 +1853,7 @@ static int gui_drawbox(lua_State *L) {
 }
 
 // gui.drawcircle(x0, y0, radius, colour)
+
 static int gui_drawcircle(lua_State *L) {
 
 	int x, y, r;
@@ -1775,6 +1872,7 @@ static int gui_drawcircle(lua_State *L) {
 }
 
 // gui.fillbox(x1, y1, x2, y2, colour)
+
 static int gui_fillbox(lua_State *L) {
 
 	int x1,y1,x2,y2;
@@ -1800,6 +1898,7 @@ static int gui_fillbox(lua_State *L) {
 }
 
 // gui.fillcircle(x0, y0, radius, colour)
+
 static int gui_fillcircle(lua_State *L) {
 
 	int x, y, r;
@@ -1816,7 +1915,6 @@ static int gui_fillcircle(lua_State *L) {
 
 	return 0;
 }
-
 
 static int gui_getpixel(lua_State *L) {
 	int x = luaL_checkinteger(L, 1);
@@ -1851,17 +1949,17 @@ static int gui_parsecolor(lua_State *L)
 	return 4;
 }
 
-
 // gui.gdscreenshot()
 //
-//  Returns a screen shot as a string in gd's v1 file format.
-//  This allows us to make screen shots available without gd installed locally.
-//  Users can also just grab pixels via substring selection.
-//
-//  I think...  Does lua support grabbing byte values from a string? // yes, string.byte(str,offset)
-//  Well, either way, just install gd and do what you like with it.
-//  It really is easier that way.
+//  Returns a screenshot as a string in the GD v1 file format
+//  This allows us to make screenshots available without GD installed locally
+//  Users can also just grab pixels via substring selection
+
+//  Lua supports grabbing byte values from a string with string.byte(str,offset)
+//  But, just install GD and do what you like with it
+//  It's easier that way
 // example: gd.createFromGdStr(gui.gdscreenshot()):png("outputimage.png")
+
 static int gui_gdscreenshot(lua_State *L) {
 	int x,y;
 
@@ -1876,7 +1974,7 @@ static int gui_gdscreenshot(lua_State *L) {
 	str[size] = 0;
 	ptr = (unsigned char*)str;
 
-	// GD format header for truecolor image (11 bytes)
+	// GD format header for true color image (11 bytes)
 	*ptr++ = (65534 >> 8) & 0xFF;
 	*ptr++ = (65534     ) & 0xFF;
 	*ptr++ = (width >> 8) & 0xFF;
@@ -1897,7 +1995,7 @@ static int gui_gdscreenshot(lua_State *L) {
 			g = screen[(y*LUA_SCREEN_WIDTH+x)*4+1];
 			b = screen[(y*LUA_SCREEN_WIDTH+x)*4];
 
-			// overlay uncommited Lua drawings if needed
+			// Overlay uncommitted Lua drawings if needed
 			if (gui_used != GUI_CLEAR && gui_enabled) {
 				const uint8 gui_alpha = gui_data[(y*LUA_SCREEN_WIDTH+x)*4+3];
 				const uint8 gui_red   = gui_data[(y*LUA_SCREEN_WIDTH+x)*4+2];
@@ -1905,13 +2003,13 @@ static int gui_gdscreenshot(lua_State *L) {
 				const uint8 gui_blue  = gui_data[(y*LUA_SCREEN_WIDTH+x)*4];
 
 				if (gui_alpha == 255) {
-					// direct copy
+					// Direct copy
 					r = gui_red;
 					g = gui_green;
 					b = gui_blue;
 				}
 				else if (gui_alpha != 0) {
-					// alpha-blending
+					// Alpha-blending
 					r = (((int) gui_red   - r) * gui_alpha / 255 + r) & 255;
 					g = (((int) gui_green - g) * gui_alpha / 255 + g) & 255;
 					b = (((int) gui_blue  - b) * gui_alpha / 255 + b) & 255;
@@ -1930,14 +2028,14 @@ static int gui_gdscreenshot(lua_State *L) {
 	return 1;
 }
 
-
 // gui.opacity(number alphaValue)
-// sets the transparency of subsequent draw calls
+// Sets the transparency of subsequent draw calls
 // 0.0 is completely transparent, 1.0 is completely opaque
-// non-integer values are supported and meaningful, as are values greater than 1.0
-// it is not necessary to use this function to get transparency (or the less-recommended gui.transparency() either),
-// because you can provide an alpha value in the color argument of each draw call.
-// however, it can be convenient to be able to globally modify the drawing transparency
+// Non-integer values are supported and meaningful, as are values greater than 1.0
+// It is not necessary to use this function to get transparency (or the less-recommended gui.transparency() either),
+// because you can provide an alpha value in the color argument of each draw call
+// However, it can be convenient to be able to globally modify the drawing transparency
+
 static int gui_setopacity(lua_State *L) {
 	double opacF = luaL_checknumber(L,1);
 	transparencyModifier = (int) (opacF * 255);
@@ -1960,11 +2058,11 @@ static int gui_transparency(lua_State *L) {
 // gui.clearuncommitted()
 //
 //  undoes uncommitted drawing commands
+
 static int gui_clearuncommitted(lua_State *L) {
 	PSXjin_LuaClearGui();
 	return 0;
 }
-
 
 static const uint32 Small_Font_Data[] =
 {
@@ -2095,7 +2193,7 @@ static void PutTextInternal (const char *str, int len, short x, short y, int col
 			y += 8;
 			continue;
 		}
-		else if(c == '\t') // just in case
+		else if(c == '\t') // Just in case
 		{
 			const int tabSpace = 8;
 			x += (tabSpace-(((x-origX)/4)%tabSpace))*4;
@@ -2264,7 +2362,7 @@ static int gui_gdoverlay(lua_State *L) {
 	if(alphaMul <= 0)
 		return 0;
 
-	// since there aren't that many possible opacity levels,
+	// Since there aren't that many possible opacity levels,
 	// do the opacity modification calculations beforehand instead of per pixel
 	for(i = 0; i < 128; i++)
 	{
@@ -2275,7 +2373,7 @@ static int gui_gdoverlay(lua_State *L) {
 		opacMap[i] = opac;
 	}
 	for(i = 128; i < 256; i++)
-		opacMap[i] = 0; // what should we do for them, actually?
+		opacMap[i] = 0; // What should we do for them, actually?
 
 	if (!trueColor) {
 		colorsTotal = *ptr++ << 8;
@@ -2292,7 +2390,8 @@ static int gui_gdoverlay(lua_State *L) {
 		pal[i].a = opacMap[*ptr++];
 	}
 
-	// some of clippings
+	// Some of clippings (What?)
+	
 	if (xStartSrc < 0) {
 		width += xStartSrc;
 		xStartDst -= xStartSrc;
@@ -2326,7 +2425,7 @@ static int gui_gdoverlay(lua_State *L) {
 	if (yStartDst+height >= LUA_SCREEN_HEIGHT)
 		height = LUA_SCREEN_HEIGHT - yStartDst;
 	if (width <= 0 || height <= 0)
-		return 0; // out of screen or invalid size
+		return 0; // Out of screen or invalid size
 
 	gui_prepare();
 
@@ -2432,12 +2531,11 @@ static int doPopup(lua_State *L, const char* deftype, const char* deficon) {
 		return 1;
 	}
 
-
-
 }
 
 // string gui.popup(string message, string type = "ok", string icon = "message")
 // string input.popup(string message, string type = "yesno", string icon = "question")
+
 static int gui_popup(lua_State *L)
 {
 	return doPopup(L, "ok", "message");
@@ -2561,17 +2659,18 @@ void GetMouseData(uint32 *md)
 #endif
 
 // input.get()
-// takes no input, returns a lua table of entries representing the current input state,
-// independent of the joypad buttons the emulated game thinks are pressed
+// Takes no input, returns a Lua table of entries representing the current input state,
+// independent of the controller buttons the emulated game thinks are pressed
 // for example:
-//   if the user is holding the W key and the left mouse button
-//   and has the mouse at the bottom-right corner of the game screen,
-//   then this would return {W=true, leftclick=true, xmouse=255, ymouse=223}
+// if the user is holding the W key and the left mouse button
+// and has the mouse at the bottom-right corner of the game screen,
+// then this would return {W=true, leftclick=true, xmouse=255, ymouse=223}
+
 static int input_getcurrentinputstatus(lua_State *L) {
 	lua_newtable(L);
 
 #ifdef WIN32
-	// keyboard and mouse button status
+	// Keyboard and mouse button status
 	{
 		int i;
 		for(i = 1; i < 255; i++) {
@@ -2589,7 +2688,7 @@ static int input_getcurrentinputstatus(lua_State *L) {
 			}
 		}
 	}
-	// mouse position in game screen pixel coordinates
+	// Mouse position in game screen pixel coordinates
 	{
 		uint32 MouseData[2];
 		int x, y;
@@ -2610,8 +2709,9 @@ static int input_getcurrentinputstatus(lua_State *L) {
 }
 
 // test.checksum(string component)
-// Return a crc32 checksum over the given component.
-// Component can be "mainmem", "videomem", "cpu", or "savestate".
+// Return a CRC32 checksum over the given component
+// Component can be "mainmem", "videomem", "cpu", or "savestate"
+
 static int test_checksum(lua_State *L)
 {
 	const char *cname = luaL_checkstring(L, 1);
@@ -2636,7 +2736,7 @@ static int test_checksum(lua_State *L)
 	return 1;
 }
 
-// the following bit operations are ported from LuaBitOp 1.0.1,
+// The following bit operations are ported from LuaBitOp 1.0.1,
 // because it can handle the sign bit (bit 31) correctly.
 
 /*
@@ -2668,7 +2768,7 @@ static int test_checksum(lua_State *L)
 */
 
 #ifdef _MSC_VER
-/* MSVC is stuck in the last century and doesn't have C99's stdint.h. */
+// MSVC is stuck in the last century and doesn't have C99's stdint.h
 typedef __int32 int32_t;
 typedef unsigned __int32 uint32_t;
 typedef unsigned __int64 uint64_t;
@@ -2688,14 +2788,14 @@ typedef union {
 #endif
 } BitNum;
 
-/* Convert argument to bit type. */
+// Convert argument to bit type
 static UBits barg(lua_State *L, int idx)
 {
   BitNum bn;
   UBits b;
   bn.n = lua_tonumber(L, idx);
 #if defined(LUA_NUMBER_DOUBLE)
-  bn.n += 6755399441055744.0;  /* 2^52+2^51 */
+  bn.n += 6755399441055744.0;  // 2^52+2^51
 #ifdef SWAPPED_DOUBLE
   b = (UBits)(bn.b >> 32);
 #else
@@ -2718,7 +2818,7 @@ static UBits barg(lua_State *L, int idx)
   return b;
 }
 
-/* Return bit type. */
+// Return bit type
 #define BRET(b)  lua_pushnumber(L, (lua_Number)(SBits)(b)); return 1;
 
 static int bit_tobit(lua_State *L) { BRET(barg(L, 1)) }
@@ -2782,18 +2882,18 @@ static const struct luaL_Reg bit_funcs[] = {
   { NULL, NULL }
 };
 
-/* Signed right-shifts are implementation-defined per C89/C99.
-** But the de facto standard are arithmetic right-shifts on two's
-** complement CPUs. This behaviour is required here, so test for it.
-*/
+// Signed right-shifts are implementation-defined per C89/C99.
+// But the best standard are arithmetic right-shifts on two's
+// complement CPUs. This behavior is required here, so test for it.
+
 #define BAD_SAR		(bsar(-8, 2) != (SBits)-2)
 
-BOOL luabitop_validate(lua_State *L) // originally named as luaopen_bit
+BOOL luabitop_validate(lua_State *L) // Originally named as luaopen_bit
 {
   UBits b;
   lua_pushnumber(L, (lua_Number)1437217655L);
   b = barg(L, -1);
-  if (b != (UBits)1437217655L || BAD_SAR) {  /* Perform a simple self-test. */
+  if (b != (UBits)1437217655L || BAD_SAR) {  // Perform a simple self-test
     const char *msg = "compiled with incompatible luaconf.h";
 #ifdef LUA_NUMBER_DOUBLE
 #ifdef WIN32
@@ -2839,8 +2939,8 @@ static int bitbit(lua_State *L)
 	BRET(rv);
 }
 
-
 // The function called periodically to ensure Lua doesn't run amok.
+
 static void PSXjin_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 	if (numTries-- == 0) {
 
@@ -2875,7 +2975,7 @@ static void PSXjin_LuaHookFunction(lua_State *L, lua_Debug *dbg) {
 			PSXjin_LuaOnStop();
 		}
 
-		// else, kill the debug hook.
+		// else, kill the debug hook
 		lua_sethook(L, NULL, 0, 0);
 	}
 }
@@ -2890,6 +2990,7 @@ void HandleCallbackError(lua_State* L)
 		lua_setfield(LUA, LUA_REGISTRYINDEX, guiCallbackTable);
 
 		// Error?
+		
 #ifdef WIN32
 		MessageBox( gApp.hWnd, lua_tostring(LUA,-1), "Lua run error", MB_OK | MB_ICONSTOP);
 #else
@@ -2961,7 +3062,7 @@ static const struct luaL_reg psxjinlib [] = {
 	{"registerafter", psxjin_registerafter},
 	{"registerexit", psxjin_registerexit},
 	{"message", psxjin_message},
-	{"print", print}, // sure, why not
+	{"print", print}, // Sure, why not
 	{"exitemulator", psxjin_exitemulator},
 	{NULL,NULL}
 };
@@ -2977,7 +3078,9 @@ static const struct luaL_reg memorylib [] = {
 	{"writebyte", memory_writebyte},
 	{"writeword", memory_writeword},
 	{"writedword", memory_writedword},
+	
 	// alternate naming scheme for word and double-word and unsigned
+	
 	{"readbyteunsigned", memory_readbyte},
 	{"readwordunsigned", memory_readword},
 	{"readdwordunsigned", memory_readdword},
@@ -2991,8 +3094,11 @@ static const struct luaL_reg memorylib [] = {
 	{"writelong", memory_writedword},
 
 	// memory hooks
+	
 	{"registerwrite", memory_registerwrite},
+	
 	// alternate names
+	
 	{"register", memory_registerwrite},
 
 	{NULL,NULL}
@@ -3006,7 +3112,9 @@ static const struct luaL_reg joypadlib[] = {
 	{"getanalog", joypad_getanalog},
 	{"setanalog", joypad_setanalog},
 	{"controltype",joypad_controltype},
+	
 	// alternative names
+	
 	{"read", joypad_get},
 	{"write", joypad_set},
 	{"readdown", joypad_getdown},
@@ -3039,6 +3147,7 @@ static const struct luaL_reg movielib[] = {
 	{"stop", movie_stop},
 
 	// alternative names
+	
 	{"close", movie_stop},
 	{NULL,NULL}
 };
@@ -3057,7 +3166,9 @@ static const struct luaL_reg guilib[] = {
 	{"gdoverlay", gui_gdoverlay},
 	{"getpixel", gui_getpixel},
 	{"clearuncommitted", gui_clearuncommitted},
+	
 	// alternative names
+	
 	{"drawtext", gui_text},
 	{"drawbox", gui_drawbox},
 	{"drawline", gui_drawline},
@@ -3075,7 +3186,9 @@ static const struct luaL_reg guilib[] = {
 static const struct luaL_reg inputlib[] = {
 	{"get", input_getcurrentinputstatus},
 	{"popup", input_popup},
+	
 	// alternative names
+	
 	{"read", input_getcurrentinputstatus},
 	{NULL, NULL}
 };
@@ -3089,16 +3202,18 @@ void PSXjin_LuaFrameBoundary() {
 	lua_State *thread;
 	int result;
 
-	// HA!
+	// Ha!
 	if (!LUA || !luaRunning)
 		return;
 
 	// Our function needs calling
+	
 	lua_settop(LUA,0);
 	lua_getfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
 	thread = lua_tothread(LUA,1);	
 
 	// Lua calling C must know that we're busy inside a frame boundary
+	
 	frameBoundary = TRUE;
 	frameAdvanceWaiting = FALSE;
 
@@ -3111,14 +3226,19 @@ void PSXjin_LuaFrameBoundary() {
 	_getcwd(luaCWD, _MAX_PATH);
 	
 	if (result == LUA_YIELD) {
+		
 		// Okay, we're fine with that.
+		
 	} else if (result != 0) {
+		
 		// Done execution by bad causes
+		
 		PSXjin_LuaOnStop();
 		lua_pushnil(LUA);
 		lua_setfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
 		
 		// Error?
+		
 #ifdef WIN32
 		MessageBox( gApp.hWnd, lua_tostring(thread,-1), "Lua run error", MB_OK | MB_ICONSTOP);
 #else
@@ -3130,7 +3250,7 @@ void PSXjin_LuaFrameBoundary() {
 		//GPUdisplayText("Script died of natural causes.\n");
 	}
 
-	// Past here, the nes actually runs, so any Lua code is called mid-frame. We must
+	// Past here, the PS1 actually runs, so any Lua code is called mid-frame. We must
 	// not do anything too stupid, so let ourselves know.
 	frameBoundary = FALSE;
 
@@ -3170,7 +3290,7 @@ int PSXjin_LoadLuaCode(const char *filename) {
 	if (!slash || (backslash && backslash < slash))
 		slash = backslash;
 	if (slash) {
-		slash[1] = '\0';    // keep slash itself for some reasons
+		slash[1] = '\0';    // Keep slash itself for some reasons
 		_chdir(dir);
 	}
 	_getcwd(luaCWD, _MAX_PATH);
@@ -3189,7 +3309,7 @@ int PSXjin_LoadLuaCode(const char *filename) {
 		luaL_register(LUA, "input", inputlib);
 		luaL_register(LUA, "bit", bit_funcs); // LuaBitOp library
 		luaL_register(LUA, "test", testlib);
-		lua_settop(LUA, 0); // clean the stack, because each call to luaL_register leaves a table on top
+		lua_settop(LUA, 0); // Clean the stack, because each call to luaL_register leaves a table on top
 
 		// register a few utility functions outside of libraries (in the global namespace)
 		lua_register(LUA, "print", print);
@@ -3221,22 +3341,24 @@ int PSXjin_LoadLuaCode(const char *filename) {
 
 	if (result) {
 #ifdef WIN32
+
 		// Doing this here caused nasty problems; reverting to MessageBox-from-dialog behavior.
+		
 		MessageBox(NULL, lua_tostring(LUA,-1), "Lua load error", MB_OK | MB_ICONSTOP);
 #else
 		fprintf(stderr, "Failed to compile file: %s\n", lua_tostring(LUA,-1));
 #endif
 
-		// Wipe the stack. Our thread
+		// Wipe the stack
 		lua_settop(LUA,0);
-		return 0; // Oh shit.
+		return 0; // Uh oh
 	}
 
 	
 	// Get our function into it
 	lua_xmove(LUA, thread, 1);
 	
-	// Save the thread to the registry. This is why I make the thread FIRST.
+	// Save the thread to the registry. This is why I make the thread FIRST
 	lua_setfield(LUA, LUA_REGISTRYINDEX, frameAdvanceThread);
 	
 
@@ -3265,10 +3387,10 @@ int PSXjin_LoadLuaCode(const char *filename) {
 	// And run it right now. :)
 	//PSXjin_LuaFrameBoundary();
 
-	// Set up our protection hook to be executed once every 10,000 bytecode instructions.
+	// Set up our protection hook to be executed once every 10,000 bytecode instructions
 	lua_sethook(thread, PSXjin_LuaHookFunction, LUA_MASKCOUNT, 10000);
 
-	// We're done.
+	// We're done
 	return 1;
 }
 
@@ -3286,39 +3408,38 @@ void PSXjin_ReloadLuaCode()
 
 
 /**
- * Terminates a running Lua script by killing the whole Lua engine.
+ * Terminates a running Lua script by killing the whole Lua engine
  *
- * Always safe to call, except from within a lua call itself (duh).
+ * Always safe to call, except from within a Lua call itself
  *
  */
 void PSXjin_LuaStop() {
-	//already killed
+	// Already killed
 	if (!LUA) return;
 
-	//execute the user's shutdown callbacks
+	// Execute the user shutdown callbacks
 	CallExitFunction();
 
 	if (info_onstop)
 		info_onstop(info_uid);
 
-	lua_close(LUA); // this invokes our garbage collectors for us
+	lua_close(LUA); // This invokes our garbage collectors for us
 	LUA = NULL;
 	PSXjin_LuaOnStop();
 }
 
 
 /**
- * Returns true if there is a Lua script running.
+ * Returns true if there is a Lua script running
  *
  */
 int PSXjin_LuaRunning() {
-	// FIXME: return false when no callback functions are registered.
-	return (int) (LUA != NULL); // should return true if callback functions are active.
+	// FIXME: return false when no callback functions are registered
+	return (int) (LUA != NULL); // Should return true if callback functions are active
 }
 
-
 /**
- * Returns true if Lua would like to steal the given joypad control.
+ * Returns true if Lua would like to steal the given game controller control.
  */
 int PSXjin_LuaUsingJoypad(int which) {
 	if (!PSXjin_LuaRunning())
@@ -3329,9 +3450,9 @@ int PSXjin_LuaUsingJoypad(int which) {
 
 
 /**
- * Reads the buttons Lua is feeding for the given joypad, in the same
- * format as the OS-specific code.
- *
+ * Reads the buttons Lua is feeding for the given controller, in the same
+ * format as the OS-specific code
+
  * This function must not be called more than once per frame. Ideally exactly once
  * per frame (if PSXjin_LuaUsingJoypad says it's safe to do so)
  */
@@ -3342,12 +3463,12 @@ uint32 PSXjin_LuaReadJoypad(int which) {
 		return lua_joypads[which];
 	}
 	else
-		return 0; // disconnected
+		return 0; // Disconnected
 }
 
 
 /**
- * Returns true if Lua would like to steal the given analog joypad control.
+ * Returns true if Lua would like to steal the given analog game controller control.
  */
 int PSXjin_LuaUsingAnalogJoy(int which) {
 	if (!PSXjin_LuaRunning())
@@ -3355,9 +3476,8 @@ int PSXjin_LuaUsingAnalogJoy(int which) {
 	return lua_analogjoy_used & (1 << which);
 }
 
-
 /**
- * Reads the analog joysticks Lua is feeding for the given joypad.
+ * Reads the analog joysticks Lua is feeding for the given controller.
  */
 LuaAnalogJoy* PSXjin_LuaReadAnalogJoy(int which) {
 	if (!PSXjin_LuaRunning())
@@ -3366,9 +3486,8 @@ LuaAnalogJoy* PSXjin_LuaReadAnalogJoy(int which) {
 		return &lua_analogjoy[which];
 	}
 	else
-		return NULL; // disconnected
+		return NULL; // Disconnected
 }
-
 
 /**
  * If this function returns true, the movie code should NOT increment
@@ -3380,7 +3499,6 @@ int PSXjin_LuaRerecordCountSkip() {
 	// FIXME: return true if (there are any active callback functions && skipRerecords)
 	return LUA && luaRunning && skipRerecords;
 }
-
 
 /**
  * Given an 8-bit screen with the indicated resolution,
@@ -3428,7 +3546,7 @@ void PSXjin_LuaGui(void *s, int width, int height, int bpp, int pitch) {
 		}
 	}
 
-	// And wreak the stack
+	// Wreck the stack
 	lua_settop(LUA, 0);
 
 	if (gui_used == GUI_CLEAR || !gui_enabled)

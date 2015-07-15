@@ -1,18 +1,13 @@
-// Microsoft Visual C++ generated resource script.
-//
 #include "resource.h"
 
 #define APSTUDIO_READONLY_SYMBOLS
-/////////////////////////////////////////////////////////////////////////////
-//
+
 // Generated from the TEXTINCLUDE 2 resource.
-//
+
 #include "afxres.h"
 
-/////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
-/////////////////////////////////////////////////////////////////////////////
 // Neutral resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
@@ -21,17 +16,11 @@ LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
 #pragma code_page(1252)
 #endif //_WIN32
 
-/////////////////////////////////////////////////////////////////////////////
-//
 // Bitmap
-//
 
 IDB_GPU                 BITMAP                  "res\\gpu.bmp"
 #endif    // Neutral resources
-/////////////////////////////////////////////////////////////////////////////
 
-
-/////////////////////////////////////////////////////////////////////////////
 // English (U.S.) resources
 
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
@@ -41,10 +30,8 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 #endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
+
 // TEXTINCLUDE
-//
 
 1 TEXTINCLUDE 
 BEGIN
@@ -69,18 +56,14 @@ BEGIN
     "LANGUAGE 9, 1\r\n"
     "#pragma code_page(1252)\r\n"
     "#endif\r\n"
-    "#include ""res\\gpuPeopsSoft.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""res\\gpupeopssoft.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "#include ""afxres.rc""         // Standard components\r\n"
     "#endif\0"
 END
 
 #endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Dialog
-//
 
 IDD_CFGSOFT DIALOGEX 0, 0, 291, 292
 STYLE DS_SETFONT | DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
@@ -89,7 +72,7 @@ FONT 8, "MS Sans Serif", 0, 0, 0x1
 BEGIN
     PUSHBUTTON      "Select device...",IDC_SELDEV,7,3,60,12
     CONTROL         "Fullscreen mode",IDC_DISPMODE1,"Button",BS_AUTORADIOBUTTON,10,28,67,10
-    CONTROL         "Window mode",IDC_DISPMODE2,"Button",BS_AUTORADIOBUTTON,10,43,63,10
+    CONTROL         "Windowed mode",IDC_DISPMODE2,"Button",BS_AUTORADIOBUTTON,10,43,63,10
     COMBOBOX        IDC_RESOLUTION,78,27,102,64,CBS_DROPDOWNLIST | CBS_SORT | WS_DISABLED | WS_VSCROLL | WS_TABSTOP
     COMBOBOX        IDC_COLDEPTH,225,27,52,64,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_WINX,103,43,36,12,ES_AUTOHSCROLL
@@ -105,13 +88,13 @@ BEGIN
     CONTROL         "FPS limit (10-200) :",IDC_FRAMEMANUELL,"Button",BS_AUTORADIOBUTTON,143,140,72,11
     EDITTEXT        IDC_FRAMELIM,218,140,28,12,ES_AUTOHSCROLL
     COMBOBOX        IDC_SCANLINES,78,167,199,64,CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP
-    CONTROL         "Use system memory - slower with most cards, disables auto-screen-filtering",IDC_SYSMEMORY,
+    CONTROL         "Use system memory - slower with most cards, disables automatic screen filtering",IDC_SYSMEMORY,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,184,260,10
     CONTROL         "Wait for VSYNC - synchronize screen update with monitor refresh rate",IDC_VSYNC,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,195,256,10
-    CONTROL         "Stop screen saver - disables screen savers/power-saving (n.a. in W95/NT4!)",IDC_STOPSAVER,
+    CONTROL         "Stop screen saver - disables screensaver/power-saving (not applicable in Windows 95/NT4!)",IDC_STOPSAVER,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,206,263,10
-    CONTROL         "Debug mode - enables some debugging features (n.a. with all cards)",IDC_DEBUGMODE,
+    CONTROL         "Debug mode - enables some debugging features (not applicable with all cards)",IDC_DEBUGMODE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,217,263,10
     CONTROL         "Activate special game fixes",IDC_GAMEFIX,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,228,101,10
     PUSHBUTTON      "...",IDC_SELFIX,121,229,11,10,0,WS_EX_STATICEDGE
@@ -158,7 +141,7 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,103,176,50,14
     RTEXT           "Version:",IDC_STATIC,17,6,49,10
     RTEXT           "Coded by:",IDC_STATIC,17,29,49,10
-    RTEXT           "Pete's EMail:",IDC_STATIC,17,41,49,10
+    RTEXT           "Pete's Email:",IDC_STATIC,17,41,49,10
     LTEXT           "x.x",IDC_STATIC,69,6,159,10
     LTEXT           "Pete Bernert and the P.E.Op.S. team",IDC_STATIC,69,29,159,10
     LTEXT           "---",IDC_STATIC,69,41,159,10
@@ -168,7 +151,7 @@ BEGIN
     LTEXT           "The P.E.Op.S. SoftGPU team:",IDC_STATIC,9,82,103,10
     CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDFRAME | SS_SUNKEN,4,76,249,94
     RTEXT           "P.E.Op.S. page:",IDC_STATIC,9,56,57,10
-    LTEXT           "https://sourceforge.net/projects/peops",IDC_STATIC,69,56,159,10
+    LTEXT           "https://www.sourceforge.net/projects/peops",IDC_STATIC,69,56,159,10
     LTEXT           "- Pete Bernert",IDC_STATIC,13,95,69,10
     LTEXT           "- Lewpy",IDC_STATIC,13,106,69,10
     LTEXT           "- lu_zero",IDC_STATIC,13,117,69,10
@@ -190,9 +173,9 @@ BEGIN
     CONTROL         "Odd/even bit hack",IDC_FIX1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,30,100,10
     CONTROL         "Expand screen width",IDC_FIX2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,45,91,10
     CONTROL         "Ignore black brightness color",IDC_FIX3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,60,106,10
-    CONTROL         "Disable coord check",IDC_FIX4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,75,85,10
-    CONTROL         "Use low-res fps timer",IDC_FIX5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,90,101,10
-    CONTROL         "Use PC fps calculation",IDC_FIX6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,105,91,10
+    CONTROL         "Disable coordinate check",IDC_FIX4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,75,85,10
+    CONTROL         "Use low-res FPS timer",IDC_FIX5,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,90,101,10
+    CONTROL         "Use PC FPS calculation",IDC_FIX6,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,105,91,10
     CONTROL         "Lazy screen updates",IDC_FIX7,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,120,91,10
     CONTROL         "Use old frame skipping",IDC_FIX8,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,135,91,10
     CONTROL         "Repeated flat tex triangles",IDC_FIX9,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,150,97,10
@@ -200,13 +183,13 @@ BEGIN
     DEFPUSHBUTTON   "OK",IDOK,66,199,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,169,199,50,14
     LTEXT           "Activate the following options only if you want to play one of the listed games (or if your game is showing similar glitches)!",IDC_STATIC,8,4,245,22
-    LTEXT           "Needed with epsxe 1.5.2 and older",IDC_STATIC,145,30,135,9,SS_CENTERIMAGE
+    LTEXT           "Needed with ePSXe 1.5.2 and older",IDC_STATIC,145,30,135,9,SS_CENTERIMAGE
     LTEXT           "Shows the full area in Capcom 2D fighters",IDC_STATIC,145,45,136,9,SS_CENTERIMAGE
     LTEXT           "Fixes black screens in Lunar",IDC_STATIC,145,60,134,9,SS_CENTERIMAGE
     LTEXT           "Old compatibility mode",IDC_STATIC,145,75,135,9,SS_CENTERIMAGE
     LTEXT           "For buggy motherboard chipsets",IDC_STATIC,145,90,133,9,SS_CENTERIMAGE
-    LTEXT           "Better fps limitation with some games",IDC_STATIC,145,105,129,9,SS_CENTERIMAGE
-    LTEXT           "Maybe faster, needed for Pandemonium2",IDC_STATIC,145,120,139,9,SS_CENTERIMAGE
+    LTEXT           "Better FPS limitation with some games",IDC_STATIC,145,105,129,9,SS_CENTERIMAGE
+    LTEXT           "Maybe faster, needed for Pandemonium 2",IDC_STATIC,145,120,139,9,SS_CENTERIMAGE
     RTEXT           "0x0001:",IDC_STATIC,1,30,28,9,SS_CENTERIMAGE
     RTEXT           "0x0002:",IDC_STATIC,1,45,28,9,SS_CENTERIMAGE
     RTEXT           "0x0004:",IDC_STATIC,1,60,28,9,SS_CENTERIMAGE
@@ -220,16 +203,12 @@ BEGIN
     RTEXT           "0x0100:",IDC_STATIC,1,150,28,9,SS_CENTERIMAGE
     LTEXT           "Slightly distorted textures can happen",IDC_STATIC,145,165,139,9,SS_CENTERIMAGE
     RTEXT           "0x0200:",IDC_STATIC,1,165,28,9,SS_CENTERIMAGE
-    CONTROL         "Fake 'gpu busy' states",IDC_FIX11,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,180,100,10
+    CONTROL         "Fake 'GPU busy' states",IDC_FIX11,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,34,180,100,10
     LTEXT           "Toggles busy flags after drawing",IDC_STATIC,145,180,139,9,SS_CENTERIMAGE
     RTEXT           "0x0400:",IDC_STATIC,1,180,28,9,SS_CENTERIMAGE
 END
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // DESIGNINFO
-//
 
 #ifdef APSTUDIO_INVOKED
 GUIDELINES DESIGNINFO 
@@ -267,29 +246,21 @@ BEGIN
 END
 #endif    // APSTUDIO_INVOKED
 
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // String Table
-//
 
 STRINGTABLE 
 BEGIN
     IDS_INFO0               "FL - Frame limitation:\n[Off] - Speed as fast as possible\n[On-1] - Limits speed to manual value\n[On-2] - Limits speed to auto-detected value."
-    IDS_INFO1               "FS - Frame skipping:\n[Off] - No frames get skipped\n[On] - Tries to speed up the game by skipping frames. Can cause glitches!"
-    IDS_INFO2               "GF - Special game fixes:\n[Off] - Turn off all fixes\n[On] - Turn on all activated fixes. You have to select the fixes you want to use in the gpu config."
+    IDS_INFO1               "FS - Frame skipping:\n[Off] - No frames get skipped\n[On] - Tries to speed up the game by skipping frames. Could cause glitches!"
+    IDS_INFO2               "GF - Special game fixes:\n[Off] - Turn off all fixes\n[On] - Turn on all activated fixes. You have to select the fixes you want to use in the GPU config."
 END
 
 #endif    // English (U.S.) resources
-/////////////////////////////////////////////////////////////////////////////
-
-
 
 #ifndef APSTUDIO_INVOKED
-/////////////////////////////////////////////////////////////////////////////
-//
-// Generated from the TEXTINCLUDE 3 resource.
-//
+
+// Generated from the TEXTINCLUDE 3 resource
+
 #define _AFX_NO_SPLITTER_RESOURCES
 #define _AFX_NO_OLE_RESOURCES
 #define _AFX_NO_TRACKER_RESOURCES
@@ -300,7 +271,7 @@ END
 LANGUAGE 9, 1
 #pragma code_page(1252)
 #endif
-#include "res\gpuPeopsSoft.rc2"  // non-Microsoft Visual C++ edited resources
+#include "res\gpupeopssoft.rc2"  // non-Microsoft Visual C++ edited resources
 #include "afxres.rc"         // Standard components
 #endif
 /////////////////////////////////////////////////////////////////////////////

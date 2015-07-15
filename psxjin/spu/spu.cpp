@@ -1,17 +1,5 @@
-//spu.cpp
-//original (C) 2002 by Pete Bernert
-//nearly entirely rewritten for PSXjin by zeromus
-//original changelog is at end of file, for reference
-
-//This program is free software; you can redistribute it and/or modify
-//it under the terms of the GNU General Public License as published by
-//the Free Software Foundation; either version 2 of the License, or
-//(at your option) any later version. See also the license.txt file for
-//additional informations.                                              
-
-//TODO - volume sweep not emulated
-
-//-------------------------------
+// To do - volume sweep not emulated
+// Emulate volume sweep
 
 #include "stdafx.h"
 
@@ -33,7 +21,7 @@
 #include "dsoundoss.h"
 #include "record.h"
 #include "resource.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 #include "spu.h"
 #include "adsr.h"
 #include "reverb.h"
@@ -45,12 +33,14 @@
 
 SPU_struct *SPU_core, *SPU_user;
 
-//global spu values
-u16 regArea[0x100]; //register cache
+// Global SPU values
+
+u16 regArea[0x100]; // Register cache
 
 static ISynchronizingAudioBuffer* synchronizer = NULL;
 
-// user settings
+// User settings
+
 #define SOUND_MODE_ASYNCH 0
 #define SOUND_MODE_DUAL 1
 #define SOUND_MODE_SYNCH 2
@@ -66,11 +56,9 @@ int iUseInterpolation=2;
 
 int bSpuInit=0;
 
-
-HWND    hWMain=0;                                      // window handle
+HWND    hWMain=0;                                      // Window handle
 HWND    hWRecord=0;
 static HANDLE   hMainThread;                           
-
 
 extern volatile int win_sound_samplecounter;
 CRITICAL_SECTION win_execute_sync;
@@ -78,8 +66,7 @@ Lock::Lock() : m_cs(&win_execute_sync) { EnterCriticalSection(m_cs); }
 Lock::Lock(CRITICAL_SECTION& cs) : m_cs(&cs) { EnterCriticalSection(m_cs); }
 Lock::~Lock() { LeaveCriticalSection(m_cs); }
 
-unsigned long dwNewChannel=0;                          // flags for faster testing, if new channel starts
-
+unsigned long dwNewChannel=0;                          // Flags for faster testing, if a new channel starts
 
 void (CALLBACK *cddavCallback)(unsigned short,unsigned short)=0;
 
@@ -100,9 +87,10 @@ INLINE int limit( int v )
 	return v;
 }
 
-// certain globals (were local before, but with the new timeproc I need em global)
+// Certain globals (they were local before, but with the new timeproc I need them global)
 
-//this is used by the BRR decoder
+// This is used by the BRR decoder
+
 const int f[5][2] = 
 {   {    0,  0  },
 	{   60,  0  },
@@ -114,11 +102,9 @@ const int f[5][2] =
 int iCycle=0;
 short * pS;
 
-static int lastch=-1;      // last channel processed on spu irq in timer mode
-static int lastns=0;       // last ns pos
-static int iSecureStart=0; // secure start counter
-
-//--------------------------------------------------------------
+static int lastch=-1;      // Last channel processed on SPU IRQ in timer mode
+static int lastns=0;       // Last ns pos
+static int iSecureStart=0; // Secure start counter
 
 void SPU_chan::updatePitch(u16 pitch)
 {
@@ -128,12 +114,13 @@ void SPU_chan::updatePitch(u16 pitch)
 
 void SPU_chan::keyon()
 {
-	//? what happens when we keyon an already on channel? just guessing that its benign
+	// What happens when we keyon an already on channel? I am guessing that it's benign. (We should check)
 	status = CHANSTATUS_PLAY;
 	
-	//DO NOT DO THIS even though spu.txt made you believe it was necessary.
-	//ff7 sets loop starts before keyon and this overrides it
-	//loopStartAddr = 0;
+	// DO NOT DO THIS even though spu.txt made you believe it was necessary
+	// ff7 sets loop starts before keyon and this overrides it
+	// loopStartAddr = 0;
+	// Confirm the above causes issues, read SPU.txt and NOCASH's documents as comparison
 
 	iOldNoise = 0;
 	flags = 0;
@@ -145,10 +132,11 @@ void SPU_chan::keyon()
 	
 	//if(spu->isCore) printf("[%02d] Keyon at %08X with smpinc %f and pending %d and bNoise %d\n",ch,blockAddress,smpinc,pending,bNoise);
 
-	//init interpolation state with zeros
+	// Initialize interpolation state with zeros
+	
 	block[24] = block[25] = block[26] = block[27] = 0;
 
-	//init BRR
+	// Initialize BRR
 	s_1 = s_2 = 0;
 
 	StartADSR(this);
@@ -162,14 +150,13 @@ void SPU_chan::keyoff()
 {
 	//printf("[%02d] keyoff\n",ch);
 	
-	//SPECULATIVE: keyoff if we're not playing? probably not
+	// Speculative: keyoff if we're not playing? (We should investigate this)
+	
 	if(status == CHANSTATUS_PLAY)
 		status = CHANSTATUS_KEYOFF;
 }
 
-//---------------------------------------
-
-//old functions handy to refer to
+// Old functions for reference
 
 //INLINE void VoiceChangeFrequency(SPUCHAN * pChannel)
 //{
@@ -199,12 +186,10 @@ void SPU_chan::keyoff()
 //	iFMod[ns]=0;
 //}
 
-
-//-----------------------------------------------------------------------
-
-// noise handler... just produces some noise data
-// surely wrong... and no noise frequency (spuCtrl&0x3f00) will be used...
-// and sometimes the noise will be used as fmod modulation... pfff
+// Noise handler. This just produces some noise data
+// Surely wrong...and no noise frequency (spuCtrl&0x3f00) will be used
+// And sometimes the noise will be used as FMOD modulation
+// Check the above for accuracy
 
 INLINE int iGetNoiseVal(SPU_chan* pChannel)
 {
@@ -219,23 +204,25 @@ INLINE int iGetNoiseVal(SPU_chan* pChannel)
 	}
 	else fa=(dwNoiseVal>>2)&0x7fff;
 
-//// mmm... depending on the noise freq we allow bigger/smaller changes to the previous val
+// Depending on the noise frequency we allow bigger or smaller changes to the previous value
+
 	fa=pChannel->iOldNoise+((fa-pChannel->iOldNoise)/((0x001f-((pChannel->spu->spuCtrl&0x3f00)>>9))+1));
 	if (fa>32767L)  fa=32767L;
 	if (fa<-32767L) fa=-32767L;
 	pChannel->iOldNoise=fa;
 
-//	if (iUseInterpolation<2)                              // no gauss/cubic interpolation?
-//		pChannel->SB[29] = fa;                               // -> store noise val in "current sample" slot
+//	if (iUseInterpolation<2)                              // No gaussian/cubic interpolation?
+//		pChannel->SB[29] = fa;                               // Store noise value in "current sample" slot
 
 	return fa;
 
-
 }
 
-//these functions are an unreliable, inaccurate floor.
-//it should only be used for positive numbers
-//this isnt as fast as it could be if we used a visual c++ intrinsic, but those appear not to be universally available
+// These functions are an unreliable, inaccurate floor
+// It should only be used for positive numbers
+// This isn't as fast as it could be if we used a visual c++ intrinsic, but those appear not to be universally available
+// We should all this for a better solution
+
 FORCEINLINE u32 u32floor(float f)
 {
 #ifdef ENABLE_SSE2
@@ -253,8 +240,9 @@ FORCEINLINE u32 u32floor(double d)
 #endif
 }
 
-//same as above but works for negative values too.
-//be sure that the results are the same thing as floorf!
+// Same as above, but works for negative values too
+// Be sure that the results are the same thing as floorf
+
 FORCEINLINE s32 s32floor(float f)
 {
 #ifdef ENABLE_SSE2
@@ -276,7 +264,8 @@ enum SPUInterpolationMode
 	SPUInterpolation_Cosine = 4,
 };
 
-//a is the most recent sample, going back to d as the oldest
+// a is the most recent sample, going back to d as the oldest
+
 s32 _Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 {
 	SPUInterpolationMode INTERPOLATE_MODE = (SPUInterpolationMode)iUseInterpolation;
@@ -288,7 +277,8 @@ s32 _Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 		return a;
 	case SPUInterpolation_Cosine:
 		{
-			//why did we change it away from the lookup table? somebody should research that
+			// Why did we change it away from the lookup table? Somebody should research that (We will research that)
+			
 			ratio = ratio - (int)ratio;
 			double ratio2 = ((1.0 - cos(ratio * M_PI)) * 0.5);
 			//double ratio2 = (1.0f - cos_lut[((int)(ratio*256.0))&0xFF]) / 2.0f;
@@ -296,7 +286,7 @@ s32 _Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 		}
 	case SPUInterpolation_Linear:
 		{
-			//linear interpolation
+			// Linear interpolation
 			ratio = ratio - sputrunc(ratio);
 			s32 temp = s32floor((1-ratio)*b + ratio*a);
 			//printf("%d %d %d %f\n",a,b,temp,_ratio);
@@ -304,10 +294,11 @@ s32 _Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 		} 
 	case SPUInterpolation_Gaussian:
 		{
-			//I'm not sure whether I am doing this right.. 
-			//low frequency things (try low notes on channel 10 of ff7 prelude song credits screen)
-			//pop a little bit
-			//the bit logic is taken from libopenspc
+			// I'm not sure whether I am doing this right
+			// Low frequency things (try low notes on channel 10 of Final Fantasy VII prelude song credits screen)
+			// Pop a little bit
+			// The bit logic is taken from libopenspc
+			
 			ratio = ratio - sputrunc(ratio);
 			ratio *= 256;
 			s32 index = sputrunc(ratio)*4;
@@ -341,14 +332,14 @@ static FORCEINLINE s32 Interpolate(s16 a, s16 b, s16 c, s16 d, double _ratio)
 	return _Interpolate(a,b,c,d,_ratio);
 }
 
-////////////////////////////////////////////////////////////////////////
+// Triggers an IRQ if the IRQ address is in the specified range
 
-//triggers an irq if the irq address is in the specified range
 void SPU_struct::triggerIrqRange(u32 base, u32 size)
 {
 	if(!isCore) return;
 
-	//can't trigger an irq without the flag enabled
+	// Can't trigger an IRQ without the flag enabled
+	
 	if(!(spuCtrl&0x40)) return;
 
 	u32 irqAddr = ((u32)spuIrq)<<3;
@@ -380,7 +371,8 @@ SPU_struct::SPU_struct(bool _isCore)
 , mixtime(0)
 , dwNoiseVal(1)
 {
-	//for debugging purposes it is handy for each channel to know what index he is.
+	// For debugging purposes, it is handy for each channel to know what index he is
+	
 	for(int i=0;i<24;i++)
 	{
 		channels[i].ch = i;
@@ -395,11 +387,11 @@ SPU_struct::~SPU_struct() {
 
 s32 SPU_chan::decodeBRR(SPU_struct* spu)
 {
-	//find out which block we need and decode a new one if necessary.
-	//it is safe to only check for overflow once since we can only play samples at +2 octaves (4x too fast)
-	//and so as long as we are outputting at near psx resolution (44100) we can only advance through samples
-	//at rates that are low enough to be safe.
-	//if we permitted 11025khz output the story would be different.
+	// Find out which block we need and decode a new one if necessary
+	// It is safe to only check for overflow once, since we can only play samples at +2 octaves (4x too fast)
+	// and so as long as we are outputting at near PS1 audio resolution (44100) we can only advance through samples
+	// at rates that are low enough to be safe
+	// If we permitted 11025khz output, the story would be different
 
 restart:
 
@@ -407,18 +399,20 @@ restart:
 	int sampnum = (int)smpcnt;
 	if(sampnum>=28)
 	{
-		//end or loop
+		// End or loop
 		if(flags&1)
 		{
-			//there seems to be a special condition which triggers the irq if the loop address equals the irq address
-			//(even if this sample is stopping)
-			//either that, or the hardware always reads the block referenced by loop target even if the sample is ending.
-			//thousand arms will need this in order to trigger the very first voiceover
-			//should this be 1 or 16? equality or range?
+			// There seems to be a special condition which triggers the IRQ if the loop address equals the IRQ address
+			// Even if this sample is stopping
+			// Either that, or the hardware always reads the block referenced by loop target even if the sample is ending
+			// Thousand Arms will need this in order to trigger the very first voice over
+			// Should this be 1 or 16? Equality or range?
+			
 			spu->triggerIrqRange(loopStartAddr,16);
 
-			//when the old spu would kill a sound this way, it was immediate.
-			//maybe adsr release is only for keyoff
+			// When the old SPU would kill a sound this way, it was immediate
+			// Maybe adsr release is only for keyoff
+			
 			if(flags != 3) {
 				status = CHANSTATUS_STOPPED;
 				return 0;
@@ -431,22 +425,25 @@ restart:
 			}
 		}
 
-		//do not do this before "end or loop" or else looping will glitch as it fails to
-		//immediately decode a block.
-		//why did I ever try this? I can't remember.
+		// Do not do this before "End or loop" or else looping will glitch as it fails to
+		// immediately decode a block
+		// Why did I ever try this? I can't remember. (We should check for accuracy)
+		
 		smpcnt -= 28;
 
 		sampnum = (int)smpcnt;
 
-		//this will be tested by the impressive valkyrie profile new game sound
-		//which is large and apparently streams in
+		// This will be tested by the impressive Valkyrie Profile new game sound
+		// Which is large and apparently streams in
+		
 		spu->triggerIrqRange(blockAddress,16);
 
 		u8 header0 = spu->readSpuMem(blockAddress);
 		
 		flags = spu->readSpuMem(blockAddress+1);
 
-		//this flag bit means that we are setting the loop start point
+		// This flag bit means that we are setting the loop start point
+		
 		if(flags&4) {
 			loopStartAddr = blockAddress;
 			//printf("[%02d] embedded loop addr set to %d\n",ch,loopStartAddr);
@@ -458,13 +455,14 @@ restart:
 		s32 shift_factor = predict_nr&0xf;
 		predict_nr >>= 4;
 
-		//before we decode a new block, save the last 4 values of the old block
+		// Before we decode a new block, save the last 4 values of the old block
 		block[28] = block[24];
 		block[29] = block[25];
 		block[30] = block[26];
 		block[31] = block[27];
 
-		//decode 
+		// Decode
+		
 		for(int i=0,j=0;i<14;i++)
 		{
 			s32 d = spu->readSpuMem(blockAddress++);
@@ -489,9 +487,12 @@ restart:
 		}
 	}
 
-	//perform interpolation. hardcoded for now
+	// Perform interpolation. Hard coded for now
+	// We will try to remove as much "hard coding" as we can
+	
 	//if(GetAsyncKeyState('I'))
 	//it is safe to only check for overflow once since we can only play samples at +2 octaves (4x too fast)
+
 	if(true)
 	{
 		s16 a = block[sampnum];
@@ -510,7 +511,8 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 {
 	memset(spu->outbuf, 0, length*4*2);
 
-	//(todo - analyze master volumes etc.)
+	// To do - analyze master volumes etc.
+	// Make sure to implement this
 
 	bool checklog[24]; for(int i=0;i<24;i++) checklog[i] = false;
 
@@ -537,43 +539,49 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 				samp = chan->decodeBRR(spu);
 
 
-			//channel may have ended at any time (from the BRR decode or from a previous envelope calculation
+			// Channel may have ended at any time (from the BRR decode or from a previous envelope calculation)
+			
 			if (chan->status == CHANSTATUS_STOPPED) {
 				fmod = 0;
 				continue;
 			}
 
-			//since we tick the envelope when we keyon, we need to retrieve that value here.
+			// Since we tick the envelope when we keyon, we need to retrieve that value here
+			
 			s32 adsrLevel = chan->ADSR.lVolume;
 
-			//and now immediately afterwards tick it again
+			// And now immediately afterwards tick it again
+			
 			MixADSR(chan);
 	
 			checklog[i] = true;
 
 			samp = samp * adsrLevel/1023;
-			//samp = ((s64)samp * adsrLevel)>>10; //maybe better?
+			//samp = ((s64)samp * adsrLevel)>>10; // Maybe better? Check this.
 
-			//apply the modulation
+			// Apply the modulation
+			
 			if(chan->bFMod)
 			{
-				if(fmod < -32768 || fmod > 32767) printf("[%02d]: fmod value out of range! (%d) !\n",samp);
-				//this was a little hard to test. ff7 battle fx were using it, but 
-				//its hard to tell since I dont think our noise is very good. need a better test.
+				if(fmod < -32768 || fmod > 32767) printf("[%02d]: FMOD value out of range! (%d) !\n",samp);
+				// This was a little hard to test. Final Fantasy VII battle effects were using it, but 
+				// it's hard to tell since I don't think our noise is very good. We need a better test
+				// We need to update this.
+				
 				s32 pitch = chan->rawPitch;
 				pitch = ((32768+fmod)*pitch)>>15;
-				//if(pitch>=0x4000 || pitch<0) printf("crap! fmodulated pitch was out of range!");
+				//if(pitch>=0x4000 || pitch<0) printf("fmodulated pitch was out of range!");
 				//if(pitch>0x3FFF) pitch = 0x3FFF;
 				chan->updatePitch((u16)pitch);
 			
-				//just some diagnostics
+				// Just some diagnostics
 				//static u16 lastPitch=0xFFFF, lastRawPitch=0xFFFF; if(chan->rawPitch != lastRawPitch || lastPitch != pitch) printf("fmod bending pitch from %04X to %04X\n",lastRawPitch=chan->rawPitch,lastPitch=pitch);
 				//printf("fmod: %d\n",fmod);
 			}
 
 			chan->smpcnt += chan->smpinc;
 
-			fmod = samp; //save fmod value to be used for next channel, if it is a modulation channel
+			fmod = samp; // Save FMOD value to be used for next channel, if it is a modulation channel
 
 			s32 left = (samp * chan->iLeftVolume) / 0x4000;
 			s32 right = (samp * chan->iRightVolume) / 0x4000;
@@ -584,7 +592,7 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 			if(!killReverb)
 				if (chan->bRVBActive) 
 					spu->StoreREVERB(chan,left,right);
-		} //channel loop
+		} // Channel loop
 
 		if(!killReverb)
 		{
@@ -600,7 +608,8 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 			right_accum += right;
 		}
 
-		//handle spu mute
+		// Handle SPU mute
+		
 		if ((spu->spuCtrl&0x4000)==0) {
 			left_accum = 0;
 			right_accum = 0;
@@ -618,21 +627,21 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 		//fwrite(&right_out,2,1,wavout);
 		//fflush(wavout);
 
-		// special irq handling in the decode buffers (0x0000-0x1000)
-		// we know:
-		// the decode buffers are located in spu memory in the following way:
+		// Special IRQ handling in the decode buffers (0x0000-0x1000)
+		// We know:
+		// The decode buffers are located in SPU memory in the following way:
 		// 0x0000-0x03ff  CD audio left
 		// 0x0400-0x07ff  CD audio right
 		// 0x0800-0x0bff  Voice 1
 		// 0x0c00-0x0fff  Voice 3
-		// and decoded data is 16 bit for one sample
-		// we assume:
-		// even if voices 1/3 are off or no cd audio is playing, the internal
-		// play positions will move on and wrap after 0x400 bytes.
+		// And decoded data is 16-bit for one sample
+		// We assume:
+		// Even if voices 1/3 are off or no CD audio is playing, the internal
+		// play positions will move on and wrap after 0x400 bytes
 		// Therefore: we just need a pointer from spumem+0 to spumem+3ff, and
 		// increase this pointer on each sample by 2 bytes. If this pointer
-		// (or 0x400 offsets of this pointer) hits the spuirq address, we generate
-		// an IRQ. 
+		// (or 0x400 offsets of this pointer) hits the SPUIRQ address, we generate
+		// an IRQ
 
 		if(spu->isCore)
 		{
@@ -645,9 +654,9 @@ void mixAudio(bool killReverb, SPU_struct* spu, int length)
 			spu->mixIrqCounter &= 0x3FF;
 		}
 
-	} //sample loop
+	} // Sample loop
 
-	//this prints which channels are active
+	// This prints which channels are active
 	//for(int i=0;i<24;i++) {
 	//	if(i==16) printf(" ");
 	//	if(checklog[i]) printf("%1x",i&15);
@@ -679,26 +688,26 @@ void SPU_struct::SPUreadDMAMem(u16 * pusPSXMem,int iSize)
 
 	for (int i=0;i<iSize;i++)
 	{
-		*pusPSXMem++=spuMem[spuAddr>>1];                    // spu addr got by writeregister
+		*pusPSXMem++=spuMem[spuAddr>>1];                    // SPU addr got by writeregister
 		//triggerIrqRange(spuAddr,2);
-		spuAddr+=2;                                         // inc spu addr
-		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
+		spuAddr+=2;                                         // inc SPU addr
+		if (spuAddr>0x7ffff) spuAddr=0;                     // Wrap
 	}
 }
 
-// to investigate: do sound data updates by writedma affect spu
-// irqs? Will an irq be triggered, if new data is written to
-// the memory irq address?
+// Investigate: do sound data updates by writedma affect SPU
+// IRQS? Will an IRQ be triggered, if new data is written to
+// the memory IRQ address?
 
 void SPU_struct::SPUwriteDMA(u16 val)
 {
 	//printf("SPU single write dma %08X\n",spuAddr);
 
-	spuMem[spuAddr>>1] = val;                             // spu addr got by writeregister
+	spuMem[spuAddr>>1] = val;                             // SPU addr got by writeregister
 	//triggerIrqRange(spuAddr,2);
 
-	spuAddr+=2;                                           // inc spu addr
-	if (spuAddr>0x7ffff) spuAddr=0;                       // wrap
+	spuAddr+=2;                                           // inc SPU addr
+	if (spuAddr>0x7ffff) spuAddr=0;                       // Wrap
 }
 
 
@@ -708,10 +717,10 @@ void SPU_struct::SPUwriteDMAMem(u16 * pusPSXMem,int iSize)
 
 	for (int i=0;i<iSize;i++)
 	{
-		spuMem[spuAddr>>1] = *pusPSXMem++;                  // spu addr got by writeregister
+		spuMem[spuAddr>>1] = *pusPSXMem++;                  // SPU addr got by writeregister
 		//triggerIrqRange(spuAddr,2);
-		spuAddr+=2;                                         // inc spu addr
-		if (spuAddr>0x7ffff) spuAddr=0;                     // wrap
+		spuAddr+=2;                                         // inc SPU addr
+		if (spuAddr>0x7ffff) spuAddr=0;                     // Wrap
 	}
 }
 
@@ -726,15 +735,16 @@ void SPUwriteDMAMem(u16 * pusPSXMem,int iSize) {
 	if(SPU_user) SPU_user->SPUwriteDMAMem(pusPSXMem,iSize);
 }
 
-//measured 16123034 cycles per second
-//this is around 15.3761 MHZ
-//this is pasted from the gpu:
+// Measured 16123034 cycles per second
+// This is around 15.3761 MHZ
+// This is pasted from the GPU:
 //fFrameRateHz=33868800.0f/677343.75f;        // 50.00238
 //else fFrameRateHz=33868800.0f/680595.00f;        // 49.76351
-//16934400 is half this. we'll go with that assumption for now
+//16934400 is half this. We'll go with that assumption for now
+// Check the above data with NOCASH's documentation
+
 static const double time_per_cycle = (double)1.0/(PSXCLK);
 static const double samples_per_cycle = time_per_cycle * 44100;
-
 
 _ADSRInfo::_ADSRInfo()
 :	State(0)
@@ -769,22 +779,23 @@ void SPUasync(unsigned long cycle)
 	case SOUND_MODE_ASYNCH:
 		break;
 	case SOUND_MODE_DUAL:
-		//produce the logically correct amount of sound, just for emulation's sake (output will be discarded)
-		//TODO (as an optimization, the output could actually be non-mixed. i think this may be done in desmume)
+		// Produce the logically correct amount of sound, just for emulation's sake (output will be discarded)
+		// To do (as an optimization, the output could actually be non-mixed. I think this may be done in desmume)
+		// Check this
 		mixAudio(true,SPU_core,mixtodo);
 		break;
 	case SOUND_MODE_SYNCH:
 		//printf("mixing %d cycles (%d samples) (adjustobuf size:%d)\n",cycle,mixtodo,adjustobuf.size);
 
-		//produce the logically correct amount of sound. 
-		//these will get enqueued in the synchronizer
+		// Produce the logically correct amount of sound
+		// These will get enqueued in the synchronizer
 		mixAudio(false,SPU_core,mixtodo);
 		break;
 	}
 }
 
 void _ADSRInfo::save(EMUFILE* fp) {
-	fp->write32le((u32)0); //version
+	fp->write32le((u32)0); // Version
 	fp->write32le(&State);
 	fp->write32le(&AttackModeExp);
 	fp->write32le(&AttackRate);
@@ -815,7 +826,7 @@ void _ADSRInfo::load(EMUFILE* fp) {
 }
 
 void REVERBInfo::save(EMUFILE* fp) {
-	fp->write32le((u32)0); //version
+	fp->write32le((u32)0); // Version
 	for(int i=0;i<41;i++)
 		fp->write32le(&arr[i]);
 }
@@ -825,18 +836,16 @@ void REVERBInfo::load(EMUFILE* fp) {
 		fp->read32le(&arr[i]);
 }
 
-
-////////////////////////////////////////////////////////////////////////
 // XA AUDIO
-////////////////////////////////////////////////////////////////////////
 
-//this is called from the cdrom system with a buffer of decoded xa audio
-//we are supposed to grab it and then play it. 
+// This is called from the CD-ROM system with a buffer of decoded XA audio
+// We are supposed to grab it and then play it
+
 void SPUplayADPCMchannel(xa_decode_t *xap)
 {
-	if (!iUseXA)    return;                               // no XA? bye
+	if (!iUseXA)    return;                               // No XA? Bye.
 	if (!xap)       return;
-	if (!xap->freq) return;                               // no xa freq ? bye
+	if (!xap->freq) return;                               // No XA frequency? Bye.
 
 	Lock lock;
 	SPU_core->xaqueue.feed(xap);
@@ -852,7 +861,8 @@ void SPUplayADPCMchannel(xa_decode_t *xap)
 	}
 }
 
-//this func will be called first by the main emu
+// This function will be called first by the main emulator
+
 long SPUinit(void)
 {
 	//wavout = fopen("c:\\pcsx.raw","wb");
@@ -876,8 +886,10 @@ void SPUReset()
 	delete synchronizer;
 	synchronizer = metaspu_construct(method);
 	
-	//call this from reset as well (then we wont have to track the user spu during non-dual modes)
-	//TODO - make same optimization in desmume
+	// Call this from reset as well (then we won't have to track the user SPU during non-dual modes)
+	// To do - make same optimizations
+	// Try to optimize this
+	
 	SPUcloneUser();
 }
 
@@ -926,10 +938,11 @@ bool SPUunfreeze_new(EMUFILE* fp)
 
 	SPU_core->xaqueue.unfreeze(fp);
 
-	//a bit weird to do this here, but i wanted to have a more solid XA state saver
-	//and the cdr freeze sucks. I made sure this saves and loads after the cdr state
+	// A bit weird to do this here, but I wanted to have a more solid XA state saver
+	// and the CDR freeze sucks. I made sure this saves and loads after the CDR state
+	// Check this for accuracy and test it
+	
 	cdr.Xa.load(fp);
-
 
 	u32 endtag = fp->read32le();
 	if(endtag != 0xBAADF00D) return false;
@@ -939,12 +952,7 @@ bool SPUunfreeze_new(EMUFILE* fp)
 	return true;
 }
 
-
-
-
-////////////////////////////////////////////////////////////////////////
-// SPUOPEN: called by main emu after init
-////////////////////////////////////////////////////////////////////////
+// SPUOPEN: called by main emulator after initialization
 
 static volatile bool doterminate;
 static volatile bool terminated;
@@ -983,8 +991,9 @@ void SPU_Emulate_user()
 
 		if(samplesOutput)
 		{
-			//1 - loudest
-			//5 - mute
+			// 1 - loudest
+			// 5 - mute
+			
 			int vol = 5-iVolume;
 			for(int i=0;i<samplesOutput*2;i++)
 			{
@@ -1023,22 +1032,22 @@ long SPUopen(void)
 	soundInitialized = true;
 	InitializeCriticalSection(&win_execute_sync);
 
-	iUseXA=1;                                             // just small setup
+	iUseXA=1;                                             // Just small setup
 	iVolume=3;
 
 #ifdef _WINDOWS
 //	LastWrite=0xffffffff;
-//	LastPlay=0;                      // init some play vars
+//	LastPlay=0;                      // Initialize some play variables
 	if (!IsWindow(hW)) hW=GetActiveWindow();
-	hWMain = hW;                                          // store hwnd
+	hWMain = hW;                                          // Store hwnd
 #endif
 
-	ReadConfig();                                         // read user stuff
+	ReadConfig();                                         // Read user stuff
 
-	SetupSound();                                         // setup sound (before init!)
+	SetupSound();                                         // Setup sound before initialization
 
 #ifdef _WINDOWS
-	if (iRecordMode)                                      // windows recording dialog
+	if (iRecordMode)                                      // Windows recording dialog
 	{
 		hWRecord=CreateDialog(0,MAKEINTRESOURCE(IDD_RECORD),
 		                      NULL,(DLGPROC)RecordDlgProc);
@@ -1067,9 +1076,6 @@ void SPUunMute()
 	SNDDXUnMuteAudio();
 }
 
-
-////////////////////////////////////////////////////////////////////////
-
 #ifndef _WINDOWS
 void SPUsetConfigFile(char * pCfg)
 {
@@ -1077,9 +1083,7 @@ void SPUsetConfigFile(char * pCfg)
 }
 #endif
 
-////////////////////////////////////////////////////////////////////////
 // SPUCLOSE: called before shutdown
-////////////////////////////////////////////////////////////////////////
 
 long SPUclose(void)
 {
@@ -1088,23 +1092,19 @@ long SPUclose(void)
 	hWRecord=0;
 #endif
 
-	RemoveSound();                                        // no more sound handling
+	RemoveSound();                                        // No more sound handling
 
 	return 0;
 }
 
-////////////////////////////////////////////////////////////////////////
-// SPUSHUTDOWN: called by main emu on final exit
-////////////////////////////////////////////////////////////////////////
+// SPUSHUTDOWN: called by main emulator on final exit
 
 long SPUshutdown(void)
 {
 	return 0;
 }
 
-////////////////////////////////////////////////////////////////////////
-// SPUCONFIGURE: call config dialog
-////////////////////////////////////////////////////////////////////////
+// SPUCONFIGURE: call configuration dialog
 
 long SPUconfigure(void)
 {
@@ -1118,20 +1118,16 @@ long SPUconfigure(void)
 	return 0;
 }
 
-////////////////////////////////////////////////////////////////////////
 // SETUP CALLBACKS
-// this functions will be called once,
-// passes a callback that should be called on SPU-IRQ/cdda volume change
-////////////////////////////////////////////////////////////////////////
+// This functions will be called once,
+// passes a callback that should be called on SPUIRQ/CDDA volume change
 
 void SPUregisterCDDAVolume(void (CALLBACK *CDDAVcallback)(unsigned short,unsigned short))
 {
 	cddavCallback = CDDAVcallback;
 }
 
-////////////////////////////////////////////////////////////////////////
-// COMMON PLUGIN INFO FUNCS
-////////////////////////////////////////////////////////////////////////
+// Common plugin info functions
 
 void SPUstartWav(char* filename)
 {

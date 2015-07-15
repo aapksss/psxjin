@@ -1,52 +1,3 @@
-/***************************************************************************
-                         menu.c  -  description
-                             -------------------
-    begin                : Sun Oct 28 2001
-    copyright            : (C) 2001 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2005/04/15 - Pete
-// - Changed user frame limit to floating point value
-//
-// 2003/07/27 - Pete
-// - Added pad core flags display
-//
-// 2002/12/14 - Pete
-// - Added dithering menu item
-//
-// 2002/05/25 - Pete
-// - Added menu support for linuzappz's fast forward skipping
-//
-// 2002/01/13 - linuzappz
-// - Added timing for the szDebugText (to 2 secs)
-//
-// 2001/12/22 - syo
-// - modified for "transparent menu"
-//   (Pete: added 'V' display for WaitVBlank)
-//
-// 2001/11/09 - Darko Matesic
-// - added recording status
-//   (Pete: added terminate zero to the menu buffer ;)
-//
-// 2001/10/28 - Pete
-// - generic cleanup for the Peops release
-//
-//*************************************************************************//
-
 #include "stdafx.h"
 
 #ifdef _WINDOWS
@@ -65,7 +16,7 @@
 #include "draw.h"
 #include "menu.h"
 #include "gpu.h"
-#include "PSXCommon.h"
+#include "psxcommon.h"
 
 unsigned long dwCoreFlags=0;
 char cCurrentFrame[14];
@@ -83,9 +34,7 @@ extern char modeFlags;
 #define MODE_FLAG_REPLAY (1<<2)
 #define MODE_FLAG_PAUSED (1<<3)
 
-////////////////////////////////////////////////////////////////////////
-// create lists/stuff for fonts (actually there are no more lists, but I am too lazy to change the func names ;)
-////////////////////////////////////////////////////////////////////////
+// Create lists/stuff for fonts (actually there are no more lists, but I am too lazy to change the function names (we aren't, we may do this in the future for code readability)
 
 #ifdef _WINDOWS
 HFONT hGFont=NULL;
@@ -97,7 +46,7 @@ void InitMenu(void)
 {
 #ifdef _WINDOWS
 	StatusFont = CreateFont(24, 0, 0, 0, FW_DEMIBOLD, 0, 0, 0, DEFAULT_CHARSET, 0, 0, ANTIALIASED_QUALITY, FF_SWISS, "Webdings");
-	hGFont=CreateFont(//-8,
+	hGFont=CreateFont( //-8,
 	         13,0,0,0,FW_NORMAL,FALSE,FALSE,FALSE,
 	         ANSI_CHARSET,OUT_DEFAULT_PRECIS,
 	         CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,
@@ -108,9 +57,7 @@ void InitMenu(void)
 #endif
 }
 
-////////////////////////////////////////////////////////////////////////
-// kill existing lists/fonts
-////////////////////////////////////////////////////////////////////////
+// Kill existing lists/fonts
 
 void CloseMenu(void)
 {
@@ -124,16 +71,14 @@ void CloseMenu(void)
 #endif
 }
 
-////////////////////////////////////////////////////////////////////////
-// DISPLAY FPS/MENU TEXT
-////////////////////////////////////////////////////////////////////////
+// Display FPS/menu text
 
 #include <time.h>
 extern time_t tStart;
 
-int iMPos=0;                                           // menu arrow pos
+int iMPos=0;                                           // Menu arrow position
 
-void DisplayText(void)                                 // DISPLAY TEXT
+void DisplayText(void)                                 // Display text
 {
 #ifdef _WINDOWS
 	HDC hdc;
@@ -147,17 +92,16 @@ void DisplayText(void)                                 // DISPLAY TEXT
 		SetBkMode(hdc,TRANSPARENT);
 	else SetBkColor(hdc,RGB(0,0,0));
 
-	if (szDebugText[0] && ((time(NULL) - tStart) < 2) && (ulKeybits&KEY_SHOWFPS))    // special debug text? show it
+	if (szDebugText[0] && ((time(NULL) - tStart) < 2) && (ulKeybits&KEY_SHOWFPS))    // Special debug text? Show it
 	{
 		RECT r={2,PSXDisplay.DisplayMode.y-200,1022,1024};
 		DrawText(hdc,szDebugText,lstrlen(szDebugText),&r,DT_LEFT|DT_NOCLIP);
 	}
-	else                                                  // else standard gpu menu
+	else                                                  // else standard GPU menu
 	{
 		szDebugText[0]=0;	
 	}
 	
-
 	SelectObject(hdc,hFO);
 	IDirectDrawSurface_ReleaseDC(DX.DDSRender,hdc);
 #endif
@@ -326,24 +270,22 @@ void DisplayRecording(int RecNum, int MaxPlayer)
 	#endif
 }
 
-////////////////////////////////////////////////////////////////////////
-// Build Menu buffer (== Dispbuffer without FPS)...
-////////////////////////////////////////////////////////////////////////
+// Build menu buffer (== Display buffer without FPS)
 
 void BuildDispMenu(int iInc)
 {
 	unsigned char nStatusSymbols[3] = {0x3D, 0x34, 0x3B};
 	int j = 0;
 	int i = 0;
-	if (!(ulKeybits&KEY_SHOWFPS)) return;                 // mmm, cheater ;)
+	if (!(ulKeybits&KEY_SHOWFPS)) return;                 // Cheating
 
-	iMPos+=iInc;                                          // up or down
-	if (iMPos<0) iMPos=3;                                 // wrap around
+	iMPos+=iInc;                                          // Up or down
+	if (iMPos<0) iMPos=3;                                 // Wrap around
 	if (iMPos>3) iMPos=0;
 
-	strcpy(szMenuBuf,"   FL   FS   DI   GF        ");     // main menu items
+	strcpy(szMenuBuf,"   FL   FS   DI   GF        ");     // Main menu items
 
-	if (UseFrameLimit)                                    // set marks
+	if (UseFrameLimit)                                    // Set marks
 	{
 		if (iFrameLimit==1) szMenuBuf[2]  = '+';
 		else               szMenuBuf[2]  = '*';
@@ -352,7 +294,7 @@ void BuildDispMenu(int iInc)
 	else
 		if (UseFrameSkip)   szMenuBuf[7]  = '*';
 
-	if (iUseDither)                                       // set marks
+	if (iUseDither)                                       // Set marks
 	{
 		if (iUseDither==1) szMenuBuf[12]  = '+';
 		else              szMenuBuf[12]  = '*';
@@ -429,7 +371,7 @@ void BuildDispMenu(int iInc)
 					if ((dwCoreFlags&0x0f00)==0x0300)                   // G
 						szMenuBuf[23]  = 'G';
 
-		szMenuBuf[24]='0'+(char)((dwCoreFlags&0xf000)>>12);                         // number
+		szMenuBuf[24]='0'+(char)((dwCoreFlags&0xf000)>>12);                         // Number
 	}
 
 #ifdef _WINDOWS
@@ -437,7 +379,7 @@ void BuildDispMenu(int iInc)
 #endif
 	if (lSelectedSlot)  szMenuBuf[26]  = '0'+(char)lSelectedSlot;
 
-	szMenuBuf[(iMPos+1)*5]='<';                           // set arrow
+	szMenuBuf[(iMPos+1)*5]='<';                           // Set arrow
 
 #ifdef _WINDOWS
 	if (RECORD_RECORDING)
@@ -455,17 +397,15 @@ void BuildDispMenu(int iInc)
 #endif
 }
 
-////////////////////////////////////////////////////////////////////////
-// Some menu action...
-////////////////////////////////////////////////////////////////////////
+// Some menu action
 
-void SwitchDispMenu(int iStep)                         // SWITCH DISP MENU
+void SwitchDispMenu(int iStep)                         // Switch display menu
 {
 	if (!(ulKeybits&KEY_SHOWFPS)) return;                 // tststs
 
 	switch (iMPos)
 	{//////////////////////////////////////////////////////
-	case 0:                                             // frame limit
+	case 0:                                             // Frame limit
 	{
 		int iType=0;
 		bInitCap = TRUE;
@@ -494,8 +434,8 @@ void SwitchDispMenu(int iStep)                         // SWITCH DISP MENU
 		}
 	}
 	break;
-	//////////////////////////////////////////////////////
-	case 1:                                             // frame skip
+
+	case 1:                                             // Frame skip
 		bInitCap = TRUE;
 		if (iStep>0)
 		{
@@ -533,14 +473,14 @@ void SwitchDispMenu(int iStep)                         // SWITCH DISP MENU
 		}
 		bSkipNextFrame=FALSE;
 		break;
-		//////////////////////////////////////////////////////
-	case 2:                                             // dithering
+
+	case 2:                                             // Dithering
 		iUseDither+=iStep;
 		if (iUseDither<0) iUseDither=2;
 		if (iUseDither>2) iUseDither=0;
 		break;
-		//////////////////////////////////////////////////////
-	case 3:                                             // special fixes
+
+	case 3:                                             // Special fixes
 		if (iUseFixes)
 		{
 			iUseFixes=0;
@@ -556,5 +496,5 @@ void SwitchDispMenu(int iStep)                         // SWITCH DISP MENU
 		break;
 	}
 
-	BuildDispMenu(0);                                     // update info
+	BuildDispMenu(0);                                     // Update information
 }

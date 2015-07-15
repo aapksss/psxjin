@@ -1,30 +1,13 @@
-/* SPU2-X, a plugin for emulating the Sound Processing Unit of the PlayStation 2
- * Developed and maintained by the PSXjin2 Development Team. < Is that a real emulator/team? I thought there was only PSXjin?
- * 
- * Original portions from SPU2ghz are (c) 2008 by David Quintana [gigaherz]
- *
- * SPU2-X is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Lesser General Public License as published by the Free Software Found-
- * ation, either version 3 of the License, or (at your option) any later version.
- *
- * SPU2-X is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with SPU2-X.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 //#include "Global.h"
 //#include "types.h" //desmume
-#include "PsxCommon.h"
-#include "SndOut.h"
+#include "psxcommon.h"
+#include "sndout.h"
 #include <assert.h>
 
-//----------------
+// Check the above for what is needed for the emulator
+
 int SndOutLatencyMS = 160;
 bool timeStretchDisabled = false;
-//----------------
 
 StereoOut32 StereoOut32::Empty( 0, 0 );
 
@@ -56,7 +39,6 @@ StereoOut32 StereoOut16::UpSample() const
 	);
 
 }
-
 
 //class NullOutModule: public SndOutModule
 //{
@@ -129,6 +111,7 @@ int GetAlignedBufferSize( int comp )
 
 // Returns TRUE if there is data to be output, or false if no data
 // is available to be copied.
+
 bool SndBuffer::CheckUnderrunStatus( int& nSamples, int& quietSampleCount )
 {
 	quietSampleCount = 0;
@@ -146,10 +129,11 @@ bool SndBuffer::CheckUnderrunStatus( int& nSamples, int& quietSampleCount )
 		}
 
 		m_underrun_freeze = false;
-		//TODO
+		// To do
+		// Check this code for completeness
 		//if( MsgOverruns() )
 			printf(" * SPU2 > Underrun compensation (%d packets buffered)\n", toFill / SndOutPacketSize );
-		lastPct = 0.0;		// normalize timestretcher
+		lastPct = 0.0;		// Normalize time stretcher
 	}
 	else if( m_data < nSamples )
 	{
@@ -184,7 +168,7 @@ void SndBuffer::_WriteSamples(StereoOut32 *bData, int nSamples)
 	// Problem:
 	//  If the SPU2 gets out of sync with the SndOut device, the writepos of the
 	//  circular buffer will overtake the readpos, leading to a prolonged period
-	//  of hopscotching read/write accesses (ie, lots of staticy crap sound for
+	//  of hopscotching read/write accesses (IE, lots of crappy sound for
 	//  several seconds).
 	//
 	// Compromise:
@@ -206,7 +190,7 @@ void SndBuffer::_WriteSamples(StereoOut32 *bData, int nSamples)
 		}
 		else
 		{
-			// Toss half the buffer plus whatever's being written anew:
+			// Toss half the buffer plus whatever is being written anew:
 			comp = GetAlignedBufferSize( (m_size + nSamples ) / 2 );
 			if( comp > (m_size-SndOutPacketSize) ) comp = m_size-SndOutPacketSize;
 		}
@@ -215,13 +199,13 @@ void SndBuffer::_WriteSamples(StereoOut32 *bData, int nSamples)
 		m_rpos = (m_rpos+comp) % m_size;
 		//TODO
 		//if( MsgOverruns() )
-			printf(" * SPU2 > Overrun Compensation (%d packets tossed)\n", comp / SndOutPacketSize );
-		lastPct = 0.0;		// normalize the timestretcher
+			printf(" * SPU2 > Overrun compensation (%d packets tossed)\n", comp / SndOutPacketSize );
+		lastPct = 0.0;		// Normalize the time stretcher
 	}
 
-	// copy in two phases, since there's a chance the packet
+	// Copy in two phases, since there's a chance the packet
 	// wraps around the buffer (it'd be nice to deal in packets only, but
-	// the timestretcher and DSP options require flexibility).
+	// the time stretcher and DSP options require flexibility).
 
 	const int endPos = m_wpos + nSamples;
 	const int secondCopyLen = endPos - m_size;
@@ -248,10 +232,9 @@ void SndBuffer::Init()
 	//	return;
 	//}
 
-	// initialize sound buffer
+	// Initialize sound buffer
 	// Buffer actually attempts to run ~50%, so allocate near double what
 	// the requested latency is:
-
 
 	m_rpos = 0;
 	m_wpos = 0;
@@ -269,26 +252,27 @@ void SndBuffer::Init()
 	}
 	catch( std::bad_alloc& )
 	{
-		// out of memory exception (most likely)
+		// Out of memory exception (most likely)
 
 		printf( "Out of memory error occurred while initializing SPU2." );
 		_InitFail();
 		return;
 	}
 
-	// clear buffers!
-	// Fixes loopy sounds on emu resets.
+	// Clear buffers!
+	// Fixes loopy sounds on emulator resets
+	
 	memset( sndTempBuffer, 0, sizeof(StereoOut32) * SndOutPacketSize );
 	memset( sndTempBuffer16, 0, sizeof(StereoOut16) * SndOutPacketSize );
 
 	sndTempProgress = 0;
 
-	soundtouchInit();		// initializes the timestretching
+	soundtouchInit();		// Initializes the time stretching
 
-	// some crap
+	// Some stuff
 	//spdif_set51(mods[OutputModule]->Is51Out());
 
-	// initialize module
+	// Initialize module
 	//if( mods[OutputModule]->Init() == -1 ) _InitFail();
 }
 
@@ -314,12 +298,12 @@ int SndBuffer::ssFreeze = 0;
 void SndBuffer::ClearContents()
 {
 	SndBuffer::soundtouchClearContents();
-	SndBuffer::ssFreeze = 30; //Delays sound output for about half a second.
+	SndBuffer::ssFreeze = 30; // Delays sound output for about half a second
 }
 
 void SndBuffer::Write( const StereoOut32& Sample )
 {
-	// Log final output to wavefile.
+	// Log final output to wav file
 	//WaveDump::WriteCore( 1, CoreSrc_External, Sample.DownSample() );
 
 	//RecordWrite( Sample.DownSample() );
@@ -330,10 +314,12 @@ void SndBuffer::Write( const StereoOut32& Sample )
 	sndTempBuffer[sndTempProgress++] = Sample;
 
 	// If we haven't accumulated a full packet yet, do nothing more:
+	
 	if(sndTempProgress < SndOutPacketSize) return;
 	sndTempProgress = 0;
 
-	//Don't play anything directly after loading a savestate, avoids static killing your speakers.
+	// Don't play anything directly after loading a savestate, avoids static killing your speakers
+	
 //	if ( ssFreeze > 0 )
 //	{	
 //		ssFreeze--;

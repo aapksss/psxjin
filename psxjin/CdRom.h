@@ -1,8 +1,8 @@
 #ifndef __CDROM_H__
 #define __CDROM_H__
 
-#include "PsxCommon.h"
-#include "DecodeXA.h"
+#include "psxcommon.h"
+#include "decodexa.h"
 
 struct cdrStruct{
 	unsigned char OCUP;
@@ -31,7 +31,7 @@ struct cdrStruct{
 	unsigned long Reading;
 
 	unsigned char ResultTN[6];
-#ifdef __DREAMCAST__
+#ifdef __DREAMCAST__ // Dreamcast, huh? We need to figure out what this is for. Perhaps a Bleemcast sort of thing?
 	unsigned char ResultTD[4] __attribute__ ((aligned (4)));
 #else
 	unsigned char ResultTD[4];

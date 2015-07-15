@@ -11,16 +11,18 @@ extern int ramw_x;
 extern int ramw_y;
 extern bool RWfileChanged;
 
-//Constants
+// Constants
+
 #define AUTORWLOAD "RamWatchAutoLoad"
 #define RWSAVEPOS "RamWatchSaveWindowPos"
 #define RAMWX "RamwX"
 #define RAMWY "RamwY"
 
 // AddressWatcher is self-contained now
+
 struct AddressWatcher
 {
-	unsigned int Address; // hardware address
+	unsigned int Address; // Hardware address
 	char Size;
 	char Type;
 	char* comment; // NULL means no comment, non-NULL means allocated comment
@@ -29,7 +31,7 @@ struct AddressWatcher
 };
 #define MAX_WATCH_COUNT 256
 extern AddressWatcher rswatches[MAX_WATCH_COUNT];
-extern int WatchCount; // number of valid items in rswatches
+extern int WatchCount; // Number of valid items in rswatches
 
 extern char Watch_Dir[1024];
 
@@ -37,7 +39,7 @@ extern HWND RamWatchHWnd;
 extern HACCEL RamWatchAccels;
 
 bool InsertWatch(const AddressWatcher& Watch, char *Comment);
-bool InsertWatch(const AddressWatcher& Watch, HWND parent=NULL); // asks user for comment
+bool InsertWatch(const AddressWatcher& Watch, HWND parent=NULL); // Will ask the user for comment
 void Update_RAM_Watch();
 bool Load_Watches(bool clear, const char* filename);
 void RWAddRecentFile(const char *filename);

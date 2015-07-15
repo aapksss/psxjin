@@ -1,12 +1,11 @@
 #ifndef __PLUGINS_H__
 #define __PLUGINS_H__
 
-#include "Win32\plugin.h"
-#include "PSEmuPluginDefs.h"
-#include "PsxCommon.h"
-#include "DecodeXA.h"
-#include "CdRom.h"
-
+#include "win32\plugin.h"
+#include "psemuplugindefs.h"
+#include "psxcommon.h"
+#include "decodexa.h"
+#include "cdrom.h"
 #include "iso/cdriso.h"
 
 void PlayMovieFromBeginning();
@@ -17,8 +16,8 @@ int  OpenPlugins();
 void ClosePlugins();
 void ResetPlugins();
 
+// SPU plugin
 
-// spu plugin
 long SPUinit(void);				
 long SPUshutdown(void);	
 long SPUclose(void);			
@@ -33,7 +32,9 @@ void SPUsetAddr(unsigned char, unsigned short);
 void SPUsetPitch(unsigned char, unsigned short);		
 void SPUsetVolumeL(unsigned char, short );		
 void SPUsetVolumeR(unsigned char, short );		
-//psemu pro 2 functions from now..
+
+//PSEmu Pro 2 functions from now
+
 void SPUwriteRegister(u32, u16);	
 u16 SPUreadRegister(u32);		
 void SPUwriteDMA(short);
@@ -41,7 +42,9 @@ unsigned short SPUreadDMA(void);
 void SPUwriteDMAMem(unsigned short *, int);
 void SPUreadDMAMem(unsigned short *, int);
 void SPUplayADPCMchannel(xa_decode_t *);
-//void SPUregisterCallback(void (CALLBACK *callback)(void));
+
+// void SPUregisterCallback(void (CALLBACK *callback)(void));
+
 long SPUconfigure(void);
 long SPUopen(HWND hwnd);
 struct FreezeStub_t {
@@ -53,7 +56,6 @@ void SPUasync(unsigned long);
 void SPUstartWav(char*);
 void SPUstopWav(void);
 
-
 START_EXTERN_C
 
 typedef unsigned long (CALLBACK* PSEgetLibType)(void);
@@ -62,7 +64,8 @@ typedef char *(CALLBACK* PSEgetLibName)(void);
 
 END_EXTERN_C
 
-///GPU PLUGIN STUFF 
+// GPU plugin
+
 long CALLBACK  GPUinit(void);
 long CALLBACK  GPUshutdown(void);
 long CALLBACK  GPUclose(void);
@@ -111,9 +114,8 @@ void CALLBACK  GPUstopAvi(void);
 void CALLBACK GPUrestartAVINewRes(void);
 void CALLBACK  GPUsendFpLuaGui(void (*fpPSXjin_LuaGui)(void *,int,int,int,int));
 
-
-//Padwin Exports
-//Should probably put these in a separate .h file, but whatever.
+// Padwin exports
+// Should probably put these in a separate .h file, but whatever (we probably should, but we will wait until the renaming and Visual Studio stuff is done)
 
 //int LoadCDRplugin(char *CDRdll);
 //int LoadSPUplugin(char *SPUdll);

@@ -1,42 +1,26 @@
-/* SPU2-X, a plugin for emulating the Sound Processing Unit of the PlayStation 2
-* Developed and maintained by the PSXjin2 Development Team. < Is this a real emulator/team? I thought there was only PSXjin?
-* 
-* Original portions from SPU2ghz are (c) 2008 by David Quintana [gigaherz]
-*
-* SPU2-X is free software: you can redistribute it and/or modify it under the terms
-* of the GNU Lesser General Public License as published by the Free Software Found-
-* ation, either version 3 of the License, or (at your option) any later version.
-*
-* SPU2-X is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-* PURPOSE.  See the GNU Lesser General Public License for more details.
-*
-* You should have received a copy of the GNU Lesser General Public License
-* along with SPU2-X.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 //#include "Global.h"
 #include <math.h>
 //#include "types.h" //desmume
-#include "PsxCommon.h"
-#include "SoundTouch/SoundTouch.h"
-#include "SndOut.h"
-//#include "SoundTouch/WavFile.h"
+#include "psxcommon.h"
+#include "soundtouch/soundtouch.h"
+#include "sndout.h"
+//#include "soundtouch/wavfile.h"
+#include "win32/dialogs.h"
 
-#include "win32/Dialogs.h"
-
+// We need to check what of the above is used and necessary for the emulator
 
 static soundtouch::SoundTouch* pSoundTouch = NULL;
 static int ts_stats_stretchblocks = 0;
 static int ts_stats_normalblocks = 0;
 static int ts_stats_logcounter = 0;
 
+// Data prediction amount, used to "commit" data that hasn't
+// finished time-stretch processing
 
-// data prediction amount, used to "commit" data that hasn't
-// finished timestretch processing.
 s32 SndBuffer::m_predictData;
 
-// records last buffer status (fill %, range -100 to 100, with 0 being 50% full)
+// Records last buffer status (fill %, range -100 to 100, with 0 being 50% full)
+
 float SndBuffer::lastPct;
 float SndBuffer::lastEmergencyAdj;
 
@@ -57,11 +41,13 @@ void SndBuffer::PredictDataWrite( int samples )
 float SndBuffer::GetStatusPct()
 {
 	// Get the buffer status of the output driver too, so that we can
-	// obtain a more accurate overall buffer status.
+	// obtain a more accurate overall buffer status
 
 	int drvempty = 0;
 	//int drvempty = mods[OutputModule]->GetEmptySampleCount(); // / 2;
-	//TODO 
+	//TODO
+	
+	// Check this stuff to see what is so "to do" about it
 
 	//ConLog( "Data %d >>> driver: %d   predict: %d\n", data, drvempty, predictData );
 
@@ -87,7 +73,7 @@ void SndBuffer::UpdateTempoChange()
 	// IMPORTANT!
 	// If you plan to tweak these values, make sure you're using a release build
 	// OUTSIDE THE DEBUGGER to test it!  The Visual Studio debugger can really cause
-	// erratic behavior in the audio buffers, and makes the timestretcher seem a
+	// erratic behavior in the audio buffers, and makes the time stretcher seem a
 	// lot more inconsistent than it really is.
 
 	// We have two factors.
@@ -101,17 +87,17 @@ void SndBuffer::UpdateTempoChange()
 
 	if( statusPct * tempoChange < 0.0f )
 	{
-		// only apply tempo change if it is in synch with the buffer status.
+		// Only apply tempo change if it is in sync with the buffer status.
 		// In other words, if the buffer is high (over 0%), and is decreasing,
 		// ignore it.  It'll just muck things up.
 
 		tempoChange = 0;
 	}
 
-	// Sudden spikes in framerate can cause the nominal buffer status
+	// Sudden spikes in frame rate can cause the nominal buffer status
 	// to go critical, in which case we have to enact an emergency
 	// stretch. The following cubic formulas do that.  Values near
-	// the extremeites give much larger results than those near 0.
+	// the extremes give much larger results than those near 0.
 	// And the value is added only this time, and does not accumulate.
 	// (otherwise a large value like this would cause problems down the road)
 
@@ -130,9 +116,9 @@ void SndBuffer::UpdateTempoChange()
 	const float statusWeight = 2.99f;
 	const float statusRange = 0.068f;
 
-	// "non-emergency" deadzone:  In this area stretching will be strongly discouraged.
-	// Note: due tot he nature of timestretch latency, it's always a wee bit harder to
-	// cope with low fps (underruns) than it is high fps (overruns).  So to help out a
+	// "non-emergency" dead zone:  In this area stretching will be strongly discouraged.
+	// Note: due to the nature of time stretch latency, it's always a bit harder to
+	// cope with low FPS (underruns) than it is high FPS (overruns).  So to help out a
 	// little, the low-end portions of this check are less forgiving than the high-sides.
 
 	if( cTempo < 0.965f || cTempo > 1.060f ||
@@ -167,10 +153,11 @@ void SndBuffer::UpdateTempoChange()
 
 	float newTempo = newcee + ( emergencyAdj * cTempo );
 
-	// ... and as a final optimization, only stretch if the new tempo is outside
+	// As a final optimization, only stretch if the new tempo is outside
 	// a nominal threshold.  Keep this threshold check small, because it could
 	// cause some serious side effects otherwise. (enlarging the cTempo check above
 	// is usually better/safer)
+	
 	if( newTempo < 0.970f || newTempo > 1.045f )
 	{
 		cTempo = (float)newcee;
@@ -196,8 +183,9 @@ void SndBuffer::UpdateTempoChange()
 	else
 	{
 		// Nominal operation -- turn off stretching.
-		// note: eTempo 'slides' toward 1.0 for smoother audio and better
+		// Note: eTempo 'slides' toward 1.0 for smoother audio and better
 		// protection against spikes.
+		
 		if( cTempo != 1.0f )
 		{
 			cTempo = 1.0f;
@@ -215,7 +203,7 @@ void SndBuffer::UpdateTempoChange()
 
 void SndBuffer::timeStretchUnderrun()
 {
-	// timeStretcher failed it's job.  We need to slow down the audio some.
+	// Time stretcher failed it's job.  We need to slow down the audio some.
 
 	cTempo -= (cTempo * 0.12f);
 	eTempo -= (eTempo * 0.30f);
@@ -225,15 +213,16 @@ void SndBuffer::timeStretchUnderrun()
 
 s32 SndBuffer::timeStretchOverrun()
 {
-	// If we overran it means the timestretcher failed.  We need to speed
+	// If we overran it means the time stretcher failed.  We need to speed
 	// up audio playback.
+	
 	cTempo += cTempo * 0.12f;
 	eTempo += eTempo * 0.40f;
 	if( eTempo > 7.5f ) eTempo = 7.5f;
 	pSoundTouch->setTempo( eTempo );
 
 	// Throw out just a little bit (two packets worth) to help
-	// give the TS some room to work:
+	// give the time stretcher some room to work:
 
 	return SndOutPacketSize*2;
 }
@@ -246,7 +235,8 @@ static void CvtPacketToFloat( StereoOut32* srcdest )
 		*dest = (StereoOutFloat)*src;
 }
 
-// Parameter note: Size should always be a multiple of 128, thanks!
+// Parameter note: Size should always be a multiple of 128
+
 static void CvtPacketToInt( StereoOut32* srcdest, uint size )
 {
 	//jASSUME( (size & 127) == 0 );
@@ -262,11 +252,11 @@ void SndBuffer::timeStretchWrite()
 {
 	bool progress = false;
 
-	// data prediction helps keep the tempo adjustments more accurate.
-	// The timestretcher returns packets in belated "clump" form.
+	// Data prediction helps keep the tempo adjustments more accurate.
+	// The time stretcher returns packets in belated "clump" form.
 	// Meaning that most of the time we'll get nothing back, and then
 	// suddenly we'll get several chunks back at once.  Thus we use
-	// data prediction to make the timestretcher more responsive.
+	// data prediction to make the time stretcher more responsive.
 
 	PredictDataWrite( (int)( SndOutPacketSize / eTempo ) );
 	CvtPacketToFloat( sndTempBuffer );
@@ -278,7 +268,7 @@ void SndBuffer::timeStretchWrite()
 		tempProgress != 0 )
 	{
 		// Hint: It's assumed that pSoundTouch will return chunks of 128 bytes (it always does as
-		// long as the SSE optimizations are enabled), which means we can do our own SSE opts here.
+		// long as the SSE optimizations are enabled), which means we can do our own SSE optimizations here.
 		
 		CvtPacketToInt( sndTempBuffer, tempProgress );
 		_WriteSamples( sndTempBuffer, tempProgress );
@@ -289,13 +279,14 @@ void SndBuffer::timeStretchWrite()
 
 	//TODO
 	//if( MsgOverruns() )
+	// Check this out
 	{
 		if( progress )
 		{
 			if( ++ts_stats_logcounter > 300 )
 			{
 				ts_stats_logcounter = 0;
-				printf( " * SPU2 > Timestretch Stats > %d%% of packets stretched.\n",
+				printf( " * SPU2 > Time stretch stats > %d%% of packets stretched.\n",
 					( ts_stats_stretchblocks * 100 ) / ( ts_stats_normalblocks + ts_stats_stretchblocks ) );
 				ts_stats_normalblocks = 0;
 				ts_stats_stretchblocks = 0;
@@ -317,20 +308,22 @@ void SndBuffer::soundtouchInit()
 
 	pSoundTouch->setTempo(1);
 
-	// some timestretch management vars:
+	// Some time stretch management variables:
 
 	cTempo = 1.0;
 	eTempo = 1.0;
 	lastPct = 0;
 	lastEmergencyAdj = 0;
 
-	// just freeze tempo changes for a while at startup.
-	// the driver buffers are bogus anyway.
+	// Just freeze tempo changes for a while at startup.
+	// The driver buffers are bogus anyway
+	
 	freezeTempo = 16;
 	m_predictData = 0;
 }
 
-// reset timestretch management vars, and delay updates a bit:
+// Reset time stretch management variables, and delay updates a bit:
+
 void SndBuffer::soundtouchClearContents()
 {
 	if( pSoundTouch == NULL ) return;

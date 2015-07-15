@@ -1,29 +1,7 @@
-/*	snddx.cpp
-	
-	Copyright (C) 2005-2007 Theo Berkau
-	Copyright (C) 2008-2009 DeSmuME team
-
-    This file is part of DeSmuME
- 
-    DeSmuME is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    DeSmuME is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with DeSmuME; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
-*/
-
 #include <stdio.h>
 #include "dsound.h"
 #include "dxerr8.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 int SNDDXInit(int buffersize);
 void SNDDXDeInit();
@@ -32,7 +10,6 @@ u32 SNDDXGetAudioSpace();
 void SNDDXMuteAudio();
 void SNDDXUnMuteAudio();
 void SNDDXSetVolume(int volume);
-
 
 LPDIRECTSOUND8 lpDS8 = NULL;
 LPDIRECTSOUNDBUFFER lpDSB, lpDSB2;
@@ -44,8 +21,6 @@ static LONG soundvolume;
 static int issoundmuted;
 
 extern HWND    hWMain;
-
-//////////////////////////////////////////////////////////////////////////////
 
 static volatile bool doterminate;
 static volatile bool terminated;
@@ -110,7 +85,7 @@ int SNDDXInit(int buffersize)
 		return -1;
 	}
 
-	soundbufsize = buffersize * 2; // caller already multiplies buffersize by 2
+	soundbufsize = buffersize * 2; // Caller already multiplies buffersize by 2
 
 	memset(&wfx, 0, sizeof(wfx));
 	wfx.wFormatTag = WAVE_FORMAT_PCM;
@@ -143,6 +118,7 @@ int SNDDXInit(int buffersize)
 			ret == E_NOTIMPL)
 		{
 			// Try using a software buffer instead
+			
 			dsbdesc.dwFlags = DSBCAPS_GLOBALFOCUS | DSBCAPS_STICKYFOCUS |
 				DSBCAPS_CTRLVOLUME | DSBCAPS_GETCURRENTPOSITION2 |
 				DSBCAPS_LOCSOFTWARE;
@@ -178,8 +154,6 @@ int SNDDXInit(int buffersize)
 	return 0;
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 void SNDDXDeInit()
 {
 	DWORD status=0;
@@ -213,12 +187,11 @@ void SNDDXDeInit()
 	}
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 void SNDDXClearAudioBuffer()
 {
-	// we shouldn't need to provide 2 buffers since it's 1 contiguous range
-	// but maybe newer directsound implementations have issues
+	// We shouldn't need to provide 2 buffers since it's 1 contiguous range
+	// But maybe newer DirectSound implementations have issues
+	
 	LPVOID buffer1;
 	LPVOID buffer2;
 	DWORD buffer1_size, buffer2_size;
@@ -230,7 +203,6 @@ void SNDDXClearAudioBuffer()
 		memset(buffer2, 0, buffer2_size);
 	lpDSB2->Unlock(buffer1, buffer1_size, buffer2, buffer2_size);
 }
-
 
 void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
 {
@@ -251,7 +223,7 @@ void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
 
 	//printf("%d\n",num_samples);
 
-	bool silence = (samplecounter<-44100*15/60); //behind by more than a quarter second -> silence
+	bool silence = (samplecounter<-44100*15/60); // If you are behind by more than a quarter second then start silence
 
 	if(insilence)
 	{
@@ -302,8 +274,6 @@ void SNDDXUpdateAudio(s16 *buffer, u32 num_samples)
 	lpDSB2->Unlock(buffer1, buffer1_size, buffer2, buffer2_size);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 static inline u32 circularDist(u32 from, u32 to, u32 size)
 {
 	if(size == 0)
@@ -313,7 +283,6 @@ static inline u32 circularDist(u32 from, u32 to, u32 size)
 		diff += size;
 	return (u32)diff;
 }
-
 
 u32 SNDDXGetAudioSpace()
 {
@@ -325,14 +294,11 @@ u32 SNDDXGetAudioSpace()
 	u32 curToPlay = circularDist(soundoffset, playcursor, soundbufsize);
 
 	if(curToWrite < curToPlay)
-		return 0; // in-between the two cursors. we shouldn't write anything during this time.
+		return 0; // In between the two cursors. we shouldn't write anything during this time
 
 	//printf("[%012d] SNDDXGetAudioSpace returns %d\n",timeGetTime(), curToPlay / (sizeof(s16) * 2));
 	return curToPlay / (sizeof(s16) * 2);
 }
-
-
-//////////////////////////////////////////////////////////////////////////////
 
 void SNDDXMuteAudio()
 {
@@ -340,26 +306,19 @@ void SNDDXMuteAudio()
 	IDirectSoundBuffer8_SetVolume (lpDSB2, DSBVOLUME_MIN);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 void SNDDXUnMuteAudio()
 {
 	issoundmuted = 0;
 	IDirectSoundBuffer8_SetVolume (lpDSB2, soundvolume);
 }
 
-//////////////////////////////////////////////////////////////////////////////
-
 void SNDDXSetVolume(int volume)
 {
-	if (!lpDSB2) return ;     /* might happen when changing sounddevice on the fly, caused a gpf */
+	if (!lpDSB2) return ;     // Might happen when changing sound devices on the fly, caused a GPF (What is a GPF?)
 	soundvolume = (((LONG)volume) - 100) * 100;
 	if (!issoundmuted)
 		IDirectSoundBuffer8_SetVolume (lpDSB2, soundvolume);
 }
-
-//////////////////////////////////////////////////////////////////////////////
-
 
 void SetupSound(void)
 {

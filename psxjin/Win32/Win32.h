@@ -15,7 +15,7 @@
 #include <ctype.h>
 #include <io.h>
 #include <direct.h>
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 #ifndef strcasecmp
 #define strcasecmp _stricmp
@@ -64,12 +64,14 @@ void ResetGame();
 void UpdateToolWindows();
 
 // maphkeys.c
+
 extern HWND hMHkeysDlg;
 int MHkeysUpdate();
 int MHkeysCreate();
 int MHkeysListMake(int bBuild);
 
-// cheats
+// Cheats
+
 void CreateCheatEditor();
 void MemSearchCommand(int command);
 

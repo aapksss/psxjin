@@ -7,8 +7,8 @@
 
 #include <stdio.h>
 
-#include "CdRom.h"
-#include "DecodeXA.h"
+#include "cdrom.h"
+#include "decodexa.h"
 
 #define FIXED
 
@@ -120,7 +120,6 @@ static __inline void ADPCM_DecodeBlock16( ADPCM_Decode_t *decp, U8 filter_range,
 
 static int headtable[4] = {0,2,8,10};
 
-//===========================================
 static void xa_decode_data( xa_decode_t *xdp, unsigned char *srcp ) {
 	const U8    *sound_groupsp;
 	const U8    *sound_datap, *sound_datap2;
@@ -376,7 +375,7 @@ void ADPCM_Decode_t::load(EMUFILE* fp) {
 }
 
 void xa_decode_t::save(EMUFILE* fp) {
-	fp->write32le((u32)0); //version
+	fp->write32le((u32)0); // version
 	fp->write32le(&freq);
 	fp->write32le(&nbits);
 	fp->write32le(&stereo);

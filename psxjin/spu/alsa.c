@@ -1,32 +1,3 @@
-/***************************************************************************
-                            alsa.c  -  description
-                             -------------------
-    begin                : Sat Mar 01 2003
-    copyright            : (C) 2002 by Pete Bernert
-    email                : BlackDove@addcom.de
- ***************************************************************************/
-
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version. See also the license.txt file for *
- *   additional informations.                                              *
- *                                                                         *
- ***************************************************************************/
-
-//*************************************************************************//
-// History of changes:
-//
-// 2003/03/02 - linuzappz
-// - fixed XRUN behavior
-//
-// 2003/03/01 - linuzappz
-// - created
-//
-//*************************************************************************//
-
 #include "stdafx.h"
 
 #define _IN_OSS
@@ -39,29 +10,25 @@
 #define ALSA_PCM_NEW_SW_PARAMS_API
 #include <alsa/asoundlib.h>
 
-////////////////////////////////////////////////////////////////////////
-// small linux time helper... only used for watchdog
-////////////////////////////////////////////////////////////////////////
+// Small Linux time helper...only used for watchdog
 
 unsigned long timeGetTime()
 {
 	struct timeval tv;
-	gettimeofday(&tv, 0);                                 // well, maybe there are better ways
+	gettimeofday(&tv, 0);                                 // Well, maybe there are better ways
 	return tv.tv_sec * 1000 + tv.tv_usec/1000;            // to do that, but at least it works
+	
+	// Check if this is the best way
 }
 
-////////////////////////////////////////////////////////////////////////
-// oss globals
-////////////////////////////////////////////////////////////////////////
+// OSS globals
 
 #define ALSA_MEM_DEF
 #include "alsa.h"
 static snd_pcm_t *handle = NULL;
 static snd_pcm_uframes_t buffer_size;
 
-////////////////////////////////////////////////////////////////////////
-// SETUP SOUND
-////////////////////////////////////////////////////////////////////////
+// Setup sound
 
 void SetupSound(void)
 {
@@ -92,7 +59,7 @@ void SetupSound(void)
 
 	if ((err=snd_pcm_nonblock(handle, 0))<0)
 	{
-		printf("Can't set blocking moded: %s\n", snd_strerror(err));
+		printf("Can't set blocking mode: %s\n", snd_strerror(err));
 		return;
 	}
 
@@ -156,9 +123,7 @@ void SetupSound(void)
 	buffer_size=snd_pcm_status_get_avail(status);
 }
 
-////////////////////////////////////////////////////////////////////////
-// REMOVE SOUND
-////////////////////////////////////////////////////////////////////////
+// Remove sound
 
 void RemoveSound(void)
 {
@@ -170,28 +135,24 @@ void RemoveSound(void)
 	}
 }
 
-////////////////////////////////////////////////////////////////////////
-// GET BYTES BUFFERED
-////////////////////////////////////////////////////////////////////////
+// Get bytes buffered
 
 unsigned long SoundGetBytesBuffered(void)
 {
 	unsigned long l;
 
-	if (handle == NULL)                                // failed to open?
+	if (handle == NULL)                                // Failed to open?
 		return SOUNDSIZE;
 	l = snd_pcm_avail_update(handle);
 	if (l<0) return 0;
-	if (l<buffer_size/2)                                // can we write in at least the half of fragments?
-		l=SOUNDSIZE;                                   // -> no? wait
-	else l=0;                                           // -> else go on
+	if (l<buffer_size/2)                                // Can we write in at least the half of fragments?
+		l=SOUNDSIZE;                                   // No? Wait.
+	else l=0;                                           // else go on
 
 	return l;
 }
 
-////////////////////////////////////////////////////////////////////////
-// FEED SOUND DATA
-////////////////////////////////////////////////////////////////////////
+// Feed sound data
 
 void SoundFeedStreamData(unsigned char* pSound,long lBytes)
 {

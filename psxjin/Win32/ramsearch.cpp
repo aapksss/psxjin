@@ -1,34 +1,31 @@
 // A few notes about this implementation of a RAM search window:
 //
-// Speed of update was one of the highest priories.
+// Speed of update was one of the highest priories
 // This is because I wanted the RAM search window to be able to
 // update every single value in RAM every single frame, and
 // keep track of the exact number of frames across which each value has changed,
-// without causing the emulation to run noticeably slower than normal.
-//
+// without causing the emulation to run noticeably slower than normal
 // The data representation was changed from one entry per valid address
-// to one entry per contiguous range of uneliminated addresses
-// which references uniform pools of per-address properties.
-// - This saves time when there are many items because
-//   it minimizes the amount of data that needs to be stored and processed per address.
-// - It also saves time when there are few items because
-//   it ensures that no time is wasted in iterating through
-//   addresses that have already been eliminated from the search.
-//
+// to one entry per contiguous range of addresses that haven't been eliminated
+// which references uniform pools of per-address properties
+// This saves time when there are many items because
+// it minimizes the amount of data that needs to be stored and processed per address
+// It also saves time when there are few items because
+// it ensures that no time is wasted in iterating through
+// addresses that have already been eliminated from the search
 // The worst-case scenario is when every other item has been
-// eliminated from the search, maximizing the number of regions.
+// eliminated from the search, maximizing the number of regions
 // This implementation manages to handle even that pathological case
-// acceptably well. In fact, it still updates faster than the previous implementation.
+// acceptably well. In fact, it still updates faster than the previous implementation
 // The time spent setting up or clearing such a large number of regions
 // is somewhat horrendous, but it seems reasonable to have poor worst-case speed
-// during these sporadic "setup" steps to achieve an all-around faster per-update speed.
+// during these sporadic "setup" steps to achieve an all-around faster per-update speed
 // (You can test this case by performing the search: Modulo 2 Is Specific Address 0)
- 
 
-#include "../PsxCommon.h"
+#include "../psxcommon.h"
 #include "../cheat.h"
 #ifdef WIN32
-#include "Win32.h"
+#include "win32.h"
 #endif
 
 #include "resource.h"
@@ -56,25 +53,24 @@ static inline u8* HardwareToSoftwareAddress(HWAddressType address)
 		return NULL;
 }
 
-
 struct MemoryRegion
 {
-	HWAddressType hardwareAddress; // hardware address of the start of this region
-	unsigned int size; // number of bytes to the end of this region
-	unsigned char* softwareAddress; // pointer to the start of the live emulator source values for this region
+	HWAddressType hardwareAddress; // Hardware address of the start of this region
+	unsigned int size; // Number of bytes to the end of this region
+	unsigned char* softwareAddress; // Pointer to the start of the live emulator source values for this region
 
-	unsigned int virtualIndex; // index into s_prevValues, s_curValues, and s_numChanges, valid after being initialized in ResetMemoryRegions()
-	unsigned int itemIndex; // index into listbox items, valid when s_itemIndicesInvalid is false
+	unsigned int virtualIndex; // Index into s_prevValues, s_curValues, and s_numChanges, valid after being initialized in ResetMemoryRegions()
+	unsigned int itemIndex; // Index into listbox items, valid when s_itemIndicesInvalid is false
 };
 
 int MAX_RAM_SIZE = 0;
-static unsigned char* s_prevValues = 0; // values at last search or reset
-static unsigned char* s_curValues = 0; // values at last frame update
-static unsigned short* s_numChanges = 0; // number of changes of the item starting at this virtual index address
-static MemoryRegion** s_itemIndexToRegionPointer = 0; // used for random access into the memory list (trading memory size to get speed here, too bad it's so much memory), only valid when s_itemIndicesInvalid is false
-static BOOL s_itemIndicesInvalid = true; // if true, the link from listbox items to memory regions (s_itemIndexToRegionPointer) and the link from memory regions to list box items (MemoryRegion::itemIndex) both need to be recalculated
-static BOOL s_prevValuesNeedUpdate = true; // if true, the "prev" values should be updated using the "cur" values on the next frame update signaled
-static unsigned int s_maxItemIndex = 0; // max currently valid item index, the listbox sometimes tries to update things past the end of the list so we need to know this to ignore those attempts
+static unsigned char* s_prevValues = 0; // Values at last search or reset
+static unsigned char* s_curValues = 0; // Values at last frame update
+static unsigned short* s_numChanges = 0; // Number of changes of the item starting at this virtual index address
+static MemoryRegion** s_itemIndexToRegionPointer = 0; // Used for random access into the memory list (trading memory size to get speed here, too bad it's so much memory), only valid when s_itemIndicesInvalid is false
+static BOOL s_itemIndicesInvalid = true; // If true, the link from listbox items to memory regions (s_itemIndexToRegionPointer) and the link from memory regions to list box items (MemoryRegion::itemIndex) both need to be recalculated
+static BOOL s_prevValuesNeedUpdate = true; // If true, the "prev" values should be updated using the "cur" values on the next frame update signaled
+static unsigned int s_maxItemIndex = 0; // Maximum currently valid item index, the listbox sometimes tries to update things past the end of the list so we need to know this to ignore those attempts
 
 HWND RamSearchHWnd;
 #define hWnd gApp.hWnd
@@ -83,8 +79,6 @@ static char Str_Tmp [1024];
 
 int disableRamSearchUpdate = false;
 
-
-
 //static const MemoryRegion s_prgRegion    = {  0x020000, SEGACD_RAM_PRG_SIZE, (unsigned char*)Ram_Prg,     true};
 //static const MemoryRegion s_word1MRegion = {  0x200000, SEGACD_1M_RAM_SIZE,  (unsigned char*)Ram_Word_1M, true};
 //static const MemoryRegion s_word2MRegion = {  0x200000, SEGACD_2M_RAM_SIZE,  (unsigned char*)Ram_Word_2M, true};
@@ -92,12 +86,14 @@ int disableRamSearchUpdate = false;
 //static const MemoryRegion s_68kRegion    = {  0xFF0000, _68K_RAM_SIZE,       (unsigned char*)Ram_68k,     true};
 //static const MemoryRegion s_32xRegion    = {0x06000000, _32X_RAM_SIZE,       (unsigned char*)_32X_Ram,    false};
 
-// list of contiguous uneliminated memory regions
+// List of contiguous memory regions that haven't been eliminated
 typedef std::list<MemoryRegion> MemoryList;
 static MemoryList s_activeMemoryRegions;
 static CRITICAL_SECTION s_activeMemoryRegionsCS;
 
-// for undo support (could be better, but this way was really easy)
+// For undo support (could be better, but this way was really easy)
+// Check this to see if we can do it better
+
 static MemoryList s_activeMemoryRegionsBackup;
 static int s_undoType = 0; // 0 means can't undo, 1 means can undo, 2 means can redo
 
@@ -111,9 +107,9 @@ void ResetMemoryRegions()
 
 	s_activeMemoryRegions.clear();
 
-	// use HardwareToSoftwareAddress to figure out what all the possible memory regions are,
+	// Use HardwareToSoftwareAddress to figure out what all the possible memory regions are,
 	// split up wherever there's a discontinuity in the address in our software RAM.
-	static const int regionSearchGranularity = 0x100; // if this is too small, we'll waste time (in this function only), but if any region in RAM isn't evenly divisible by this, we might crash.
+	static const int regionSearchGranularity = 0x100; // If this is too small, we'll waste time (in this function only), but if any region in RAM isn't evenly divisible by this, we might crash
 	HWAddressType hwRegionStart = 0;
 	u8* regionStart = NULL;
 	u8* regionEnd = NULL;
@@ -122,8 +118,8 @@ void ResetMemoryRegions()
 		u8* swAddr = HardwareToSoftwareAddress(addr);
 		if(regionEnd && swAddr != regionEnd+regionSearchGranularity)
 		{
-			// hit end of region
-			// check to see if it mirrors an existing one (in which case we discard it)
+			// Hit end of region
+			// Check to see if it mirrors an existing one (in which case we discard it)
 			bool discard = false;
 			for(MemoryList::iterator iter = s_activeMemoryRegions.begin(); iter != s_activeMemoryRegions.end(); ++iter)
 			{
@@ -144,9 +140,10 @@ void ResetMemoryRegions()
 				}
 			}
 			
-			// TODO: don't include ROM in our RAM search (it's too huge)
+			// To do: don't include ROM in our RAM search (it's too huge)
 
-			// create the region
+			// Create the region
+			
 			if(!discard)
 			{
 				MemoryRegion region = { hwRegionStart, regionSearchGranularity + (regionEnd - regionStart), regionStart };
@@ -161,12 +158,14 @@ void ResetMemoryRegions()
 		{
 			if(regionStart)
 			{
-				// continue region
+				// Continue region
+				
 				regionEnd = swAddr;
 			}
 			else
 			{
-				// start new region
+				// Start new region
+				
 				hwRegionStart = addr;
 				regionStart = swAddr;
 				regionEnd = swAddr;
@@ -174,13 +173,12 @@ void ResetMemoryRegions()
 		}
 	}
 
-
 	int nextVirtualIndex = 0;
 	for(MemoryList::iterator iter = s_activeMemoryRegions.begin(); iter != s_activeMemoryRegions.end(); ++iter)
 	{
 		MemoryRegion& region = *iter;
 		region.virtualIndex = nextVirtualIndex;
-		assert(((intptr_t)region.softwareAddress & 1) == 0 && "somebody needs to reimplement ReadValueAtSoftwareAddress()");
+		assert(((intptr_t)region.softwareAddress & 1) == 0 && "somebody needs to re-implement ReadValueAtSoftwareAddress()"); // We should check all of this so maybe we don't need to have this message?
 		nextVirtualIndex = region.virtualIndex + region.size;
 	}
 	//assert(nextVirtualIndex <= MAX_RAM_SIZE);
@@ -204,28 +202,31 @@ void ResetMemoryRegions()
 	LeaveCriticalSection(&s_activeMemoryRegionsCS);
 }
 
-// eliminates a range of hardware addresses from the search results
+// Eliminates a range of hardware addresses from the search results
 // returns 2 if it changed the region and moved the iterator to another region
 // returns 1 if it changed the region but didn't move the iterator
 // returns 0 if it had no effect
-// warning: don't call anything that takes an itemIndex in a loop that calls DeactivateRegion...
-//   doing so would be tremendously slow because DeactivateRegion invalidates the index cache
+// Warning: don't call anything that takes an itemIndex in a loop that calls DeactivateRegion
+// Doing so would be tremendously slow because DeactivateRegion invalidates the index cache
+
 int DeactivateRegion(MemoryRegion& region, MemoryList::iterator& iter, HWAddressType hardwareAddress, unsigned int size)
 {
 	if(hardwareAddress + size <= region.hardwareAddress || hardwareAddress >= region.hardwareAddress + region.size)
 	{
-		// region is unaffected
+		// Region is unaffected
+		
 		return 0;
 	}
 	else if(hardwareAddress > region.hardwareAddress && hardwareAddress + size >= region.hardwareAddress + region.size)
 	{
-		// erase end of region
+		// Erase end of region
+		
 		region.size = hardwareAddress - region.hardwareAddress;
 		return 1;
 	}
 	else if(hardwareAddress <= region.hardwareAddress && hardwareAddress + size < region.hardwareAddress + region.size)
 	{
-		// erase start of region
+		// Erase start of region
 		int eraseSize = (hardwareAddress + size) - region.hardwareAddress;
 		region.hardwareAddress += eraseSize;
 		region.size -= eraseSize;
@@ -235,14 +236,14 @@ int DeactivateRegion(MemoryRegion& region, MemoryList::iterator& iter, HWAddress
 	}
 	else if(hardwareAddress <= region.hardwareAddress && hardwareAddress + size >= region.hardwareAddress + region.size)
 	{
-		// erase entire region
+		// Erase entire region
 		iter = s_activeMemoryRegions.erase(iter);
 		s_itemIndicesInvalid = TRUE;
 		return 2;
 	}
 	else //if(hardwareAddress > region.hardwareAddress && hardwareAddress + size < region.hardwareAddress + region.size)
 	{
-		// split region
+		// Split region
 		int eraseSize = (hardwareAddress + size) - region.hardwareAddress;
 		MemoryRegion region2 = {region.hardwareAddress + eraseSize, region.size - eraseSize, region.softwareAddress + eraseSize, region.virtualIndex + eraseSize};
 		region.size = hardwareAddress - region.hardwareAddress;
@@ -253,7 +254,7 @@ int DeactivateRegion(MemoryRegion& region, MemoryList::iterator& iter, HWAddress
 }
 
 /*
-// eliminates a range of hardware addresses from the search results
+// Eliminates a range of hardware addresses from the search results
 // this is a simpler but usually slower interface for the above function
 void DeactivateRegion(HWAddressType hardwareAddress, unsigned int size)
 {
@@ -273,7 +274,8 @@ struct AutoCritSect
 	CRITICAL_SECTION* m_cs;
 };
 
-// warning: can be slow
+// Warning: can be slow
+
 void CalculateItemIndices(int itemSize)
 {
 	AutoCritSect cs(&s_activeMemoryRegionsCS);
@@ -282,7 +284,7 @@ void CalculateItemIndices(int itemSize)
 	{
 		MemoryRegion& region = *iter;
 		region.itemIndex = itemIndex;
-		int startSkipSize = ((unsigned int)(itemSize - (unsigned int)region.hardwareAddress)) % itemSize; // FIXME: is this still ok?
+		int startSkipSize = ((unsigned int)(itemSize - (unsigned int)region.hardwareAddress)) % itemSize; // FIXME: is this still OK? (We should check)
 		unsigned int start = startSkipSize;
 		unsigned int end = region.size;
 		for(unsigned int i = start; i < end; i += itemSize)
@@ -303,7 +305,6 @@ void UpdateRegionT(const MemoryRegion& region, const MemoryRegion* nextRegionPtr
 
 	unsigned int startSkipSize = ((unsigned int)(sizeof(stepType) - region.hardwareAddress)) % sizeof(stepType);
 
-
 	unsigned char* sourceAddr = region.softwareAddress - region.virtualIndex;
 
 	unsigned int indexStart = region.virtualIndex + startSkipSize;
@@ -313,18 +314,18 @@ void UpdateRegionT(const MemoryRegion& region, const MemoryRegion* nextRegionPtr
 	{
 		for(unsigned int i = indexStart; i < indexEnd; i++)
 		{
-			if(s_curValues[i] != sourceAddr[i]) // if value changed
+			if(s_curValues[i] != sourceAddr[i]) // If value changed
 			{
-				s_curValues[i] = sourceAddr[i]; // update value
+				s_curValues[i] = sourceAddr[i]; // Update value
 				//if(s_numChanges[i] != 0xFFFF)
-					s_numChanges[i]++; // increase change count
+					s_numChanges[i]++; // Increase change count
 			}
 		}
 	}
-	else // it's more complicated for non-byte sizes because:
-	{    // - more than one byte can affect a given change count entry
-	     // - when more than one of those bytes changes simultaneously the entry's change count should only increase by 1
-	     // - a few of those bytes can be outside the region
+	else // It's more complicated for non-byte sizes because:
+	{    // more than one byte can affect a given change count entry
+	     // when more than one of those bytes changes simultaneously the entry's change count should only increase by 1
+	     // a few of those bytes can be outside the region
 
 		unsigned int endSkipSize = ((unsigned int)(startSkipSize - region.size)) % sizeof(stepType);
 		unsigned int lastIndexToRead = indexEnd + endSkipSize + sizeof(compareType) - sizeof(stepType);
@@ -344,19 +345,19 @@ void UpdateRegionT(const MemoryRegion& region, const MemoryRegion* nextRegionPtr
 
 		for(unsigned int i = indexStart, j = 0; i < lastIndexToRead; i++, j++)
 		{
-			if(s_curValues[i] != sourceAddr[i]) // if value of this byte changed
+			if(s_curValues[i] != sourceAddr[i]) // If value of this byte changed
 			{
 				if(i < lastIndexToCopy)
-					s_curValues[i] = sourceAddr[i]; // update value
-				for(int k = 0; k < sizeof(compareType); k++) // loop through the previous entries that contain this byte
+					s_curValues[i] = sourceAddr[i]; // Update value
+				for(int k = 0; k < sizeof(compareType); k++) // Loop through the previous entries that contain this byte
 				{
 					if(i >= indexEnd+k)
 						continue;
 					int m = (j-k+sizeof(compareType)) & (sizeof(compareType)-1);
-					if(nextValidChange[m] <= i) // if we didn't already increase the change count for this entry
+					if(nextValidChange[m] <= i) // If we didn't already increase the change count for this entry
 					{
 						//if(s_numChanges[i-k] != 0xFFFF)
-							s_numChanges[i-k]++; // increase the change count for this entry
+							s_numChanges[i-k]++; // Increase the change count for this entry
 						nextValidChange[m] = i-k+sizeof(compareType); // and remember not to increase it again
 					}
 				}
@@ -395,7 +396,7 @@ int CountRegionItemsT()
 		MemoryRegion& lastRegion = s_activeMemoryRegions.back();
 		return lastRegion.itemIndex + lastRegion.size;
 	}
-	else // the branch above is faster but won't work if the step size isn't 1
+	else // The branch above is faster but won't work if the step size isn't 1 (Maybe update it so it could? Could be a small performance improvement)
 	{
 		int total = 0;
 		for(MemoryList::iterator iter = s_activeMemoryRegions.begin(); iter != s_activeMemoryRegions.end(); ++iter)
@@ -408,8 +409,9 @@ int CountRegionItemsT()
 	}
 }
 
-// returns information about the item in the form of a "fake" region
+// Returns information about the item in the form of a "fake" region
 // that has the item in it and nothing else
+
 template<typename stepType, typename compareType>
 void ItemIndexToVirtualRegion(unsigned int itemIndex, MemoryRegion& virtualRegion)
 {
@@ -450,9 +452,9 @@ T ReadLocalValue(const unsigned char* data)
 {
 	return *(const T*)data;
 }
+
 //template<> signed char ReadLocalValue(const unsigned char* data) { return *data; }
 //template<> unsigned char ReadLocalValue(const unsigned char* data) { return *data; }
-
 
 template<typename stepType, typename compareType>
 compareType GetPrevValueFromVirtualIndex(unsigned int virtualIndex)
@@ -502,7 +504,8 @@ unsigned int GetHardwareAddressFromItemIndex(unsigned int itemIndex)
 	return virtualRegion.hardwareAddress;
 }
 
-// this one might be unreliable, haven't used it much
+// This one might be unreliable, haven't used it much
+
 template<typename stepType, typename compareType>
 unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 {
@@ -522,9 +525,8 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 	return -1;
 }
 
+// Workaround for MSVC 7 that doesn't support varadic C99 macros (What? Could be a hack so we should remove)
 
-
-// workaround for MSVC 7 that doesn't support varadic C99 macros
 #define CALL_WITH_T_SIZE_TYPES_0(functionName, sizeTypeID, isSigned, requiresAligned) \
 	(sizeTypeID == 'b' \
 		? (isSigned \
@@ -617,7 +619,8 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 				: functionName<char, unsigned long>(p0, p1, p2, p3))) \
 	: functionName<char, signed char>(p0, p1, p2, p3))
 
-// version that takes a forced comparison type
+// Version that takes a forced comparison type
+
 #define CALL_WITH_T_STEP_3(functionName, sizeTypeID, type, requiresAligned, p0, p1, p2) \
 	(sizeTypeID == 'b' \
 		? functionName<char, type>(p0, p1, p2) \
@@ -631,7 +634,8 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 			: functionName<char, type>(p0, p1, p2)) \
 	: functionName<char, type>(p0, p1, p2))
 
-// version that takes a forced comparison type
+// Version that takes a forced comparison type
+
 #define CALL_WITH_T_STEP_4(functionName, sizeTypeID, type, requiresAligned, p0, p1, p2, p3) \
 	(sizeTypeID == 'b' \
 		? functionName<char, type>(p0, p1, p2, p3) \
@@ -645,7 +649,8 @@ unsigned int HardwareAddressToItemIndex(HWAddressType hardwareAddress)
 			: functionName<char, type>(p0, p1, p2, p3)) \
 	: functionName<char, type>(p0, p1, p2, p3))
 
-// basic comparison functions:
+// Basic comparison functions
+
 template <typename T> inline bool LessCmp (T x, T y, T i)        { return x < y; }
 template <typename T> inline bool MoreCmp (T x, T y, T i)        { return x > y; }
 template <typename T> inline bool LessEqualCmp (T x, T y, T i)   { return x <= y; }
@@ -655,7 +660,8 @@ template <typename T> inline bool UnequalCmp (T x, T y, T i)     { return x != y
 template <typename T> inline bool DiffByCmp (T x, T y, T p)      { return x - y == p || y - x == p; }
 template <typename T> inline bool ModIsCmp (T x, T y, T p)       { return p && x % p == y; }
 
-// compare-to type functions:
+// Compare to type functions
+
 template<typename stepType, typename T>
 void SearchRelative (bool(*cmpFun)(T,T,T), T ignored, T param)
 {
@@ -674,6 +680,7 @@ outerContinue:
 		continue;
 	}
 }
+
 template<typename stepType, typename T>
 void SearchSpecific (bool(*cmpFun)(T,T,T), T value, T param)
 {
@@ -692,6 +699,7 @@ outerContinue:
 		continue;
 	}
 }
+
 template<typename stepType, typename T>
 void SearchAddress (bool(*cmpFun)(T,T,T), T address, T param)
 {
@@ -710,6 +718,7 @@ outerContinue:
 		continue;
 	}
 }
+
 template<typename stepType, typename T>
 void SearchChanges (bool(*cmpFun)(T,T,T), T changes, T param)
 {
@@ -741,7 +750,8 @@ int last_rs_regions = -1;
 
 void prune(char c,char o,char t,int v,int p)
 {
-	// repetition-reducing macros
+	// Repetition-reducing macros
+	
 	#define DO_SEARCH(sf) \
 	switch (o) \
 	{ \
@@ -756,7 +766,8 @@ void prune(char c,char o,char t,int v,int p)
 		default: assert(!"Invalid operator for this search type."); break; \
 	}
 
-	// perform the search, eliminating nonmatching values
+	// Perform the search, eliminating non-matching values
+	
 	switch (c)
 	{
 		#define DO_SEARCH_2(CmpFun,sf) CALL_WITH_T_SIZE_TYPES_3(sf, rs_type_size, t, noMisalign, CmpFun,v,p)
@@ -771,7 +782,7 @@ void prune(char c,char o,char t,int v,int p)
 		#define DO_SEARCH_2(CmpFun,sf) CALL_WITH_T_STEP_3(sf, rs_type_size, unsigned short, noMisalign, CmpFun,v,p)
 		case 'n': DO_SEARCH(SearchChanges); break;
 
-		default: assert(!"Invalid search comparison type."); break;
+		default: assert(!"Invalid search comparison type"); break;
 	}
 
 	s_prevValuesNeedUpdate = true;
@@ -782,28 +793,28 @@ void prune(char c,char o,char t,int v,int p)
 
 	if(prevNumItems == last_rs_possible)
 	{
-		SetRamSearchUndoType(RamSearchHWnd, 0); // nothing to undo
+		SetRamSearchUndoType(RamSearchHWnd, 0); // Nothing to undo
 	}
 }
-
-
-
 
 template<typename stepType, typename T>
 bool CompareRelativeAtItem (bool(*cmpFun)(T,T,T), int itemIndex, T ignored, T param)
 {
 	return cmpFun(GetCurValueFromItemIndex<stepType,T>(itemIndex), GetPrevValueFromItemIndex<stepType,T>(itemIndex), param);
 }
+
 template<typename stepType, typename T>
 bool CompareSpecificAtItem (bool(*cmpFun)(T,T,T), int itemIndex, T value, T param)
 {
 	return cmpFun(GetCurValueFromItemIndex<stepType,T>(itemIndex), value, param);
 }
+
 template<typename stepType, typename T>
 bool CompareAddressAtItem (bool(*cmpFun)(T,T,T), int itemIndex, T address, T param)
 {
 	return cmpFun(GetHardwareAddressFromItemIndex<stepType,T>(itemIndex), address, param);
 }
+
 template<typename stepType, typename T>
 bool CompareChangesAtItem (bool(*cmpFun)(T,T,T), int itemIndex, T changes, T param)
 {
@@ -857,12 +868,11 @@ int ReadControlInt(int controlID, bool forceHex, BOOL& success)
 	return rv;
 }
 
-
 bool Set_RS_Val()
 {
 	BOOL success;
 
-	// update rs_val
+	// Update rs_val
 	switch(rs_c)
 	{
 		case 'r':
@@ -891,7 +901,7 @@ bool Set_RS_Val()
 		}	break;
 	}
 
-	// also update rs_param
+	// Also update rs_param
 	switch(rs_o)
 	{
 		default:
@@ -911,7 +921,8 @@ bool Set_RS_Val()
 			break;
 	}
 
-	// validate that rs_param fits in the comparison data type
+	// Validate that rs_param fits in the comparison data type
+	
 	{
 		int appliedSize = rs_type_size;
 		int appliedSign = rs_t;
@@ -959,12 +970,13 @@ unsigned int ReadValueAtSoftwareAddress(const unsigned char* address, unsigned i
 	unsigned int value = 0;
 	if(!byteSwapped)
 	{
-		// assumes we're little-endian
+		// Assumes we're little-endian
 		memcpy(&value, address, size);
 	}
 	else
 	{
-		// byte-swap and convert to current endianness at the same time
+		// Byte-swap and convert to the current endian type at the same time
+		
 		for(unsigned int i = 0; i < size; i++)
 		{
 			value <<= 8;
@@ -977,12 +989,12 @@ void WriteValueAtSoftwareAddress(unsigned char* address, unsigned int value, uns
 {
 	if(!byteSwapped)
 	{
-		// assumes we're little-endian
+		// Assumes we're little-endian
 		memcpy(address, &value, size);
 	}
 	else
 	{
-		// write as big endian
+		// Write as big endian
 		for(int i = size-1; i >= 0; i--)
 		{
 			address[i] = value & 0xFF;
@@ -990,28 +1002,28 @@ void WriteValueAtSoftwareAddress(unsigned char* address, unsigned int value, uns
 		}
 	}
 }
+
 unsigned int ReadValueAtHardwareAddress(HWAddressType address, unsigned int size)
 {
 	return ReadValueAtSoftwareAddress(HardwareToSoftwareAddress(address), size);
 }
+
 bool WriteValueAtHardwareAddress(HWAddressType address, unsigned int value, unsigned int size)
 {
 	WriteValueAtSoftwareAddress(HardwareToSoftwareAddress(address), value, size);
 	return true;
 }
+
 bool IsHardwareAddressValid(HWAddressType address)
 {
 	return HardwareToSoftwareAddress(address) != NULL;
 }
-
-
 
 int ResultCount=0;
 bool AutoSearch=false;
 bool AutoSearchAutoRetry=false;
 LRESULT CALLBACK PromptWatchNameProc(HWND, UINT, WPARAM, LPARAM);
 void UpdatePossibilities(int rs_possible, int regions);
-
 
 void CompactAddrs()
 {
@@ -1040,7 +1052,7 @@ void soft_reset_address_info ()
 	}
 	else
 	{
-		// force s_prevValues to be valid
+		// Force s_prevValues to be valid
 		signal_new_frame();
 		s_prevValuesNeedUpdate = true;
 		signal_new_frame();
@@ -1049,11 +1061,12 @@ void soft_reset_address_info ()
 		memset(s_numChanges, 0, (sizeof(*s_numChanges)*(MAX_RAM_SIZE)));
 	CompactAddrs();
 }
+
 void reset_address_info ()
 {
 	SetRamSearchUndoType(RamSearchHWnd, 0);
 	EnterCriticalSection(&s_activeMemoryRegionsCS);
-	s_activeMemoryRegionsBackup.clear(); // not necessary, but we'll take the time hit here instead of at the next thing that sets up an undo
+	s_activeMemoryRegionsBackup.clear(); // Not necessary, but we'll take the time hit here, instead of at the next bit of code that sets up an undo
 	LeaveCriticalSection(&s_activeMemoryRegionsCS);
 	if(s_prevValues)
 		memcpy(s_prevValues, s_curValues, (sizeof(*s_prevValues)*(MAX_RAM_SIZE)));
@@ -1068,7 +1081,7 @@ void reset_address_info ()
 	}
 	else
 	{
-		// force s_prevValues to be valid
+		// Force s_prevValues to be valid
 		signal_new_frame();
 		s_prevValuesNeedUpdate = true;
 		signal_new_frame();
@@ -1084,10 +1097,6 @@ void signal_new_frame ()
 	LeaveCriticalSection(&s_activeMemoryRegionsCS);
 }
 
-
-
-
-
 bool RamSearchClosed = false;
 bool RamWatchClosed = false;
 
@@ -1098,7 +1107,7 @@ void ResetResults()
 	if (RamSearchHWnd)
 		ListView_SetItemCount(GetDlgItem(RamSearchHWnd,IDC_RAMLIST),ResultCount);
 }
-void CloseRamWindows() //Close the Ram Search & Watch windows when rom closes
+void CloseRamWindows() // Close the RAM search and watch windows when game closes
 {
 	ResetWatches();
 	ResetResults();
@@ -1113,7 +1122,7 @@ void CloseRamWindows() //Close the Ram Search & Watch windows when rom closes
 		RamWatchClosed = true;
 	}
 }
-void ReopenRamWindows() //Reopen them when a new Rom is loaded
+void ReopenRamWindows() // Re-open them when a new game is loaded
 {
 	HWND hwnd = GetActiveWindow();
 
@@ -1138,13 +1147,8 @@ void ReopenRamWindows() //Reopen them when a new Rom is loaded
 	}
 
 	if (hwnd == hWnd && hwnd != GetActiveWindow())
-		SetActiveWindow(hWnd); // restore focus to the main window if it had it before
+		SetActiveWindow(hWnd); // Restore focus to the main window if it had it before
 }
-
-
-
-
-
 
 void RefreshRamListSelectedCountControlStatus(HWND hDlg)
 {
@@ -1161,9 +1165,6 @@ void RefreshRamListSelectedCountControlStatus(HWND hDlg)
 		prevSelCount = selCount;
 	}
 }
-
-
-
 
 struct AddrRange
 {
@@ -1190,8 +1191,8 @@ void signal_new_size ()
 	std::vector<AddrRange> selHardwareAddrs;
 	if(numberOfItemsChanged)
 	{
-		// store selection ranges
-		// unfortunately this can take a while if the user has a huge range of items selected
+		// Store selection ranges
+		// Unfortunately, this can take a while if the user has a huge range of items selected
 //		Clear_Sound_Buffer();
 		int selCount = ListView_GetSelectedCount(lv);
 		int size = (rs_last_type_size=='b' || !rs_last_no_misalign) ? 1 : 2;
@@ -1214,14 +1215,17 @@ void signal_new_size ()
 
 	if(numberOfItemsChanged)
 	{
-		// restore selection ranges
+		// Restore selection ranges
+		
 		unsigned int newTopIndex = CALL_WITH_T_SIZE_TYPES_1(HardwareAddressToItemIndex, rs_type_size,rs_t=='s',noMisalign, oldTopAddr);
 		unsigned int newBottomIndex = newTopIndex + itemsPerPage - 1;
 		SendMessage(lv, WM_SETREDRAW, FALSE, 0);
-		ListView_SetItemState(lv, -1, 0, LVIS_SELECTED|LVIS_FOCUSED); // deselect all
+		ListView_SetItemState(lv, -1, 0, LVIS_SELECTED|LVIS_FOCUSED); // De-select all
 		for(unsigned int i = 0; i < selHardwareAddrs.size(); i++)
 		{
-			// calculate index ranges of this selection
+			
+			// Calculate index ranges of this selection
+			
 			const AddrRange& range = selHardwareAddrs[i];
 			int selRangeTop = CALL_WITH_T_SIZE_TYPES_1(HardwareAddressToItemIndex, rs_type_size,rs_t=='s',noMisalign, range.addr);
 			int selRangeBottom = -1;
@@ -1232,14 +1236,16 @@ void signal_new_size ()
 			if(selRangeTop == -1)
 				continue;
 
-			// select the entire range
+			// Select the entire range
+			
 			for (int j = selRangeTop; j <= selRangeBottom; j++)
 			{
 				ListView_SetItemState(lv, j, LVIS_SELECTED|LVIS_FOCUSED, LVIS_SELECTED|LVIS_FOCUSED);
 			}
 		}
 
-		// restore previous scroll position
+		// Restore previous scroll position
+		
 		if(newBottomIndex != -1)
 			ListView_EnsureVisible(lv, newBottomIndex, 0);
 		if(newTopIndex != -1)
@@ -1259,9 +1265,6 @@ void signal_new_size ()
 	//SetFocus(lv);
 }
 
-
-
-
 LRESULT CustomDraw (LPARAM lParam)
 {
 	LPNMLVCUSTOMDRAW lplvcd = (LPNMLVCUSTOMDRAW)lParam;
@@ -1277,14 +1280,16 @@ LRESULT CustomDraw (LPARAM lParam)
 
 			if(lplvcd->nmcd.dwItemSpec % 2)
 			{
-				// alternate the background color slightly
+				// Alternate the background color slightly
+				
 				lplvcd->clrTextBk = RGB(248,248,255);
 				rv = CDRF_NEWFONT;
 			}
 
 			if(!IsSatisfied(lplvcd->nmcd.dwItemSpec))
 			{
-				// tint red any items that would be eliminated if a search were to run now
+				// Tint red any items that would be eliminated if a search were to run now
+				
 				lplvcd->clrText = RGB(192,64,64);
 				rv = CDRF_NEWFONT;
 			}
@@ -1295,7 +1300,7 @@ LRESULT CustomDraw (LPARAM lParam)
 	return CDRF_DODEFAULT;
 }
 
-void Update_RAM_Search() //keeps RAM values up to date in the search and watch windows
+void Update_RAM_Search() // Keeps RAM values up to date in the search and watch windows
 {
 	if(disableRamSearchUpdate)
 		return;
@@ -1306,7 +1311,7 @@ void Update_RAM_Search() //keeps RAM values up to date in the search and watch w
 		if(!AutoSearchAutoRetry)
 		{
 //			Clear_Sound_Buffer();
-			int answer = MessageBox(RamSearchHWnd,"Choosing Retry will reset the search once and continue autosearching.\nChoose Ignore will reset the search whenever necessary and continue autosearching.\nChoosing Abort will reset the search once and stop autosearching.","Autosearch - out of results.",MB_ABORTRETRYIGNORE|MB_DEFBUTTON2|MB_ICONINFORMATION);
+			int answer = MessageBox(RamSearchHWnd,"Choosing retry will reset the search once and continue auto-searching.\nChoosing ignore will reset the search whenever necessary and continue auto-searching.\nChoosing abort will reset the search once and stop auto-searching.","Auto-search - out of results.",MB_ABORTRETRYIGNORE|MB_DEFBUTTON2|MB_ICONINFORMATION);
 			if(answer == IDABORT)
 			{
 				SendDlgItemMessage(RamSearchHWnd, IDC_C_AUTOSEARCH, BM_SETCHECK, BST_UNCHECKED, 0);
@@ -1323,7 +1328,8 @@ void Update_RAM_Search() //keeps RAM values up to date in the search and watch w
 		prevValuesNeededUpdate = s_prevValuesNeedUpdate;
 		if (RamSearchHWnd)
 		{
-			// update active RAM values
+			// Update active RAM values
+			
 			signal_new_frame();
 		}
 
@@ -1342,12 +1348,13 @@ void Update_RAM_Search() //keeps RAM values up to date in the search and watch w
 		HWND lv = GetDlgItem(RamSearchHWnd,IDC_RAMLIST);
 		if(prevValuesNeededUpdate != s_prevValuesNeedUpdate)
 		{
-			// previous values got updated, refresh everything visible
+			// Previous values got updated, refresh everything visible
 			ListView_Update(lv, -1);
 		}
 		else
 		{
-			// refresh any visible parts of the listview box that changed
+			// Refresh any visible parts of the listview box that changed
+			
 			static int changes[128];
 			int top = ListView_GetTopIndex(lv);
 			int count = ListView_GetCountPerPage(lv);
@@ -1407,10 +1414,9 @@ static BOOL SelectingByKeyboard()
 	int a = GetKeyState(VK_LEFT);
 	int b = GetKeyState(VK_RIGHT);
 	int c = GetKeyState(VK_UP);
-	int d = GetKeyState(VK_DOWN); // space and tab are intentionally omitted
+	int d = GetKeyState(VK_DOWN); // Space and tab are intentionally omitted
 	return (a | b | c | d) & 0x80;
 }
-
 
 LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
@@ -1432,7 +1438,8 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			dx2 = (r2.right - r2.left) / 2;
 			dy2 = (r2.bottom - r2.top) / 2;
 
-			// push it away from the main window if we can
+			// Push it away from the main window if we can
+			
 			const int width = (r.right-r.left); 
 			const int width2 = (r2.right-r2.left); 
 			if(r.left+width2 + width < GetSystemMetrics(SM_CXSCREEN))
@@ -1541,15 +1548,18 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			last_rs_possible = -1;
 			RefreshRamListSelectedCountControlStatus(hDlg);
 
-			// force misalign checkbox to refresh
+			// Force misalign checkbox to refresh
+			
 			signal_new_size();
 
-			// force undo button to refresh
+			// Force undo button to refresh
+			
 			int undoType = s_undoType;
 			SetRamSearchUndoType(hDlg, -2);
 			SetRamSearchUndoType(hDlg, undoType);
 
-			// force possibility count to refresh
+			// Force possibility count to refresh
+			
 			last_rs_possible--;
 			UpdatePossibilities(ResultCount, (int)s_activeMemoryRegions.size());
 			
@@ -1565,13 +1575,14 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 			LPNMHDR lP = (LPNMHDR) lParam;
 			switch (lP->code)
 			{
-				case LVN_ITEMCHANGED: // selection changed event
+				case LVN_ITEMCHANGED: // Selection changed event
 				{
 					NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)lP;
 					if(pNMListView->uNewState & LVIS_FOCUSED ||
 						(pNMListView->uNewState ^ pNMListView->uOldState) & LVIS_SELECTED)
 					{
-						// disable buttons that we don't have the right number of selected items for
+						// Disable buttons that we don't have the right number of selected items for
+						
 						RefreshRamListSelectedCountControlStatus(hDlg);
 					}
 				}	break;
@@ -1794,7 +1805,8 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 						else if(rs_t == 'h')
 							numberType = 2;
 
-						// TODO: open add-cheat dialog
+						// To do: open add-cheat dialog
+						// We should implement this if it isn't already
 
 						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
 					}
@@ -1807,9 +1819,9 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					soft_reset_address_info();
 
 					if(prevNumItems == last_rs_possible)
-						SetRamSearchUndoType(RamSearchHWnd, 0); // nothing to undo
+						SetRamSearchUndoType(RamSearchHWnd, 0); // Nothing to undo
 
-					ListView_SetItemState(GetDlgItem(hDlg,IDC_RAMLIST), -1, 0, LVIS_SELECTED); // deselect all
+					ListView_SetItemState(GetDlgItem(hDlg,IDC_RAMLIST), -1, 0, LVIS_SELECTED); // De-select all
 					//ListView_SetItemCount(GetDlgItem(hDlg,IDC_RAMLIST),ResultCount);
 					ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_RAMLIST), 0);
 					RefreshRamListSelectedCountControlStatus(hDlg);
@@ -1840,7 +1852,7 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 							SetRamSearchUndoType(hDlg, -1);
 						}
 						CompactAddrs();
-						ListView_SetItemState(GetDlgItem(hDlg,IDC_RAMLIST), -1, 0, LVIS_SELECTED); // deselect all
+						ListView_SetItemState(GetDlgItem(hDlg,IDC_RAMLIST), -1, 0, LVIS_SELECTED); // De-select all
 						ListView_SetSelectionMark(GetDlgItem(hDlg,IDC_RAMLIST), 0);
 						RefreshRamListSelectedCountControlStatus(hDlg);
 					}
@@ -1868,15 +1880,15 @@ LRESULT CALLBACK RamSearchProc(HWND hDlg, UINT uMsg, WPARAM wParam, LPARAM lPara
 					if(!ResultCount)
 					{
 
-						MessageBox(RamSearchHWnd,"Resetting search.","Out of results.",MB_OK|MB_ICONINFORMATION);
+						MessageBox(RamSearchHWnd,"Search resetting","Out of results.",MB_OK|MB_ICONINFORMATION);
 						soft_reset_address_info();
 					}
 
 					{rv = true; break;}
 
 invalid_field:
-					MessageBox(RamSearchHWnd,"Invalid or out-of-bound entered value.","Error",MB_OK|MB_ICONSTOP);
-					if(AutoSearch) // stop autosearch if it just started
+					MessageBox(RamSearchHWnd,"Invalid or out-of-bounds value entered.","Error",MB_OK|MB_ICONSTOP);
+					if(AutoSearch) // Stop auto-search if it just started
 					{
 						SendDlgItemMessage(hDlg, IDC_C_AUTOSEARCH, BM_SETCHECK, BST_UNCHECKED, 0);
 						SendMessage(hDlg, WM_COMMAND, IDC_C_AUTOSEARCH, 0);
@@ -1896,7 +1908,7 @@ invalid_field:
 						tempWatch.Address = CALL_WITH_T_SIZE_TYPES_1(GetHardwareAddressFromItemIndex, rs_type_size,rs_t=='s',noMisalign, watchItemIndex);
 						tempWatch.Size = rs_type_size;
 						tempWatch.Type = rs_t;
-						tempWatch.WrongEndian = 0; //Replace when I get little endian working
+						tempWatch.WrongEndian = 0; // Replace when I get little endian working (We should check if it is)
 						tempWatch.comment = NULL;
 
 						if (selCount == 1)
@@ -1906,14 +1918,17 @@ invalid_field:
 
 						watchItemIndex = ListView_GetNextItem(ramListControl, watchItemIndex, LVNI_SELECTED);
 					}
-					// bring up the ram watch window if it's not already showing so the user knows where the watch went
+					
+					// Bring up the RAM watch window if it's not already showing so the user knows where the watch went
+					
 					if(inserted && !RamWatchHWnd)
 						SendMessage(hWnd, WM_COMMAND, ID_RAM_WATCH, 0);
 					SetForegroundWindow(RamSearchHWnd);
 					{rv = true; break;}
 				}
 
-				// eliminate all selected items
+				// Eliminate all selected items
+				
 				case IDC_C_ELIMINATE:
 				{
 					RamSearchSaveUndoStateIfNotTooBig(hDlg);
@@ -1923,8 +1938,9 @@ invalid_field:
 					int selCount = ListView_GetSelectedCount(ramListControl);
 					int watchIndex = -1;
 
-					// time-saving trick #1:
-					// condense the selected items into an array of address ranges
+					// Time-saving trick #1:
+					// Condense the selected items into an array of address ranges
+					
 					std::vector<AddrRange> selHardwareAddrs;
 					for(int i = 0, j = 1024; i < selCount; ++i, --j)
 					{
@@ -1938,10 +1954,11 @@ invalid_field:
 						if(!j) UpdateRamSearchProgressBar(i * 50 / selCount), j = 1024;
 					}
 
-					// now deactivate the ranges
-
-					// time-saving trick #2:
-					// take advantage of the fact that the listbox items must be in the same order as the regions
+					// Now deactivate the ranges
+					
+					// Time-saving trick #2:
+					// Take advantage of the fact that the listbox items must be in the same order as the regions
+					
 					MemoryList::iterator iter = s_activeMemoryRegions.begin();
 					int numHardwareAddrRanges = selHardwareAddrs.size();
 					for(int i = 0, j = 16; i < numHardwareAddrRanges; ++i, --j)
@@ -1965,10 +1982,10 @@ invalid_field:
 					}
 					UpdateRamSearchTitleBar();
 
-					// careful -- if the above two time-saving tricks aren't working,
-					// the runtime can absolutely explode (seconds -> hours) when there are lots of regions
+					// Careful, if the above two time-saving tricks aren't working,
+					// the runtime can absolutely explode when there are lots of regions
 
-					ListView_SetItemState(ramListControl, -1, 0, LVIS_SELECTED); // deselect all
+					ListView_SetItemState(ramListControl, -1, 0, LVIS_SELECTED); // De-select all
 					signal_new_size();
 					{rv = true; break;}
 				}
@@ -1976,15 +1993,16 @@ invalid_field:
 				case IDCANCEL:
 					RamSearchHWnd = NULL;
 /*					if (theApp.pauseDuringCheatSearch)
-						EndDialog(hDlg, true);	// this should never be called on a modeless dialog
+						EndDialog(hDlg, true);	// This should never be called on a mode-less dialog
 					else
 */
 						DestroyWindow(hDlg);
 					{rv = true; break;}
 			}
 
-			// check refresh for comparison preview color update
-			// also, update rs_val if needed
+			// Check refresh for comparison preview color update
+			// Also, update rs_val if needed
+			
 			bool needRefresh = false;
 			switch(LOWORD(wParam))
 			{
@@ -2104,7 +2122,7 @@ struct InitRamSearch
 } initRamSearch;
 
 
-void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidths) //initializes the ram search and/or ram watch listbox
+void init_list_box(HWND Box, const char* Strs[], int numColumns, int *columnWidths) // Initializes the RAM search and/or RAM watch listbox
 {
 	LVCOLUMN Col;
 	Col.mask = LVCF_FMT | LVCF_ORDER | LVCF_SUBITEM | LVCF_TEXT | LVCF_WIDTH;

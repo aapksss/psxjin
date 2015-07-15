@@ -1,5 +1,5 @@
-#include "DrawString.h"
-#include "DrawStringFont.h"
+#include "drawstring.h"
+#include "drawstringfont.h"
 
 #define CHAR_W	10
 #define CHAR_H	14

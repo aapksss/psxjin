@@ -1,70 +1,5 @@
-////////////////////////////////////////////////////////////////////////////////
-///
-/// Win32 version of the AMD 3DNow! optimized routines for AMD K6-2/Athlon 
-/// processors. All 3DNow! optimized functions have been gathered into this
-/// single source code file, regardless to their class or original source code 
-/// file, in order to ease porting the library to other compiler and processor 
-/// platforms.
-///
-/// By the way; the performance gain depends heavily on the CPU generation: On 
-/// K6-2 these routines provided speed-up of even 2.4 times, while on Athlon the 
-/// difference to the original routines stayed at unremarkable 8%! Such a small 
-/// improvement on Athlon is due to 3DNow can perform only two operations in 
-/// parallel, and obviously also the Athlon FPU is doing a very good job with
-/// the standard C floating point routines! Here these routines are anyway, 
-/// although it might not be worth the effort to convert these to GCC platform, 
-/// for Athlon CPU at least. The situation is different regarding the SSE 
-/// optimizations though, thanks to the four parallel operations of SSE that 
-/// already make a difference.
-/// 
-/// This file is to be compiled in Windows platform with Microsoft Visual C++ 
-/// Compiler. Please see '3dnow_gcc.cpp' for the GCC compiler version for all
-/// GNU platforms (if file supplied).
-///
-/// NOTICE: If using Visual Studio 6.0, you'll need to install the "Visual C++ 
-/// 6.0 processor pack" update to support 3DNow! instruction set. The update is 
-/// available for download at Microsoft Developers Network, see here:
-/// http://msdn.microsoft.com/vstudio/downloads/tools/ppack/default.aspx
-///
-/// If the above URL is expired or removed, go to "http://msdn.microsoft.com" and 
-/// perform a search with keywords "processor pack".
-///
-/// Author        : Copyright (c) Olli Parviainen
-/// Author e-mail : oparviai 'at' iki.fi
-/// SoundTouch WWW: http://www.surina.net/soundtouch
-///
-////////////////////////////////////////////////////////////////////////////////
-//
-// Last changed  : $Date: 2006/02/05 16:44:06 $
-// File revision : $Revision: 1.10 $
-//
-// $Id: 3dnow_win.cpp,v 1.10 2006/02/05 16:44:06 Olli Exp $
-//
-////////////////////////////////////////////////////////////////////////////////
-//
-// License :
-//
-//  SoundTouch audio processing library
-//  Copyright (c) Olli Parviainen
-//
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 2.1 of the License, or (at your option) any later version.
-//
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
-//
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-////////////////////////////////////////////////////////////////////////////////
-
 #include "cpudetect.h"
-#include "STTypes.h"
+#include "sttypes.h"
 
 #ifndef _WIN32
 #error "wrong platform - this source code file is exclusively for Win32 platform"
@@ -73,22 +8,19 @@
 using namespace soundtouch;
 
 #ifdef ALLOW_3DNOW
+
 // 3DNow! routines available only with float sample type    
+// Implementation of 3DNow! optimized functions of class 'TDStretch3DNow'
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// implementation of 3DNow! optimized functions of class 'TDStretch3DNow'
-//
-//////////////////////////////////////////////////////////////////////////////
-
-#include "TDStretch.h"
+#include "tdstretch.h"
 #include <limits.h>
 
-// these are declared in 'TDStretch.cpp'
+// These are declared in tdstretch.cpp
+
 extern int scanOffsets[4][24];
 
-
 // Calculates cross correlation of two buffers
+
 double TDStretch3DNow::calcCrossCorrStereo(const float *pV1, const float *pV2) const
 {
     uint overlapLengthLocal = overlapLength;
@@ -117,9 +49,9 @@ double TDStretch3DNow::calcCrossCorrStereo(const float *pV1, const float *pV2) c
 
     _asm 
     {
-        // give prefetch hints to CPU of what data are to be needed soonish.
-        // give more aggressive hints on pV1 as that changes more between different calls 
-        // while pV2 stays the same.
+        // Give prefetch hints to CPU on what data is needed soon.
+        // Give more aggressive hints on pV1 as that changes more between different calls 
+        // while pV2 stays the same
         prefetch [pV1]
         prefetch [pV2]
         prefetch [pV1 + 32]
@@ -134,9 +66,9 @@ double TDStretch3DNow::calcCrossCorrStereo(const float *pV1, const float *pV2) c
 
     loop1:
         movq    mm1, [eax]
-        prefetch [eax + 32]     // give a prefetch hint to CPU what data are to be needed soonish
+        prefetch [eax + 32]     // Give a prefetch hint to CPU on what data is needed soon
         pfmul   mm1, [ebx]
-        prefetch [ebx + 64]     // give a prefetch hint to CPU what data are to be needed soonish
+        prefetch [ebx + 64]     // Give a prefetch hint to CPU on what data is needed soon
 
         movq    mm2, [eax + 8]
         pfadd   mm0, mm1
@@ -157,8 +89,9 @@ double TDStretch3DNow::calcCrossCorrStereo(const float *pV1, const float *pV2) c
         dec     ecx
         jnz     loop1
 
-        // add halfs of mm0 together and return the result. 
-        // note: mm1 is used as a dummy parameter only, we actually don't care about it's value
+        // Add halfs of mm0 together and return the result
+        // Note: mm1 is used as a dummy parameter only, we actually don't care about it's value
+		
         pfacc   mm0, mm1
         movd    corr, mm0
         femms
@@ -167,16 +100,9 @@ double TDStretch3DNow::calcCrossCorrStereo(const float *pV1, const float *pV2) c
     return corr;
 }
 
+// Implementation of 3DNow! optimized functions of class 'FIRFilter'
 
-
-
-//////////////////////////////////////////////////////////////////////////////
-//
-// implementation of 3DNow! optimized functions of class 'FIRFilter'
-//
-//////////////////////////////////////////////////////////////////////////////
-
-#include "FIRFilter.h"
+#include "firfilter.h"
 
 FIRFilter3DNow::FIRFilter3DNow() : FIRFilter()
 {
@@ -189,8 +115,8 @@ FIRFilter3DNow::~FIRFilter3DNow()
     delete[] filterCoeffsUnalign;
 }
 
+// (Overloaded) Calculates filter coefficients for 3DNow! routine
 
-// (overloaded) Calculates filter coefficients for 3DNow! routine
 void FIRFilter3DNow::setCoefficients(const float *coeffs, uint newLength, uint uResultDivFactor)
 {
     uint i;
@@ -199,15 +125,16 @@ void FIRFilter3DNow::setCoefficients(const float *coeffs, uint newLength, uint u
     FIRFilter::setCoefficients(coeffs, newLength, uResultDivFactor);
 
     // Scale the filter coefficients so that it won't be necessary to scale the filtering result
-    // also rearrange coefficients suitably for 3DNow!
-    // Ensure that filter coeffs array is aligned to 16-byte boundary
+    // Also rearrange coefficients suitably for 3DNow!
+    // Ensure that filter coefficients array is aligned to 16-byte boundary
+	
     delete[] filterCoeffsUnalign;
     filterCoeffsUnalign = new float[2 * newLength + 4];
     filterCoeffsAlign = (float *)(((uint)filterCoeffsUnalign + 15) & -16);
 
     fDivider = (float)resultDivider;
 
-    // rearrange the filter coefficients for mmx routines 
+    // Re-arrange the filter coefficients for MMX routines
     for (i = 0; i < newLength; i ++)
     {
         filterCoeffsAlign[2 * i + 0] =
@@ -217,6 +144,7 @@ void FIRFilter3DNow::setCoefficients(const float *coeffs, uint newLength, uint u
 
 
 // 3DNow!-optimized version of the filter routine for stereo sound
+
 uint FIRFilter3DNow::evaluateFilterStereo(float *dest, const float *src, const uint numSamples) const
 {
     float *filterCoeffsLocal = filterCoeffsAlign;
@@ -275,7 +203,6 @@ uint FIRFilter3DNow::evaluateFilterStereo(float *dest, const float *src, const u
         src += 4;
         dest += 4;
     }
-
     */
     _asm
     {
@@ -285,9 +212,9 @@ uint FIRFilter3DNow::evaluateFilterStereo(float *dest, const float *src, const u
         shr     edx, 1
 
     loop1:
-        // "outer loop" : during each round 2*2 output samples are calculated
-        prefetch  [ebx]                 // give a prefetch hint to CPU what data are to be needed soonish
-        prefetch  [filterCoeffsLocal]   // give a prefetch hint to CPU what data are to be needed soonish
+        // "Outer loop": during each round 2*2 output samples are calculated
+        prefetch  [ebx]                 // Give a prefetch hint to the CPU as to what data is going to be needed soon
+        prefetch  [filterCoeffsLocal]   // Give a prefetch hint to the CPU as to what data is going to be needed soon
 
         mov     esi, ebx
         mov     edi, filterCoeffsLocal
@@ -296,12 +223,12 @@ uint FIRFilter3DNow::evaluateFilterStereo(float *dest, const float *src, const u
         mov     ecx, lengthLocal
 
     loop2:
-        // "inner loop" : during each round four FIR filter taps are evaluated for 2*2 output samples
+        // "Inner loop": during each round four FIR filter taps are evaluated for 2*2 output samples
         movq    mm2, [edi]
         movq    mm3, mm2
-        prefetch  [edi + 32]     // give a prefetch hint to CPU what data are to be needed soonish
+        prefetch  [edi + 32]     // Give a prefetch hint to the CPU as to what data is going to be needed soon
         pfmul   mm2, [esi]
-        prefetch  [esi + 32]     // give a prefetch hint to CPU what data are to be needed soonish
+        prefetch  [esi + 32]     // Give a prefetch hint to the CPU as to what data is going to be needed soon
         pfmul   mm3, [esi + 8]
 
         movq    mm4, [edi + 8]

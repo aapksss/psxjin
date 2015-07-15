@@ -2,7 +2,7 @@
 #define __MAPHKEYS_H__
 
 #ifdef WIN32
-#include "Win32.h"
+#include "win32.h"
 #endif
 
 enum EMUCMD {

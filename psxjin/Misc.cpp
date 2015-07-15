@@ -4,17 +4,17 @@
 #include <stdarg.h>
 #include <ctype.h>
 
-#include "Coff.h"
-#include "PsxCommon.h"
+#include "coff.h"
+#include "psxcommon.h"
 #include "plugins.h"
-#include "EmuFile.h"
-#include "CdRom.h"
+#include "emufile.h"
+#include "cdrom.h"
 #include "padwin.h"
 #include "spu/spu.h"
 
 int CDRisoFreeze(EMUFILE *f, int Mode);
 
-// global variables
+// Global variables
 char CdromId[10];
 char CdromLabel[33];
 psxjinconfig Config;
@@ -23,8 +23,8 @@ FILE *emuLog;
 int Log = 0;
 
 char *LabelAuthors = { N_(
-	"PSXjin a open source rerecording PlayStation emulator\n based on a the PCSX core\n\n"
-	"http://code.google.com/p/psxjin/\n"
+	"PSXjin is an open-source rerecording PlayStation emulator\n based on the PCSX core\n\n"
+	"https://github.com/piorrro33/psxjin\n"
 	"http://tasvideos.org/\n"
 };
 
@@ -33,11 +33,12 @@ char *LabelGreets = { N_(
 	"PCSX coders: linuzappz, shadow\n"
 	"main TAS coders: zeromus, adelikat\n"
 	"extra coders: DarkKobold\n"
-	"Tester: arukAdo"))
+	"Tester: arukAdo\n"
+	"Continuation of the project handled by Piorro and Derek Turtle Roe"))
 };
 
 
-// LOAD STUFF
+// Load Stuff
 
 #ifdef __MACOSX__
 
@@ -93,7 +94,7 @@ void mmssdd( char *b, char *p )
 	int block = *((int*)b);
 #endif
 	
-	block += 150;
+	block += 150;                // What are all these comments talking about?
 	m = block / 4500;			// minuten
 	block = block - m * 4500;	// minuten rest
 	s = block / 75;				// sekunden
@@ -139,7 +140,7 @@ int GetCdromFile(u8 *mdir, u8 *time, s8 *filename) {
 	u8 *buf;
 	int i;
 
-	// only try to scan if a filename is given
+	// Only try to scan if a filename is given
 	if(!strlen(filename)) return -1;
 
 	i = 0;
@@ -150,7 +151,7 @@ int GetCdromFile(u8 *mdir, u8 *time, s8 *filename) {
 		}
 		i += dir->length[0];
 
-		if (dir->flags[0] & 0x2) { // it's a dir
+		if (dir->flags[0] & 0x2) { // It's a directory
 			if (!_strnicmp((char*)&dir->name[0], filename, dir->name_len[0])) {
 				if (filename[dir->name_len[0]] != '\\') continue;
 				
@@ -186,7 +187,7 @@ int LoadCdrom() {
 
 	READTRACK();
 
-	// skip head and sub, and go to the root directory record
+	// Skip head and sub, and go to the root directory record
 	dir = (struct iso_directory_record*) &buf[12+156]; 
 
 	mmssdd(dir->extent, (char*)time);
@@ -255,7 +256,7 @@ int LoadCdromFile(char *filename, EXE_HEADER *head) {
 
 	READTRACK();
 
-	// skip head and sub, and go to the root directory record
+	// Skip head and sub, and go to the root directory record
 	dir = (struct iso_directory_record*) &buf[12+156]; 
 
 	mmssdd(dir->extent, (char*)time);
@@ -300,7 +301,7 @@ int CheckCdrom() {
 
 	strncpy(CdromLabel, (char*)buf+52, 32);
 
-	// skip head and sub, and go to the root directory record
+	// Skip head and sub, and go to the root directory record
 	dir = (struct iso_directory_record*) &buf[12+156]; 
 
 	mmssdd(dir->extent, (char*)time);
@@ -336,14 +337,14 @@ int CheckCdrom() {
 		}
 	}
 
-	if (Config.PsxAuto) { // autodetect system (pal or ntsc)
+	if (Config.PsxAuto) { // Automatically detect system (PAL or NTSC)
 		if (strstr(exename, "ES") != NULL)
-			Config.PsxType = 1; // pal
-		else Config.PsxType = 0; // ntsc
+			Config.PsxType = 1; // PAL
+		else Config.PsxType = 0; // NTSC
 	}
 	psxUpdateVSyncRate();
-	//zeromus 21-oct-2009 - why would you want this to be the label?  it is not unique.
-	//if it is not going to be the rom filename then it should be the id which is unique
+	// zeromus 21-oct-2009 - why would you want this to be the label? It is not unique.
+	// If it is not going to be the game filename, then it should be the ID which is unique.
 	//if (CdromLabel[0] == ' ') {
 		strncpy(CdromLabel, CdromId, 9);
 	//}
@@ -419,7 +420,7 @@ int Load(char *ExePath) {
 	return 1;
 }
 
-// STATES
+// States
 
 #define gzwrite(x,y,z) (x)->fwrite(y,z)
 #define gzread(x,y,z) (x)->fread(y,z)
@@ -438,7 +439,7 @@ int SaveStateEmufile(EMUFILE *f) {
 	if (pMem == NULL) return -1;
 	memset(pMem,0,128*96*3);
 
-	// Ugh. We need to store this information, but in a backwards-compatible fashion. Do this
+	// We need to store this information, but in a backwards-compatible fashion. Do this
 	// by (ab)using the gap previously occupied by GPU_getScreenPic. The data is tagged so it
 	// can be detected on savestate load
 	int tag = 'ExPs';
@@ -462,7 +463,7 @@ int SaveStateEmufile(EMUFILE *f) {
 	if (Config.HLE)
 		psxBiosFreeze(1);
 
-	// gpu
+	// GPU
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
 	gpufP->ulFreezeVersion = 1;
 	GPUfreeze(1, gpufP);
@@ -535,7 +536,7 @@ int LoadStateEmufile(EMUFILE *f) {
 	if (Config.HLE)
 		psxBiosFreeze(0);
 
-	// gpu
+	// GPU
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
 	gpufP->extraData = malloc(gpufP->extraDataSize);
@@ -553,7 +554,7 @@ int LoadStateEmufile(EMUFILE *f) {
 	PadFreeze(f, 0);
 	MovieFreeze(f, 0);
 
-	// spu
+	// SPU
 	gzread(f, &Size, 4);
 	EMUFILE_MEMORY memfile;
 	memfile.truncate(Size);
@@ -565,9 +566,9 @@ int LoadStateEmufile(EMUFILE *f) {
 }
 
 int LoadState(char *file) {
-	//Get the directory out of filename
-	//CreateDirectory(path, 0)
-	//If error code 0 return -1
+	// Get the directory out of filename
+	// CreateDirectory(path, 0)
+	// If error code 0 return -1
 
 	EMUFILE_FILE f(file, "rb");
 
@@ -603,7 +604,9 @@ int SaveStateEmbed(char *file) {
 
 	pMem = (unsigned char *) malloc(128*96*3);
 	if (pMem == NULL) return -1;
+	
 	//GPU_getScreenPic(pMem);
+	
 	memset(pMem,0,128*96*3);
 
 	int tag = 'ExPs';
@@ -627,7 +630,7 @@ int SaveStateEmbed(char *file) {
 	if (Config.HLE)
 		psxBiosFreeze(1);
 
-	// gpu
+	// GPU
 	gpufP = (GPUFreeze_t *) malloc(sizeof(GPUFreeze_t));
 	gpufP->ulFreezeVersion = 1;
 	GPUfreeze(1, gpufP);
@@ -644,9 +647,9 @@ int SaveStateEmbed(char *file) {
 	CDRisoFreeze(f,1);
 	psxRcntFreeze(f, 1);
 	mdecFreeze(f, 1);
-	//TODO - no movie state? are you sure?
+	// To do - no movie state? Are you sure?
 
-	// spu
+	// SPU
 	EMUFILE_MEMORY memfile;
 	SPUfreeze_new(&memfile);
 	Size = memfile.size();
@@ -706,10 +709,10 @@ int LoadStateEmbed(char *file) {
 	gzread(f, psxH, 0x00010000);
 	gzread(f, (void*)&psxRegs, sizeof(psxRegs));
 
-	if (Config.HLE)	//adelikat: TODO: remove all references to Config.HLE, we will not be using that BIOS, ever
+	if (Config.HLE)	// adelikat: To do: remove all references to Config.HLE, we will not be using that BIOS, ever
 		psxBiosFreeze(0);
 
-	// gpu
+	// GPU
 	gpufP = (GPUFreeze_t *) malloc (sizeof(GPUFreeze_t));
 	gzread(f, gpufP, sizeof(GPUFreeze_t));
 	gpufP->extraData = malloc(gpufP->extraDataSize);
@@ -724,9 +727,9 @@ int LoadStateEmbed(char *file) {
 	CDRisoFreeze(f,0);
 	psxRcntFreeze(f, 0);
 	mdecFreeze(f, 0);
-	//TODO - no movie state? are you sure?
+	// To do - no movie state? Are you sure?
 
-	// spu
+	// SPU
 	gzread(f, &Size, 4);
 	EMUFILE_MEMORY memfile;
 	memfile.truncate(Size);
@@ -738,7 +741,6 @@ int LoadStateEmbed(char *file) {
 
 	return 0;
 }
-
 
 void __Log(char *fmt, ...) {
 	va_list list;
@@ -775,7 +777,6 @@ LangDef sLangs[] = {
 	{ "ru", N_("Russian") },
 	{ "", "" },
 };
-
 
 char *ParseLang(char *id) {
 	int i=0;

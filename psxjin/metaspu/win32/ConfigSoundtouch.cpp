@@ -1,37 +1,21 @@
-/* SPU2-X, a plugin for emulating the Sound Processing Unit of the PlayStation 2
- * Developed and maintained by the PSXjin2 Development Team. < Is this a real emulator/team? I though there was only PSXjin?
- * 
- * Original portions from SPU2ghz are (c) 2008 by David Quintana [gigaherz]
- *
- * SPU2-X is free software: you can redistribute it and/or modify it under the terms
- * of the GNU Lesser General Public License as published by the Free Software Found-
- * ation, either version 3 of the License, or (at your option) any later version.
- *
- * SPU2-X is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
- * PURPOSE.  See the GNU Lesser General Public License for more details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with SPU2-X.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-//TODO - need to make a generic way for saving these configures and add in the windows
+// To do - need to make a generic way for saving these configures and add in the windows
 //rc configure
 
 //#include "types.h" //desmume
-//#include "Global.h" //?
-#include "PsxCommon.h"
-#include "Dialogs.h"
-
+//#include "Global.h"
+#include "psxcommon.h"
+#include "dialogs.h"
 #include "../metaspu.h"
+#include "../soundtouch/soundtouch.h"
 
-#include "../SoundTouch/SoundTouch.h"
+// Again, check all these includes, and also check the notes above
 
 static int SequenceLenMS = 63;
 static int SeekWindowMS = 16;
 static int OverlapMS = 7;
 
-// Timestretch Slider Bounds, Min/Max
+// Time stretch slider bounds, minimum/maximum
+
 static const int SequenceLen_Min = 50;
 static const int SequenceLen_Max = 90;
 
@@ -61,7 +45,7 @@ void SoundtouchCfg::ReadSettings()
 	SeekWindowMS	= CfgReadInt( L"SOUNDTOUCH", L"SeekWindowMS", 15 );
 	OverlapMS		= CfgReadInt( L"SOUNDTOUCH", L"OverlapMS", 25 );
 
-	ClampValues();	*/	
+	ClampValues();	*/
 }
 
 void SoundtouchCfg::WriteSettings()
@@ -128,7 +112,7 @@ void SoundtouchCfg::OpenDialog( HWND hWnd )
 	//ret = DialogBox( hInstance, MAKEINTRESOURCE(IDD_CONFIG_SOUNDTOUCH), hWnd, (DLGPROC)DialogProc );
 	//if(ret==-1)
 	//{
-	//	MessageBoxEx(GetActiveWindow(), L"Error Opening the Soundtouch advanced dialog.", L"OMG ERROR!", MB_OK, 0);
+	//	MessageBoxEx(GetActiveWindow(), L"Error Opening the SoundTouch advanced dialog.", L"OMG ERROR!", MB_OK, 0);
 	//	return;
 	//}
 	//ReadSettings();

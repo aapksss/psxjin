@@ -1,4 +1,4 @@
-#include "PSXCommon.h"
+#include "psxcommon.h"
 
 long PAD1_readPort1(PadDataS* pads);
 long PAD2_readPort2(PadDataS* pads);

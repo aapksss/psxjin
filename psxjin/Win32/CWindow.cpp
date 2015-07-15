@@ -1,39 +1,17 @@
-/*  Copyright (C) 2006 yopyop
-    Copyright (C) 2006-2010 DeSmuME team
-
-    This file is part of DeSmuME
-
-    DeSmuME is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
-
-    DeSmuME is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-    You should have received a copy of the GNU General Public License
-    along with DeSmuME; if not, write to the Free Software
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-
 //#define NOMINMAX
 #include <windows.h>
 #include <windowsx.h>
 #include <commctrl.h>
-#include "../PsxCommon.h"
-#include "Win32.h"
-#include "CWindow.h"
+#include "../psxcommon.h"
+#include "win32.h"
+#include "cwindow.h"
 #include "resource.h"
 
 using namespace std;
 
 #define hAppInst gApp.hInstance
 
-//-----------------------------------------------------------------------------
-//   The Toolkit - Helpers
-//-----------------------------------------------------------------------------
+// The Toolkit - Helpers
 
 DWORD GetFontQuality()
 {
@@ -124,9 +102,7 @@ void MakeBitmapPseudoTransparent(HBITMAP hBmp, COLORREF cKeyColor, COLORREF cNew
 	delete[] bmpdata;
 }
 
-//-----------------------------------------------------------------------------
 // Window class handling
-//-----------------------------------------------------------------------------
 
 vector<string> ReggedWndClasses;
 
@@ -137,7 +113,8 @@ bool RegWndClass(string name, WNDPROC wndProc, UINT style, int extraSize)
 
 bool RegWndClass(string name, WNDPROC wndProc, UINT style, HICON icon, int extraSize)
 {
-	// If the class is already regged, don't re-reg it
+	// If the class is already registered, don't re-register it
+	
 	if (find(ReggedWndClasses.begin(), ReggedWndClasses.end(), name) != ReggedWndClasses.end())
 		return true;
 
@@ -159,6 +136,7 @@ bool RegWndClass(string name, WNDPROC wndProc, UINT style, HICON icon, int extra
 	if (RegisterClassEx(&wc) != 0)
 	{
 		// If registration succeeded, add the class name into the list
+		
 		ReggedWndClasses.push_back(name);
 		return true;
 	}
@@ -170,20 +148,20 @@ void UnregWndClass(string name)
 {
 	vector<string>::iterator it = find(ReggedWndClasses.begin(), ReggedWndClasses.end(), name);
 
-	// If the class wasn't regged, we can't unreg it :P
+	// If the class wasn't registered, we can't unregister it
+	
 	if (it == ReggedWndClasses.end())
 		return;
 
-	// Otherwise unreg the class and remove its name from the list
-	// ONLY if unregging was successful. Unregging will fail if one
-	// or more windows using the class still exist.
+	// Otherwise unregister the class and remove its name from the list
+	// ONLY if unregistering was successful. Unregistering will fail if one
+	// or more windows using the class still exist
+	
 	if (UnregisterClass(name.c_str(), hAppInst) != 0)
 		ReggedWndClasses.erase(it);
 }
 
-//-----------------------------------------------------------------------------
 // Base toolwindow class
-//-----------------------------------------------------------------------------
 
 CToolWindow::CToolWindow(char* _className, WNDPROC _proc, char* _title, int _width, int _height)
 	: hWnd(NULL)
@@ -236,16 +214,15 @@ CToolWindow::~CToolWindow()
 {
 }
 
-//-----------------------------------------------------------------------------
 // Toolwindow handling
-//-----------------------------------------------------------------------------
 
 CToolWindow* ToolWindowList = NULL;
 
 bool OpenToolWindow(CToolWindow* wnd)
 {
-	// A hWnd value of NULL indicates failure to create the window.
-	// In this case, just delete the toolwindow and return failure.
+	// A hWnd value of NULL indicates failure to create the window
+	// In this case, just delete the toolwindow and return failure
+	
 	if (wnd->hWnd == NULL)
 	{
 		delete wnd;
@@ -253,6 +230,7 @@ bool OpenToolWindow(CToolWindow* wnd)
 	}
 
 	// Add the toolwindow to the list
+	
 	if (ToolWindowList == NULL)
 	{
 		ToolWindowList = wnd;
@@ -267,7 +245,8 @@ bool OpenToolWindow(CToolWindow* wnd)
 		ToolWindowList = wnd;
 	}
 
-	// Show the toolwindow (otherwise it won't show :P )
+	// Show the toolwindow (otherwise it won't show)
+	
 	wnd->Show();
 
 	return true;
@@ -276,6 +255,7 @@ bool OpenToolWindow(CToolWindow* wnd)
 void CloseToolWindow(CToolWindow* wnd)
 {
 	// Remove the toolwindow from the list
+	
 	if (wnd == ToolWindowList)
 	{
 		ToolWindowList = wnd->next;
@@ -291,7 +271,8 @@ void CloseToolWindow(CToolWindow* wnd)
 	}
 
 	// Delete the toolwindow object
-	// its destructor will destroy the window
+	// Its destructor will destroy the window
+	
 	delete wnd;
 }
 
@@ -330,15 +311,14 @@ void RefreshAllToolWindows()
 	}
 }
 
-//-----------------------------------------------------------------------------
-//   The Toolkit - Toolbar API wrapper
-//-----------------------------------------------------------------------------
+// The Toolkit - Toolbar API wrapper
 
 CToolBar::CToolBar(HWND hParent)
 	: hidden(false)
 {
 	// Create the toolbar
-	// Note: dropdown buttons look like crap without TBSTYLE_FLAT
+	// Note: drop down buttons look like crap without TBSTYLE_FLAT
+	
 	hWnd = CreateWindowEx(0, TOOLBARCLASSNAME, NULL, 
 		WS_CHILD | WS_VISIBLE | WS_BORDER | TBSTYLE_FLAT | TBSTYLE_TOOLTIPS, 
 		0, 0, 0, 0, hParent, NULL, hAppInst, NULL);
@@ -351,6 +331,7 @@ CToolBar::CToolBar(HWND hParent)
 CToolBar::~CToolBar()
 {
 	// Delete all the HBITMAPs we kept stored
+	
 	for (TBitmapList::iterator it = hBitmaps.begin(); 
 		it != hBitmaps.end(); it++)
 	{
@@ -381,10 +362,12 @@ void CToolBar::Show(bool bShow)
 void CToolBar::OnSize()
 {
 	// Not-fully-working wraparound handling code
-	// the toolbar behaves weirdly when it comes to separators
-	// TODO: figure out why.
+	// The toolbar behaves weirdly when it comes to separators
+	// To do: figure out why
 	// Note: right now this code is useless, but it may be useful
 	// if we use more toolbars
+	// Check all this code to see if we can fix a few bugs and improve it
+	
 #if 0
 	RECT rc;
 	int parentwidth;
@@ -394,6 +377,7 @@ void CToolBar::OnSize()
 
 	// When there's not enough space to fit all the buttons in one line,
 	// we have to add the 'linebreaks' ourselves
+	
 	int numbtns = SendMessage(hWnd, TB_BUTTONCOUNT, 0, 0);
 	int curwidth = 0;
 
@@ -415,6 +399,7 @@ void CToolBar::OnSize()
 			cmdid = btn.idCommand;
 
 			// Add/remove the TBSTATE_WRAP style if needed
+			
 			btninfo.cbSize = sizeof(TBBUTTONINFO);
 			btninfo.dwMask = TBIF_STATE;
 			SendMessage(hWnd, TB_GETBUTTONINFO, cmdid, (LPARAM)&btninfo);
@@ -440,19 +425,23 @@ void CToolBar::AppendButton(int uID, int uBitmapID, DWORD dwState, bool bDropdow
 	TBBUTTON btn;
 
 	// Get the bitmap and replace the key color (magenta) with the right color
+	
 	hbmp = LoadBitmap(hAppInst, MAKEINTRESOURCE(uBitmapID));
 	MakeBitmapPseudoTransparent(hbmp, RGB(255, 0, 255), GetSysColor(COLOR_BTNFACE));
 
 	// Add the bitmap to the toolbar's image list
+	
 	bmp.hInst = NULL;
 	bmp.nID = (UINT_PTR)hbmp;
 
 	int bmpid = SendMessage(hWnd, TB_ADDBITMAP, 1, (LPARAM)&bmp);
 
 	// Save the bitmap (if it gets deleted, the toolbar is too)
+	
 	hBitmaps[uBitmapID] = TBitmapPair(bmpid, hbmp);
 
 	// And finally add the button
+	
 	memset(&btn, 0, sizeof(TBBUTTON));
 	btn.fsStyle = bDropdown ? TBSTYLE_DROPDOWN : TBSTYLE_BUTTON;
 	btn.fsState = (BYTE) dwState;
@@ -481,6 +470,7 @@ void CToolBar::ChangeButtonBitmap(int uID, int uBitmapID)
 
 	// If we don't already have the bitmap, retrieve it,
 	// adapt it and store it in the list
+	
 	TBitmapList::iterator it = hBitmaps.find(uBitmapID);
 
 	if (it == hBitmaps.end())
@@ -502,6 +492,7 @@ void CToolBar::ChangeButtonBitmap(int uID, int uBitmapID)
 		bmpid = hBitmaps[uBitmapID].first;
 
 	// Finally change the bitmap
+	
 	SendMessage(hWnd, TB_CHANGEBITMAP, uID, MAKELPARAM(bmpid, 0));
 }
 
@@ -537,7 +528,6 @@ int CToolBar::GetHeight()
 	RECT rc; GetWindowRect(hWnd, &rc);
 	return rc.bottom - rc.top - 1;
 }
-
 
 WINCLASS::WINCLASS(LPSTR rclass, HINSTANCE hInst)
 {
@@ -617,10 +607,12 @@ static void MyAdjustWindowRectEx(RECT* rect, HWND hwnd)
 {
 	AdjustWindowRectEx(rect,GetWindowStyle(hwnd),TRUE,GetWindowExStyle(hwnd));
 	
-	//get height of one menu to subtract off
+	// Get height of one menu to subtract off
+	
 	int cymenu = GetSystemMetrics(SM_CYMENU);
 	
-	//get the height of the actual menu to add back on
+	// Get the height of the actual menu to add back on
+	
 	MENUBARINFO mbi;
 	ZeroMemory(&mbi, sizeof(mbi));
 	mbi.cbSize = sizeof(mbi);
@@ -653,10 +645,12 @@ void WINCLASS::sizingMsg(WPARAM wParam, LPARAM lParam, LONG keepRatio)
 	int frameHeight = frameInfo.bottom-frameInfo.top + tbheight;
 
 	// Calculate the minimum size in pixels
+	
 	_minWidth = adjr.right-adjr.left;
 	_minHeight = adjr.bottom-adjr.top + tbheight;
 
-	/* Clamp the size to the minimum size (256x384) */
+	// Clamp the size to the minimum size (256x384)
+	
 	rect->right = (rect->left + std::max(_minWidth, (int)(rect->right - rect->left)));
 	rect->bottom = (rect->top + std::max(_minHeight, (int)(rect->bottom - rect->top)));
 
@@ -676,7 +670,7 @@ void WINCLASS::sizingMsg(WPARAM wParam, LPARAM lParam, LONG keepRatio)
 	}
 	else
 	{
-		//Apply the ratio stuff
+		// Apply the ratio stuff
 
 		float ratio1 = ((rect->right  - rect->left - frameWidth ) / (float)minWidth);
 		float ratio2 = ((rect->bottom - rect->top  - frameHeight) / (float)minHeight);
@@ -713,7 +707,8 @@ void WINCLASS::sizingMsg(WPARAM wParam, LPARAM lParam, LONG keepRatio)
 		}
 	}
 
-	// prevent "pushing" the window across the screen when resizing from the left or top
+	// Prevent "pushing" the window across the screen when resizing from the left or top
+	
 	if(wParam == WMSZ_LEFT || wParam == WMSZ_TOPLEFT || wParam == WMSZ_BOTTOMLEFT)
 	{
 		rect->left -= rect->right - prevRight;
@@ -725,7 +720,8 @@ void WINCLASS::sizingMsg(WPARAM wParam, LPARAM lParam, LONG keepRatio)
 		rect->bottom = prevBottom;
 	}
 
-	// windows screws up the window size if the top of the window goes too high above the top of the screen
+	// Windows screws up the window size if the top of the window goes too high above the top of the screen
+	
 	if(keepRatio & KEEPY)
 	{
 		int titleBarHeight = GetSystemMetrics(SM_CYSIZE);
@@ -742,7 +738,8 @@ void WINCLASS::setClientSize(int width, int height)
 {
 	height += 0/*MainWindowToolbar->GetHeight()*/;
 
-	//yep, do it twice, once in case the menu wraps, and once to accomodate that wrap
+	// Do this twice, once in case the menu wraps, and once to accommodate that wrap
+	
 	for(int i=0;i<2;i++)
 	{
 		RECT rect;
@@ -752,7 +749,8 @@ void WINCLASS::setClientSize(int width, int height)
 	}
 }
 
-//========================================================= Thread class
+// Thread class
+
 extern DWORD WINAPI ThreadProc(LPVOID lpParameter)
 {
 	THREADCLASS *tmp = (THREADCLASS *)lpParameter;
@@ -788,7 +786,8 @@ bool THREADCLASS::createThread()
 	return true;
 }
 
-//========================================================= Tools class
+// Tools class
+
 TOOLSCLASS::TOOLSCLASS(HINSTANCE hInst, int IDD, DLGPROC dlgproc)
 {
 	this->dlgproc = dlgproc;
@@ -847,7 +846,6 @@ void TOOLSCLASS::doClose()
 DWORD TOOLSCLASS::ThreadFunc()
 {
 	//LOG("Start thread\n");
-
 
 	DWORD ret = doOpen();
 	if(ret) return ret;

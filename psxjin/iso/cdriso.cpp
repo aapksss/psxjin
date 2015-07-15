@@ -1,10 +1,3 @@
-/*
- * CD-ROM for PSEmu Pro-like emulators
- *
- * By: linuzappz <linuzappz@hotmail.com>
- *
- */
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
@@ -18,7 +11,7 @@
 
 #include "cdriso.h"
 #include "cueparse.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 std::string CDR_iso_fileToOpen;
 
@@ -39,7 +32,6 @@ char *methods[] = {
 };
 
 char *LibName = "TAS ISO Plugin";
-
 
 long CDRinit(void) {
 	return 0;
@@ -179,7 +171,7 @@ long CDRgetTD(unsigned char track, unsigned char *buffer) {
 	{
 		if (track == 1)
 		{
-			// Hardcoded single-track start
+			// Hard coded single-track start
 			buffer[1] = 0;
 			buffer[2] = 2;
 		}
@@ -221,7 +213,8 @@ long CDRgetTD(unsigned char track, unsigned char *buffer) {
 
 // read track
 // time : byte 0 - minute ; byte 1 - second ; byte 2 - frame
-// uses bcd format
+// Uses BCD format
+
 long CDRreadTrack(unsigned char *time) {
 
 	if (cdHandle == NULL) return -1;
@@ -284,19 +277,21 @@ long CDRreadTrack(unsigned char *time) {
 	return 0;
 }
 
-// return readed track
+// Return read track
 unsigned char* CDRgetBuffer(void) {
 	return pbuffer;
 }
 
-// plays CDDA audio
+// Plays CDDA audio
 // sector : byte 0 - minute ; byte 1 - second ; byte 2 - frame
-// does NOT use bcd format
+// Does NOT use BCD format
+
 long CDRplay(unsigned char *sector) {
 	return 0;
 }
 
-// stops CDDA audio
+// Stops CDDA audio
+
 long CDRstop(void) {
 	return 0;
 }

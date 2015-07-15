@@ -7,45 +7,53 @@
 #include <algorithm>
 #include <map>
 #include "cueparse.h"
-#include "PsxCommon.h"
+#include "psxcommon.h"
 
 #include <Shlwapi.h>
 
-/// \brief convert input string into vector of string tokens
-///
-/// \note consecutive delimiters will be treated as single delimiter
-/// \note delimiters are _not_ included in return data
-///
-/// \param input string to be parsed
-/// \param delims list of delimiters.
+// Brief convert input string into vector of string tokens
+// Note: consecutive delimiters will be treated as single delimiter
+// Note: delimiters are not included in return data
+// Parameter input string to be parsed
+// Parameter delimiters list of delimiters
 
 std::vector<std::string> tokenize_str(const std::string & str,
                                       const std::string & delims=", \t")
 {
   using namespace std;
-  // Skip delims at beginning, find start of first token
+  
+  // Skip delimiters at beginning, find start of first token
+  
   string::size_type lastPos = str.find_first_not_of(delims, 0);
-  // Find next delimiter @ end of token
+  
+  // Find next delimiter at end of token
+  
   string::size_type pos     = str.find_first_of(delims, lastPos);
 
-  // output vector
+  // Output vector
+  
   vector<string> tokens;
 
   while (string::npos != pos || string::npos != lastPos)
     {
-      // Found a token, add it to the vector.
+      // Found a token, add it to the vector
+	  
       tokens.push_back(str.substr(lastPos, pos - lastPos));
-      // Skip delims.  Note the "not_of". this is beginning of token
+	  
+      // Skip delimiters.  Note the "not_of". this is beginning of token
+	  
       lastPos = str.find_first_not_of(delims, pos);
-      // Find next delimiter at end of token.
+	  
+      // Find next delimiter at end of token
+	  
       pos     = str.find_first_of(delims, lastPos);
     }
 
   return tokens;
 }
 
+// Replace all instances of victim with replacement
 
-// replace all instances of victim with replacement
 std::string mass_replace(const std::string &source, const std::string &victim, const std::string &replacement)
 {
 	std::string answer = source;
@@ -64,15 +72,16 @@ std::string stringToUpper(const std::string& s) {
 	return ret;
 }
 
-#define STRIP_SP	0x01 // space
-#define STRIP_TAB	0x02 // tab
-#define STRIP_CR	0x04 // carriage return
-#define STRIP_LF	0x08 // line feed
+#define STRIP_SP	0x01 // Space
+#define STRIP_TAB	0x02 // Tab
+#define STRIP_CR	0x04 // Carriage return
+#define STRIP_LF	0x08 // Line feed
 #define STRIP_WHITESPACE (STRIP_SP|STRIP_TAB)
 
-///White space-trimming routine
-///Removes whitespace from left side of string, depending on the flags set (See STRIP_x definitions in xstring.h)
-///Returns number of characters removed
+// White space-trimming routine
+// Removes whitespace from left side of string, depending on the flags set (See STRIP_x definitions in xstring.h)
+// Returns number of characters removed
+
 std::string str_ltrim(const std::string &stdstr, int flags = STRIP_WHITESPACE) {
   char *str = strdup(stdstr.c_str());
 	int i=0;
@@ -102,10 +111,6 @@ std::string str_ltrim(const std::string &stdstr, int flags = STRIP_WHITESPACE) {
   free(str);
   return ret;
 }
-
-
-
-
 
 bool CueData::parse_cue(const char* buf)
 {
@@ -245,8 +250,10 @@ void CueData::CopyToConfig()
 
  CueTrack::CueTrack()
 {
+	
 }
 
 CueTimestamp::CueTimestamp()
 {
+	
 }

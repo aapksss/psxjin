@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "Gte.h"
-#include "R3000A.h"
+#include "gte.h"
+#include "r3000a.h"
 
 #ifdef GTE_DUMP
 #define G_OP(name,delay) fprintf(gteLog, "* : %08X : %02d : %s\n", psxRegs.code, delay, name);
@@ -248,8 +248,7 @@ void gteSWC2() {
 	psxMemWrite32(_oB_, MFC2(_Rt_));
 }
 
-/////LIMITATIONS AND OTHER STUFF************************************
-
+// LIMITATIONS AND OTHER STUFF
 
 /*
 #define MAGIC  (((65536. * 65536. * 16) + (65536.*.5)) * 65536.)
@@ -530,7 +529,7 @@ __inline s32 FlimG2(s64 x) {
 	else gteIR3=(long)gteMAC3; \
 }
 
-//********END OF LIMITATIONS**********************************/
+// END OF LIMITATIONS
 
 #define GTE_RTPS1(vn) { \
 	gteMAC1 = FNC_OVERFLOW1(((signed long)(gteR11*gteVX##vn + gteR12*gteVY##vn + gteR13*gteVZ##vn)>>12) + gteTRX); \
@@ -540,7 +539,7 @@ __inline s32 FlimG2(s64 x) {
 
 /*	gteMAC1 = NC_OVERFLOW1(((signed long)(gteR11*gteVX0 + gteR12*gteVY0 + gteR13*gteVZ0)>>12) + gteTRX);
 	gteMAC2 = NC_OVERFLOW2(((signed long)(gteR21*gteVX0 + gteR22*gteVY0 + gteR23*gteVZ0)>>12) + gteTRY);
-	gteMAC3 = NC_OVERFLOW3(((signed long)(gteR31*gteVX0 + gteR32*gteVY0 + gteR33*gteVZ0)>>12) + gteTRZ);*/
+	gteMAC3 = NC_OVERFLOW3(((signed long)(gteR31*gteVX0 + gteR32*gteVY0 + gteR33*gteVZ0)>>12) + gteTRZ); */
 
 #if 0
 
@@ -553,8 +552,8 @@ __inline s32 FlimG2(s64 x) {
 /*		if (DSZ > 2147483647.0) { DSZ = 2.0f; gteFLAG |= 1<<17; }*/ \
 	} \
  \
-/*	gteSX##vn = limG1(gteOFX/65536.0 + (limA1S(gteMAC1) * DSZ));*/ \
-/*	gteSY##vn = limG2(gteOFY/65536.0 + (limA2S(gteMAC2) * DSZ));*/ \
+/*	gteSX##vn = limG1(gteOFX/65536.0 + (limA1S(gteMAC1) * DSZ)); \
+/*	gteSY##vn = limG2(gteOFY/65536.0 + (limA2S(gteMAC2) * DSZ)); \
 	gteSX##vn = FlimG1(gteOFX/65536.0 + (gteIR1 * DSZ)); \
 	gteSY##vn = FlimG2(gteOFY/65536.0 + (gteIR2 * DSZ)); \
 }
@@ -738,7 +737,7 @@ void gteRTPT() {
 		G_SD(4);
 		G_SD(5);
 
-		G_SD(16); // Store original fifo
+		G_SD(16); // Store original FIFO
 		G_SD(17);
 		G_SD(18);
 		G_SD(19);
@@ -1002,7 +1001,7 @@ void gteMVMVA() {
 	gteFLAG = 0;
 	//gteMAC1 = (long)SSX;
 	//gteMAC2 = (long)SSY;
-	//gteMAC3 = (long)SSZ;//okay the follow lines are correct??
+	//gteMAC3 = (long)SSZ; // OK, the following lines are correct?
 /*	gteMAC1 = NC_OVERFLOW1(SSX);
 	gteMAC2 = NC_OVERFLOW2(SSY);
 	gteMAC3 = NC_OVERFLOW3(SSZ);*/
@@ -1455,7 +1454,7 @@ void gteNCCS()  {
 		//G_GD(21);
 		G_GD(22);
 
-		//G_GD(24); Doc must be wrong.  PSX does not touch it.
+		//G_GD(24); Documentation may be wrong.  PS1 does not touch it (will have to research)
 		G_GD(25);
 		G_GD(26);
 		G_GD(27);
@@ -1553,7 +1552,7 @@ void gteNCCT() {
 		G_GD(21);
 		G_GD(22);
 
-		//G_GD(24); Doc must be wrong.  PSX does not touch it.
+		//G_GD(24); Documentation may be wrong.  PS1 does not touch it (will have to research)
 		G_GD(25);
 		G_GD(26);
 		G_GD(27);
@@ -2925,7 +2924,7 @@ void gteCC() {
 #endif
 }
 
-void gteINTPL() { //test opcode
+void gteINTPL() { // test opcode
 #ifdef GTE_DUMP
 	static int sample = 0; sample++;
 #endif
@@ -3017,7 +3016,7 @@ void gteINTPL() { //test opcode
 #endif
 }
 
-void gteCDP() { //test opcode
+void gteCDP() { // test opcode
 	double RR0,GG0,BB0;
 //	s32 RR0,GG0,BB0;
 #ifdef GTE_DUMP

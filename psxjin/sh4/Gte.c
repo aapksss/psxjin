@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "Gte.h"
-#include "R3000A.h"
+#include "gte.h"
+#include "r3000a.h"
 #include "sh4/sh4.h"
 
 #define GTE_DUMP
@@ -89,8 +89,6 @@
 #define gteB2      ((u8 *)psxRegs.CP2D.r)[22*4+2]
 #define gteCODE2   ((u8 *)psxRegs.CP2D.r)[22*4+3]
 #define gteC2      gteCODE2
-
-
 
 #define gteR11  ((s16*)psxRegs.CP2C.r)[0]
 #define gteR12  ((s16*)psxRegs.CP2C.r)[1]
@@ -259,7 +257,8 @@ void gteSWC2() {
 	psxMemWrite32(_oB_, MFC2(_Rt_));
 }
 
-/////LIMITATIONS AND OTHER STUFF************************************
+// Limitations and other stuff
+
 #define MAC2IR() \
 { \
 	if ((s32)gteMAC1 < -32768) { gteIR1=(long)(-32768); gteFLAG|=1<<24;} \
@@ -275,7 +274,6 @@ void gteSWC2() {
 	if ((s32)gteMAC3 >  32767) { gteIR3=(long)( 32767); gteFLAG|=1<<22;} \
 	else gteIR3=(long)gteMAC3; \
 }
-
 
 #define MAC2IR1() \
 {           \
@@ -391,7 +389,7 @@ void cFarBackColor(float *ir_t, float *mac_t, u32 lim, float r, float g, float b
 	else limitB_m(ir_t);
 }
 
-//********END OF LIMITATIONS**********************************/
+// End of limitations
 
 void gteRTPS() {
 	double DSZ;
@@ -411,7 +409,7 @@ void gteRTPS() {
 		G_SD(0);
 		G_SD(1);
 
-		G_SD(16); // Store original fifo
+		G_SD(16); // Store original FIFO
 		G_SD(17);
 		G_SD(18);
 		G_SD(19);
@@ -511,7 +509,7 @@ void gteRTPT() {
 		G_SD(4);
 		G_SD(5);
 
-		G_SD(16); // Store original fifo
+		G_SD(16); // Store original FIFO
 		G_SD(17);
 		G_SD(18);
 		G_SD(19);
@@ -909,7 +907,7 @@ void gteNCCS()  {
 		//G_GD(21);
 		G_GD(22);
 
-		//G_GD(24); Doc must be wrong.  PSX does not touch it.
+		//G_GD(24); Documentation may be wrong.  PS1 does not touch it (investigate)
 		G_GD(25);
 		G_GD(26);
 		G_GD(27);
@@ -975,7 +973,7 @@ void gteNCCT() {
 		G_GD(21);
 		G_GD(22);
 
-		//G_GD(24); Doc must be wrong.  PSX does not touch it.
+		//G_GD(24); Documentation may be wrong.  PS1 does not touch it (investigate)
 		G_GD(25);
 		G_GD(26);
 		G_GD(27);
@@ -1662,7 +1660,7 @@ void gteCC() {
 #endif
 }
 
-void gteINTPL() { //test opcode
+void gteINTPL() { // Test opcode
 #ifdef GTE_DUMP
 	static int sample = 0; sample++;
 #endif
@@ -1713,7 +1711,7 @@ void gteINTPL() { //test opcode
 #endif
 }
 
-void gteCDP() { //test opcode
+void gteCDP() { // Test opcode
 #ifdef GTE_DUMP
 	static int sample = 0; sample++;
 #endif
@@ -1772,5 +1770,7 @@ void gteCDP() { //test opcode
 
 		G_GC(31);
 	}
+	
 #endif
+
 }

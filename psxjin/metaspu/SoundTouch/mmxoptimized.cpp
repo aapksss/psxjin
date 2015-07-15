@@ -1,56 +1,7 @@
-////////////////////////////////////////////////////////////////////////////////
-///
-/// MMX optimized routines. All MMX optimized functions have been gathered into 
-/// this single source code file, regardless to their class or original source 
-/// code file, in order to ease porting the library to other compiler and 
-/// processor platforms.
-///
-/// The MMX-optimizations are programmed using MMX compiler intrinsics that
-/// are supported both by Microsoft Visual C++ and GCC compilers, so this file
-/// should compile with both toolsets.
-///
-/// NOTICE: If using Visual Studio 6.0, you'll need to install the "Visual C++ 
-/// 6.0 processor pack" update to support compiler intrinsic syntax. The update
-/// is available for download at Microsoft Developers Network, see here:
-/// http://msdn.microsoft.com/vstudio/downloads/tools/ppack/default.aspx
-///
-/// Author        : Copyright (c) Olli Parviainen
-/// Author e-mail : oparviai 'at' iki.fi
-/// SoundTouch WWW: http://www.surina.net/soundtouch
-///
-////////////////////////////////////////////////////////////////////////////////
-//
-// Last changed  : $Date: 2006/02/06 18:52:43 $
-// File revision : $Revision: 1.1 $
-//
-// $Id: mmx_optimized.cpp,v 1.1 2006/02/06 18:52:43 Olli Exp $
-//
-////////////////////////////////////////////////////////////////////////////////
-//
-// License :
-//
-//  SoundTouch audio processing library
-//  Copyright (c) Olli Parviainen
-//
-//  This library is free software; you can redistribute it and/or
-//  modify it under the terms of the GNU Lesser General Public
-//  License as published by the Free Software Foundation; either
-//  version 2.1 of the License, or (at your option) any later version.
-//
-//  This library is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-//  Lesser General Public License for more details.
-//
-//  You should have received a copy of the GNU Lesser General Public
-//  License along with this library; if not, write to the Free Software
-//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-//
-////////////////////////////////////////////////////////////////////////////////
-
-#include "STTypes.h"
+#include "sttypes.h"
 
 #ifdef ALLOW_MMX
+
 // MMX routines available only with integer sample type
 
 #if !(_WIN32 || __i386__ || __x86_64__)
@@ -59,18 +10,14 @@
 
 using namespace soundtouch;
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// implementation of MMX optimized functions of class 'TDStretchMMX'
-//
-//////////////////////////////////////////////////////////////////////////////
+// Implementation of MMX optimized functions of class TDStretchMMX
 
-#include "TDStretch.h"
+#include "tdstretch.h"
 #include <mmintrin.h>
 #include <limits.h>
 
+// Calculates cross-correlation of two buffers
 
-// Calculates cross correlation of two buffers
 long TDStretchMMX::calcCrossCorrStereo(const short *pV1, const short *pV2) const
 {
     const __m64 *pVec1, *pVec2;
@@ -85,13 +32,14 @@ long TDStretchMMX::calcCrossCorrStereo(const short *pV1, const short *pV2) const
     shifter = _m_from_int(overlapDividerBits);
     accu = _mm_setzero_si64();
 
-    // Process 4 parallel sets of 2 * stereo samples each during each 
-    // round to improve CPU-level parallellization.
+    // Process 4 parallel sets of 2 * each stereo sample during each 
+    // round to improve CPU-level parallelization
+	
     for (i = 0; i < overlapLength / 8; i ++)
     {
         __m64 temp;
 
-        // dictionary of instructions:
+        // Dictionary of instructions:
         // _m_pmaddwd   : 4*16bit multiply-add, resulting two 32bits = [a0*b0+a1*b1 ; a2*b2+a3*b3]
         // _mm_add_pi32 : 2*32bit add
         // _m_psrad     : 32bit right-shift
@@ -108,18 +56,21 @@ long TDStretchMMX::calcCrossCorrStereo(const short *pV1, const short *pV2) const
         pVec2 += 4;
     }
 
-    // copy hi-dword of mm0 to lo-dword of mm1, then sum mmo+mm1
-    // and finally store the result into the variable "corr"
+    // Copy hi-dword of mm0 to lo-dword of mm1, then sum mmo+mm1
+    // and finally store the result into the variable corr
 
     accu = _mm_add_pi32(accu, _mm_srli_si64(accu, 32));
     corr = _m_to_int(accu);
 
     // Clear MMS state
+	
     _m_empty();
 
     return corr;
+	
     // Note: Warning about the missing EMMS instruction is harmless
-    // as it'll be called elsewhere.
+    // as it'll be called elsewhere
+	
 }
 
 
@@ -127,13 +78,14 @@ long TDStretchMMX::calcCrossCorrStereo(const short *pV1, const short *pV2) const
 void TDStretchMMX::clearCrossCorrState()
 {
     // Clear MMS state
+	
     _m_empty();
     //_asm EMMS;
+	
 }
 
-
-
 // MMX-optimized version of the function overlapStereo
+
 void TDStretchMMX::overlapStereo(short *output, const short *input) const
 {
     const __m64 *pVinput, *pVMidBuf;
@@ -160,22 +112,26 @@ void TDStretchMMX::overlapStereo(short *output, const short *input) const
     {
         __m64 temp1, temp2;
                 
-        // load & shuffle data so that input & mixbuffer data samples are paired
+        // Load and shuffle data so that input and mixbuffer data samples are paired
+		
         temp1 = _mm_unpacklo_pi16(pVMidBuf[0], pVinput[0]);     // = i0l m0l i0r m0r
         temp2 = _mm_unpackhi_pi16(pVMidBuf[0], pVinput[0]);     // = i1l m1l i1r m1r
 
         // temp = (temp .* mix) >> shifter
+		
         temp1 = _mm_sra_pi32(_mm_madd_pi16(temp1, mix1), shifter);
         temp2 = _mm_sra_pi32(_mm_madd_pi16(temp2, mix2), shifter);
         pVdest[0] = _mm_packs_pi32(temp1, temp2); // pack 2*2*32bit => 4*16bit
 
         // update mix += adder
+		
         mix1 = _mm_add_pi16(mix1, adder);
         mix2 = _mm_add_pi16(mix2, adder);
 
-        // --- second round begins here ---
+        // Second round begins here
 
-        // load & shuffle data so that input & mixbuffer data samples are paired
+        // Load and shuffle data so that input and mixbuffer data samples are paired
+		
         temp1 = _mm_unpacklo_pi16(pVMidBuf[1], pVinput[1]);       // = i2l m2l i2r m2r
         temp2 = _mm_unpackhi_pi16(pVMidBuf[1], pVinput[1]);       // = i3l m3l i3r m3r
 
@@ -193,43 +149,38 @@ void TDStretchMMX::overlapStereo(short *output, const short *input) const
         pVdest   += 2;
     }
 
-    _m_empty(); // clear MMS state
+    _m_empty(); // Clear MMS state
 }
 
+// Implementation of MMX-optimized functions of class FIRFilter
 
-//////////////////////////////////////////////////////////////////////////////
-//
-// implementation of MMX optimized functions of class 'FIRFilter'
-//
-//////////////////////////////////////////////////////////////////////////////
-
-#include "FIRFilter.h"
-
+#include "firfilter.h"
 
 FIRFilterMMX::FIRFilterMMX() : FIRFilter()
 {
     filterCoeffsUnalign = NULL;
 }
 
-
 FIRFilterMMX::~FIRFilterMMX()
 {
     delete[] filterCoeffsUnalign;
 }
 
-
 // (overloaded) Calculates filter coefficients for MMX routine
+
 void FIRFilterMMX::setCoefficients(const short *coeffs, uint newLength, uint uResultDivFactor)
 {
     uint i;
     FIRFilter::setCoefficients(coeffs, newLength, uResultDivFactor);
 
-    // Ensure that filter coeffs array is aligned to 16-byte boundary
+    // Ensure that filter coefficients array is aligned to 16-byte boundary
+	
     delete[] filterCoeffsUnalign;
     filterCoeffsUnalign = new short[2 * newLength + 8];
     filterCoeffsAlign = (short *)(((ulongptr)filterCoeffsUnalign + 15) & -16);
 
-    // rearrange the filter coefficients for mmx routines 
+    // Re-arrange the filter coefficients for MMX routines
+	
     for (i = 0;i < length; i += 4) 
     {
         filterCoeffsAlign[2 * i + 0] = coeffs[i + 0];
@@ -244,12 +195,12 @@ void FIRFilterMMX::setCoefficients(const short *coeffs, uint newLength, uint uRe
     }
 }
 
+// MMX-optimized version of the filter routine for stereo sound
 
-
-// mmx-optimized version of the filter routine for stereo sound
 uint FIRFilterMMX::evaluateFilterStereo(short *dest, const short *src, const uint numSamples) const
 {
-    // Create stack copies of the needed member variables for asm routines :
+    // Create stack copies of the needed member variables for ASM routines:
+	
     uint i, j;
     __m64 *pVdest = (__m64*)dest;
 
@@ -297,7 +248,7 @@ uint FIRFilterMMX::evaluateFilterStereo(short *dest, const short *src, const uin
         pVdest ++;
     }
 
-   _m_empty();  // clear emms state
+   _m_empty();  // Clear EMMS state
 
     return (numSamples & 0xfffffffe) - length;
 }

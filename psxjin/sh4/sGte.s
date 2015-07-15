@@ -1,6 +1,6 @@
 ! Copy a memory matrix into the internal one
 .globl _mat_vec_load
-! Number of cycles: ~11 cycles.
+! Number of cycles: Approximately 11 cycles
 _mat_vec_load:
         fschg
         fmov            @r4+,xd0
@@ -35,7 +35,7 @@ _mat_zero_load:
         rts
 		fschg
 
-! loads a GTE matrix element
+! Loads a GTE matrix element
 ! r4  element
 ! r5  matrix address
 ! r6  low word offset
@@ -63,6 +63,7 @@ _LoadMatrixElement:
 
 
 		.align 4
+		
 ! Transform a vector
 ! R4 addr of input vector and clipped transformed vector (ir)
 ! R5 addr of unclipped vector (mac)
@@ -77,14 +78,14 @@ _asmTransformVector:
 	sts.l    pr,@-r15
 	mov      #0, R1		! gteFLAG
 
-! transform vector
+! Transform vector
 	fmov.s   @R4+,fr4
 	fmov.s   @R4+,fr5
 	fmov.s   @R4+,fr6
 	fmov.s   @R4, fr7
 	ftrv     xmtrx,fv4
 
-! store back into mac vector right shifted by 12
+! Store back into mac vector right shifted by 12
 	add      #12, r5
 	mova     float4096, r0
 	fmov.s   @r0, fr0
@@ -99,7 +100,7 @@ _asmTransformVector:
 	jsr      @R0
 	nop
 
-! store back clipped vector
+! Store back-clipped vector
 	fmov.s   fr6, @-r4
 	fmov.s   fr5, @-r4
 	fmov.s   fr4, @-r4
@@ -116,7 +117,7 @@ float4096: ! 1/4096
 
 		.align 4
 ! NCLIP
-! r4  addr of CP2D
+! r4 addr of CP2D
 
 .globl _asmNCLIP
 _asmNCLIP:
@@ -157,6 +158,7 @@ _asmNCLIP:
 ! asmStore32(float *vec, u32 *addr)
 ! R4 addr of vector
 ! R5 addr of gteMAC/gteIR
+
 .globl _asmStore32
 _asmStore32:
 	fmov.s   @R4+,fr0
@@ -177,6 +179,7 @@ _asmStore32:
 ! asmLoadVec(u32 *addr, float *vec)
 ! R4 addr of gteV[XYZ]
 ! R5 addr of vector
+
 .globl _asmLoadVec
 _asmLoadVec:
 	mov.w    @R4+, R0
@@ -200,6 +203,7 @@ _asmLoadVec:
 ! asmLoad16(u32 *addr, float *vec)
 ! R4 addr of gteIR
 ! R5 addr of vector
+
 .globl _asmLoad16
 _asmLoad16:
 	mov.l    @R4+, R0
@@ -236,7 +240,8 @@ _asmColorCalc:
 	mov      #0, R1		! gteFLAG
 	mov      R6, R7
 	
-! transform color vector
+! Transform color vector
+
 	fmov.s   @R4+,fr8	! r
 	fmov.s   @R4+,fr9	! g
 	fmov.s   @R4+,fr10	! b
@@ -267,7 +272,8 @@ _asmColorCalc:
 	fmac     fr0, fr6, fr10   ! fr10 = fr0 * fr6 + fr10
 	fmov     fr10, fr6
 		
-! store back into mac vector right shifted by 12
+! Store back into mac vector right shifted by 12
+
 	add      #12, r5
 	fmov.s   fr6, @-r5
 	fmov.s   fr5, @-r5
@@ -277,7 +283,8 @@ _asmColorCalc:
 	jsr      @R0
 	mov      R7, R6
 
-! store back clipped vector into ir
+! Store back-clipped vector into IR
+
 	fmov.s   fr6, @-r4
 	fmov.s   fr5, @-r4
 	fmov.s   fr4, @-r4
@@ -295,9 +302,12 @@ floatx4096: ! 1/4096
 ! vector in fr4, fr5, fr6
 ! r1 gteFLAG
 ! deletes contents of fr0, fr1, r2
+
 asmClip:
 	sts.l    pr,@-r15
-! check limits
+	
+! Check limits
+
 	fldi0    fr0
 	cmp/pl   r6
 	bt       .L_Clip_L0
