@@ -21,7 +21,7 @@ So if you're a project admin, developer, founder, or contributor to PSXjin, chec
 
 PSXjin is a PlayStation 1 emulator.
 
-<b><i>NOT</i></b> a PSX emulator. The PSX is an entirely different system. The PSX was only released in Japan, and used the PS2 as a backbone for most of it's features. It was the first PlayStation system to utilize the CrossMediaBar (XMB). It was kind of like a PS2 with a built-in hard drive and DVR. This emulator emulates the original PlayStation (PS1) console.
+<b><i>NOT</i></b> a PSX emulator. The PSX is an entirely different system. The PSX was only released in Japan, and used the PS2 as a backbone for most of it's features. It was the first PlayStation system to utilize the XrossMediaBar (XMB). It was kind of like a PS2 with a built-in hard drive and DVR. This emulator emulates the original PlayStation (PS1) console.
 
 What does that really mean? It means that it emulates the way that a PS1 works and tries to translate PS1 machine language to PC language. This is very hard to do and we try as hard as we can to achieve the best emulator we possibly can.
 
