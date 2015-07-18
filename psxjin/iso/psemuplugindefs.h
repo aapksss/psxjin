@@ -1,3 +1,12 @@
+/*
+	PSEmu Plugin Developer Kit Header definition
+
+	(C)1998 Vision Thing
+
+	This file can be used only to develop PSEmu Plugins
+	Other usage is highly prohibited.
+*/
+
 #ifndef _PSEMU_PLUGIN_DEFS_H
 #define _PSEMU_PLUGIN_DEFS_H
 
