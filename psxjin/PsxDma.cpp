@@ -16,6 +16,8 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "PsxCommon.h"
+
 // DMA 0/1 in mdec.c
 // DMA 3   in cdrom.c
 
