@@ -1,3 +1,32 @@
+/***************************************************************************
+                            alsa.c  -  description
+                             -------------------
+    begin                : Sat Mar 01 2003
+    copyright            : (C) 2002 by Pete Bernert
+    email                : BlackDove@addcom.de
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version. See also the license.txt file for *
+ *   additional informations.                                              *
+ *                                                                         *
+ ***************************************************************************/
+
+//*************************************************************************//
+// History of changes:
+//
+// 2003/03/02 - linuzappz
+// - fixed XRUN behavior
+//
+// 2003/03/01 - linuzappz
+// - created
+//
+//*************************************************************************//
+
 #include "stdafx.h"
 
 #define _IN_OSS

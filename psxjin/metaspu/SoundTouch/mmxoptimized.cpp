@@ -1,3 +1,53 @@
+////////////////////////////////////////////////////////////////////////////////
+///
+/// MMX optimized routines. All MMX optimized functions have been gathered into 
+/// this single source code file, regardless to their class or original source 
+/// code file, in order to ease porting the library to other compiler and 
+/// processor platforms.
+///
+/// The MMX-optimizations are programmed using MMX compiler intrinsics that
+/// are supported both by Microsoft Visual C++ and GCC compilers, so this file
+/// should compile with both toolsets.
+///
+/// NOTICE: If using Visual Studio 6.0, you'll need to install the "Visual C++ 
+/// 6.0 processor pack" update to support compiler intrinsic syntax. The update
+/// is available for download at Microsoft Developers Network, see here:
+/// http://msdn.microsoft.com/vstudio/downloads/tools/ppack/default.aspx
+///
+/// Author        : Copyright (c) Olli Parviainen
+/// Author e-mail : oparviai 'at' iki.fi
+/// SoundTouch WWW: http://www.surina.net/soundtouch
+///
+////////////////////////////////////////////////////////////////////////////////
+//
+// Last changed  : $Date: 2006/02/06 18:52:43 $
+// File revision : $Revision: 1.1 $
+//
+// $Id: mmx_optimized.cpp,v 1.1 2006/02/06 18:52:43 Olli Exp $
+//
+////////////////////////////////////////////////////////////////////////////////
+//
+// License :
+//
+//  SoundTouch audio processing library
+//  Copyright (c) Olli Parviainen
+//
+//  This library is free software; you can redistribute it and/or
+//  modify it under the terms of the GNU Lesser General Public
+//  License as published by the Free Software Foundation; either
+//  version 2.1 of the License, or (at your option) any later version.
+//
+//  This library is distributed in the hope that it will be useful,
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+//  Lesser General Public License for more details.
+//
+//  You should have received a copy of the GNU Lesser General Public
+//  License along with this library; if not, write to the Free Software
+//  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+//
+////////////////////////////////////////////////////////////////////////////////
+
 #include "sttypes.h"
 
 #ifdef ALLOW_MMX

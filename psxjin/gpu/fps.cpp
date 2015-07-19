@@ -1,3 +1,44 @@
+/***************************************************************************
+																										fps.c  -  description
+																													-------------------
+				begin                : Sun Oct 28 2001
+				copyright            : (C) 2001 by Pete Bernert
+				email                : BlackDove@addcom.de
+	***************************************************************************/
+
+/***************************************************************************
+	*                                                                         *
+	*   This program is free software; you can redistribute it and/or modify  *
+	*   it under the terms of the GNU General Public License as published by  *
+	*   the Free Software Foundation; either version 2 of the License, or     *
+	*   (at your option) any later version. See also the license.txt file for *
+	*   additional informations.                                              *
+	*                                                                         *
+	***************************************************************************/
+
+//*************************************************************************//
+// History of changes:
+//
+// 2007/10/27 - Pete
+// - Added Nagisa's changes for SSSPSX as a special gpu config option
+//
+// 2005/04/15 - Pete
+// - Changed user frame limit to floating point value
+//
+// 2003/07/30 - Pete
+// - fixed frame limitation if "old skipping method" is used
+//
+// 2002/12/14 - Pete
+// - improved skipping and added some skipping security code
+//
+// 2002/11/24 - Pete
+// - added new frameskip func
+//
+// 2001/10/28 - Pete
+// - generic cleanup for the Peops release
+//
+//*************************************************************************//
+
 #include "stdafx.h"
 #include <algorithm>
 

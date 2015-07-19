@@ -1,5 +1,17 @@
-// To do - volume sweep not emulated
-// Emulate volume sweep
+//spu.cpp
+//original (C) 2002 by Pete Bernert
+//nearly entirely rewritten for PSXjin by zeromus
+//original changelog is at end of file, for reference
+
+//This program is free software; you can redistribute it and/or modify
+//it under the terms of the GNU General Public License as published by
+//the Free Software Foundation; either version 2 of the License, or
+//(at your option) any later version. See also the license.txt file for
+//additional informations.                                              
+
+//TODO - volume sweep not emulated
+
+//-------------------------------
 
 #include "stdafx.h"
 

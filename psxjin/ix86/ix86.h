@@ -1,3 +1,9 @@
+/*
+ * ix86 definitions v0.5.1
+ *  Authors: linuzappz <linuzappz@pcsx.net>
+ *           alexey silinov
+ */
+
 #ifndef __IX86_H__
 #define __IX86_H__
 

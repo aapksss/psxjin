@@ -1,3 +1,10 @@
+/*
+ * Cdrom for Psemu Pro like Emulators
+ *
+ * By: linuzappz <linuzappz@hotmail.com>
+ *
+ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
