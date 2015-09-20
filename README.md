@@ -1,11 +1,6 @@
 <h1>PSXjin</h1>
 <h2>A PlayStation 1 emulator</h2>
 
-<b><i>
-We exported the project, because if we didn't, this project might have disappeared forever.
-So if you're a project admin, developer, founder, or contributor to PSXjin, check out this issue page so that I can give you write access: https://code.google.com/p/psxjin/issues/detail?id=53
-</i></b>
-
 <h1>Contents:</h1>
 <b>
 >
