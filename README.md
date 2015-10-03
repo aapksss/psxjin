@@ -1,6 +1,8 @@
 <h1>PSXjin</h1>
 <h2>A PlayStation 1 emulator</h2>
 
+[![Build status](https://ci.appveyor.com/api/projects/status/ct1fw7n1a250alws?svg=true)](https://ci.appveyor.com/project/piorrro33/psxjin)
+
 <h1>Contents:</h1>
 <b>
 >
